@@ -31,12 +31,12 @@ Small, local, reversible projects can combine intent, scope, and plan into one s
 
 ## Install
 
-Clone the repository as `rixidz`, then place or symlink it into your user Skills directory:
+Clone the repository as `dz`, then place or symlink it into your user Skills directory:
 
 ```bash
-git clone https://github.com/Irixil/irixi-project-forge.git rixidz
+git clone https://github.com/Irixil/irixi-project-forge.git dz
 mkdir -p "$HOME/.agents/skills"
-ln -s "/absolute/path/to/rixidz" "$HOME/.agents/skills/rixidz"
+ln -s "/absolute/path/to/dz" "$HOME/.agents/skills/dz"
 ```
 
 Codex usually detects Skill changes automatically. If it does not appear, restart Codex.
@@ -46,28 +46,28 @@ Codex usually detects Skill changes automatically. If it does not appear, restar
 Start a new project in Codex:
 
 ```text
-$rixidz New project: I want to build...
+$dz New project: I want to build...
 ```
 
-In ChatGPT interfaces that use the `@` Skill picker, select it as `@rixidz`.
+In ChatGPT interfaces that use the `@` Skill picker, select it as `@dz`.
 
 For a project with substantial uncertainty, enter Plan mode first when the current Codex surface supports it:
 
 ```text
 /plan
-$rixidz Help me explore this idea and lock the product boundary before implementation.
+$dz Help me explore this idea and lock the product boundary before implementation.
 ```
 
 Resume an existing project:
 
 ```text
-$rixidz Continue this project. Read PROJECT.md, AGENTS.md, and the latest verification evidence, then tell me the current stage and next gate.
+$dz Continue this project. Read PROJECT.md, AGENTS.md, and the latest verification evidence, then tell me the current stage and next gate.
 ```
 
 ## Structure
 
 ```text
-rixidz/
+dz/
 ├── SKILL.md
 ├── agents/
 │   └── openai.yaml

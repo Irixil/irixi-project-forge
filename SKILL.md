@@ -1,5 +1,5 @@
 ---
-name: rixidz
+name: dz
 description: "Guide a new or evolving software product from a vague idea through collaborative brainstorming, intent clarification, MVP boundary lock-in, product and technical specification, staged implementation, verification, release, and maintenance with Codex. Use only when the user explicitly invokes this skill to start, design, build, or resume an app, AI product, tool, workflow, or agent; turn an idea or PRD into a real project; or run an end-to-end Codex project process. Do not use for already-scoped bug fixes, small isolated code edits, or purely conceptual explanations."
 ---
 
