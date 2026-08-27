@@ -1,7 +1,7 @@
 interface:
   display_name: "Irixi Project Forge"
   short_description: "Forge ideas into verified apps and agents"
-  default_prompt: "Use $irixi-project-forge to turn my idea into a scoped, verified app or agent."
+  default_prompt: "Use $rixidz to turn my idea into a scoped, verified app or agent."
 
 policy:
   allow_implicit_invocation: false
