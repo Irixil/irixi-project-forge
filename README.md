@@ -91,4 +91,4 @@ The Skill has been structurally validated and forward-tested against both a priv
 
 ## License
 
-No public license has been selected. Keep the repository private until the author chooses distribution terms.
+No license has been selected. The source is publicly visible, but no permission to copy, modify, or redistribute is granted unless the author adds a license.
