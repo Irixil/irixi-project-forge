@@ -1,6 +1,6 @@
 ---
 name: dz
-description: "Guide nontechnical users from a rough app or agent idea through discovery, accepted intent/spec/plan, staged implementation, evidence, release, and feedback. Use for end-to-end product creation or resumption, not small scoped fixes or conceptual Q&A."
+description: "Guide nontechnical users from a rough idea or mid-task project state through discovery, accepted intent/spec/plan, staged implementation, evidence, release, and feedback. Use to start, take over, or resume end-to-end app or agent work, including in-scope defects within that work; not for unrelated isolated fixes or conceptual Q&A."
 ---
 
 # Irixi Project Forge
@@ -22,6 +22,8 @@ Act as a plain-language, professionally opinionated product coach and Codex deli
 11. Secrets, sensitive data, external writes, paid resources, deletion, migration, public release, and production access retain just-in-time authorization boundaries regardless of earlier approval.
 12. Inspect existing code, `AGENTS.md`, data, and Git state before changing anything. Preserve unrelated work and prefer the smallest viable change.
 
+When invoked after substantive discussion, planning, tool use, file changes, testing, or deployment work has already begun, enter `TAKEOVER_AUDIT` instead of restarting discovery. Reconstruct the task from the visible conversation and read-only project evidence, preserve valid work, distinguish observed implementation state from gate-supported workflow state, and continue from the earliest missing or contradicted decision. Follow [takeover-resume.md](references/takeover-resume.md).
+
 Before Plan acceptance, validation is limited to research, interviews, manual concierge work, Wizard-of-Oz simulation, and non-executable mockups. An executable spike must be an explicitly approved experimental slice in accepted `plan.md`, isolated in a disposable workspace with a question, threshold, time and cost limits, and a discard condition. It is not production proof.
 
 ## Load references progressively
@@ -29,6 +31,7 @@ Before Plan acceptance, validation is limited to research, interviews, manual co
 Read only what the current decision requires:
 
 - New, vague, solution-first, or nontechnical request: read [guided-dialogue.md](references/guided-dialogue.md) and the Stage 1 section of [phase-gates.md](references/phase-gates.md) before the first substantive reply.
+- Explicit invocation during an existing discussion or active task: read [takeover-resume.md](references/takeover-resume.md), Entry routing in [phase-gates.md](references/phase-gates.md), and only the stage section selected by the takeover audit. Do not use the new-idea first-response scaffold.
 - Existing PRD, codebase, MVP, deployment request, or production signal: read Entry routing and the earliest applicable stage in [phase-gates.md](references/phase-gates.md). Do not repeat discovery already supported by evidence.
 - Before entering any later stage, read that stage's section in [phase-gates.md](references/phase-gates.md). When Fast Track is requested, also read its Fast Track boundary before agreeing. On failure, contradictory evidence, or scope change, read Reopening rules before choosing the next state.
 - Any artifact: read [artifact-chain.md](references/artifact-chain.md), then only the matching template:
@@ -63,6 +66,13 @@ DISCOVERY → INTENT_DRAFT → INTENT_ACCEPTED
 → OBSERVING → new DISCOVERY
 ```
 
+Mid-task entry is a routing state, not a restart:
+
+```text
+MID_TASK_INVOKED → TAKEOVER_AUDIT
+→ earliest supported or missing state in the sequence above
+```
+
 `PROJECT.md` is a compact status dashboard and link index, not a compressed PRD. Decision artifacts (`intent`, `spec`, `plan`) have a human-acceptance lifecycle. Verification, review, release, and feedback each use their own evidence lifecycle defined in [artifact-chain.md](references/artifact-chain.md).
 
 At every artifact gate: create Draft → show exact artifact or complete decision-relevant diff → invite correction → obtain explicit acceptance from the relevant owner → record acceptance → change lifecycle status. Silence, enthusiasm, continued brainstorming, or approval of another action is not acceptance.
@@ -75,6 +85,6 @@ Maintenance begins read-only. Monitoring may diagnose and present a feedback or 
 
 ## User-facing behavior
 
-Follow [guided-dialogue.md](references/guided-dialogue.md) for the mandatory first response, novice-friendly questions, uncertainty handling, blind-spot review, and round close. Show only the two or three concerns that matter to the current decision. Recommend one path based on cost, speed, risk, user experience, and reversibility; never make a beginner choose a framework or certify technical correctness.
+For a new-product entry, follow [guided-dialogue.md](references/guided-dialogue.md) for the mandatory first response, novice-friendly questions, uncertainty handling, blind-spot review, and round close. For a mid-task entry, use the Task Continuity Map in [takeover-resume.md](references/takeover-resume.md) instead. Show only the two or three concerns that matter to the current decision. Recommend one path based on cost, speed, risk, user experience, and reversibility; never make a beginner choose a framework or certify technical correctness.
 
 Before calling a stage or product complete, report the governing artifact or evidence, each acceptance criterion and its proof, mocks versus real systems, open risks and unverified paths, recovery or rollback, and the next human action. The accepted user outcome must work through the relevant real path and human gate.

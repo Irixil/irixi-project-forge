@@ -12,6 +12,13 @@ Use natural product language with users. Internal state and gate names exist to 
 
 ## Entry routing
 
+### Mid-task invocation
+
+- State: `TAKEOVER_AUDIT`.
+- Read the visible conversation and current project state before asking discovery questions or changing files.
+- Follow [takeover-resume.md](takeover-resume.md) to separate observed work from gate-supported state, preserve valid work, and identify the earliest missing or contradicted gate.
+- Resume that stage. Do not restart from Discovery when accepted evidence supports a later stage, and do not treat existing code as proof that earlier gates passed.
+
 ### New idea
 
 - State: `DISCOVERY`

@@ -15,6 +15,7 @@ Official source: [Build skills](https://developers.openai.com/codex/skills)
 | Layer | Responsible for | Not responsible for |
 |---|---|---|
 | Skill | Cross-project methods, phases, interview patterns, and quality gates | One-off state for a particular project |
+| Current task conversation | The latest user goal, corrections, recent decisions, tool results, and unfinished work visible in this task | Durable state across tasks or proof of an artifact gate that was never explicitly accepted |
 | `AGENTS.md` | Stable commands, architecture, conventions, and prohibited actions that Codex must follow whenever it enters the repository | The current milestone or a long-form PRD |
 | `PROJECT.md` | A compact status dashboard and links to the accepted SDLC artifacts | Replacing intent, specification, plan, evidence, or enforcement |
 | `docs/sdlc/*.md` | Versioned intent, specification, plan, verification, review, release, and feedback records | Stable repository-wide instructions |
@@ -67,6 +68,8 @@ Anthropic's playbook uses versioned artifacts to connect planning, design, build
 - automatic triggers are introduced gradually only after the manual feedback loop has matured.
 
 This skill now keeps the artifact boundaries explicit even for personal projects: `intent.md`, `spec.md`, and `plan.md` represent different human decisions, while verification, review, and release capture different kinds of evidence and authority. `PROJECT.md` remains a compact dashboard pointing to the current accepted version of each artifact. Fast Track may shorten the documents, but it does not merge the confirmations.
+
+When DZ is invoked midway through a task, the visible conversation and current workspace provide recovery evidence, while accepted project artifacts remain the durable gate record. DZ first maps observed work against gate-supported state, preserves useful changes, and fills only the earliest missing or contradicted contract. It must not assume access to invisible prior tasks or convert existing code into retrospective approval.
 
 Anthropic's `CLAUDE.md` role maps to Codex's repository-level `AGENTS.md`: stable commands, architecture, conventions, protected areas, and recurring mistakes. Current product state and phase decisions remain in the SDLC artifacts.
 

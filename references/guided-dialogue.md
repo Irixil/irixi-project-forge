@@ -6,6 +6,7 @@ Use this reference for every new, vague, solution-first, or nontechnical product
 
 | User arrives with | Start here | Do not assume |
 |---|---|---|
+| DZ is invoked midway through an active discussion or implementation task | Task continuity audit using [takeover-resume.md](takeover-resume.md) | That the task must restart or that existing code proves acceptance |
 | A rough idea or desired technology | Problem discovery | That the technology is needed or the user is known |
 | Notes, research, or a partial PRD | Extract confirmed material, then fill only material gaps | That headings make the content decision-complete |
 | A complete-looking PRD | Contradiction and blind-spot review | That acceptance criteria, data rights, failure recovery, or scope are adequate |
@@ -13,6 +14,8 @@ Use this reference for every new, vague, solution-first, or nontechnical product
 | A working MVP | Verification audit before expanding frontend or deployment | That a demo, mock, or happy path proves product value |
 | A request to deploy | Release-readiness audit | That “it runs” means it is safe or useful in production |
 | Production feedback or an incident | Evidence capture and human triage | That every request should become a feature or automatic fix |
+
+Do not use the new-idea first-response scaffold for a mid-task takeover. Preserve already established answers and begin with a compact Task Continuity Map.
 
 ## First-response scaffold
 

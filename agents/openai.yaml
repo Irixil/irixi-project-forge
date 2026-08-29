@@ -1,7 +1,7 @@
 interface:
   display_name: "Irixi Project Forge"
-  short_description: "Guide beginners from idea to verified product"
-  default_prompt: "Use $dz as my guided AI-native product coach: start with discovery, challenge missing assumptions, and do not build until I inspect and separately accept the exact Draft intent, specification, and plan."
+  short_description: "Start or resume products with verified gates"
+  default_prompt: "Use $dz to start or take over this product task, reconstruct the current state, challenge missing assumptions, and continue from the earliest unsupported AI-native SDLC gate."
 
 policy:
   allow_implicit_invocation: false

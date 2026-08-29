@@ -30,6 +30,8 @@ Do not force every artifact into one status vocabulary:
 
 Every artifact records its source of truth, preceding artifact or evidence, relevant revision/environment, and decision or evidence record. A timestamp, Git author, chat summary, or model assertion is not approval or proof.
 
+A conversational decision record is valid only when the exact Draft or complete decision-relevant diff was visible and the relevant owner explicitly accepted that version. Determine workflow authority from the highest contiguous accepted artifact chain; a later file cannot bridge an earlier missing or contradicted gate.
+
 For personal product choices, the user is normally the decision owner. For organizational policy, legal, security, privacy, financial, or production risk, record a named authorized owner's role, scope, and approval evidence; stop if authority is unclear.
 
 ## Exact-Draft acceptance protocol
@@ -83,6 +85,8 @@ Create this only when the project location is known and the user asks to formali
 ```
 
 Update the dashboard at transitions, material decisions, pauses, handoffs, or new evidence. Do not copy full artifacts into it.
+
+During a mid-task takeover, the chat-level Task Continuity Map comes first. Update `PROJECT.md` only when writing is authorized and routing is clear. If code exists without accepted artifacts, record the implementation as candidate or unverified work; do not falsify past acceptance or discard it automatically.
 
 ## Change routing
 

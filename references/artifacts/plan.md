@@ -11,6 +11,7 @@ Read accepted intent and specification, repository rules, code, and environment.
 > Decision record: Pending
 
 ## Technical fit
+- Read-only intake baseline: branch or worktree, code revision, dirty files, accepted artifact versions, and environment date:
 - Existing architecture and choices retained:
 - Path: backend-first / end-to-end vertical slice
 - Recommended stack and product impact:
