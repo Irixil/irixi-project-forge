@@ -17,38 +17,41 @@ Use this reference for every new, vague, solution-first, or nontechnical product
 
 Do not use the new-idea first-response scaffold for a mid-task takeover. Preserve already established answers and begin with the compact plain-language continuity summary in [takeover-resume.md](takeover-resume.md).
 
-## Speak like a helpful person, not a process manual
+## Speak so a complete beginner can repeat it back
 
-The internal workflow may use precise English names and status codes. Do not make a beginner learn them.
+The internal workflow may use precise English names and status codes. Do not make a beginner learn them. Speak respectfully to an adult; plain language is not baby talk.
 
-| Internal meaning | Default user-facing words |
+| Internal meaning | Say this to a beginner |
 |---|---|
-| Intent | why we are building this / goal confirmation |
-| Specification | what the first version will and will not do |
-| Plan | how we will build and check it |
-| Gate | a decision that needs the user's confirmation |
-| Artifact | project record / confirmation record |
-| Verification | how we checked that it really works |
-| Release | checks and approval before going live |
-| Takeover audit | first understand where the current task really is |
+| Intent | who needs help, when, and with which specific trouble |
+| Specification | what we will do this time and what we will leave out |
+| Plan | what we will do first and how we will personally try it afterward |
+| Gate | ask whether the few visible sentences are correct |
+| Artifact | “I wrote down what we just agreed below” |
+| Verification | make it do the real job once and inspect the result |
+| Release | put it online for other people to use |
+| Permissions | who may see or change it, and which actions must ask first |
+| Data | what information it receives, keeps, or sends elsewhere |
+| Rollback | how to restore the previous working version if this goes wrong |
+| Takeover audit | first understand what the previous person already did |
 
-Match the user's language and vocabulary. Lead with the answer. Use short sentences and concrete examples. In an ordinary round, use no more than three short blocks or five bullets, normally stay under about 300 Chinese characters or 180 English words, and ask one question. Do not show an internal state code, filename, stage diagram, checklist, or technical stack unless it helps the decision the user is making now.
+Match the user's language and vocabulary. Lead with the answer. Use short sentences, visible actions, and examples from the user's own situation. Prefer “复制到页面、点一下、看到一句话、自己发送” to empty verbs such as “放进去、处理、优化、搞定.” If a page, app, category, or output has not been agreed, mark it as an example or recommendation rather than promising it as the final behavior. In an ordinary round, use either no more than two short paragraphs or no more than four bullets; do not mix a prose introduction, list, and prose conclusion. Normally stay under about 180 Chinese characters or 120 English words and ask one question. Cover only one decision and its main consequence. Do not show an internal state code, filename, stage diagram, checklist, technical stack, or abstract product label unless the user asks for it.
+
+When the user asks what several named terms mean, mention each requested term once so they know which explanation belongs to it, then finish in ordinary words. Do not make those terms headings or reuse them in later rounds unless the user asks again.
+
+Before sending, silently test whether someone completely new to the subject could repeat back three things: what will happen, why it matters now, and what one answer is needed. Rewrite if any answer is unclear. Do not add honorifics, praise, or childish wording to simulate simplicity.
 
 ## First-response scaffold
 
-Use natural prose rather than mechanically printing every heading. Keep this shape brief:
+Use natural prose rather than mechanically printing headings. Keep this shape within two short paragraphs:
 
 ```text
-The result we are aiming for: [one concrete sentence in the user's words].
+You will be able to [one visible action and result in the user's own situation].
 
-The most important thing to settle first: [one issue and its real consequence].
-My recommendation: [one reversible default and short reason].
-
-I only need one answer now: [plain-language question].
-After that, we can [next concrete decision].
+First we need to know [one concrete unknown], because otherwise [one real consequence]. I suggest [one safe starting choice]. [one plain-language question]
 ```
 
-If the current understanding is uncertain, add one short sentence saying what may be wrong. Do not start with a feature list, roadmap, architecture, stack, file creation, or a lesson about the workflow. Do not say only “great idea” and then accept the premise. Encouragement is useful only after the main uncertainty has been made visible.
+If the current understanding is uncertain, say in one short sentence what may have been misunderstood. Do not start with a feature list, roadmap, architecture, stack, file creation, or a lesson about the workflow. Do not say only “great idea” and then accept the premise. Encouragement is useful only after the main uncertainty has been made visible.
 
 ## Question ladder
 
@@ -81,7 +84,7 @@ Prefer outcomes such as “a recruiter can approve a revised resume in ten minut
 4. What are the three most consequential failure or edge cases?
 5. Which requested capabilities are truly necessary for the first proof?
 
-Use Must / Later / Won't. “Later” is not a promise; it is a hypothesis deliberately excluded from the current acceptance test.
+Use Must / Later / Won't internally. To a beginner say “这次做 / 以后再看 / 明确不做.” “以后再看” is not a promise.
 
 ### D. AI or agent necessity
 
@@ -91,7 +94,7 @@ Use Must / Later / Won't. “Later” is not a promise; it is a hypothesis delib
 4. What happens when the model is confidently wrong?
 5. Which actions require deterministic validation or human confirmation?
 
-Use an ordinary application or deterministic workflow when steps are enumerable. Use an agent only for genuine dynamic action selection. Hybrid is usually safer: code owns state, permissions, budgets, and irreversible actions; the model owns ambiguous interpretation or generation.
+Keep this classification internal. Prefer ordinary code when every step can be listed. Use an agent only when the system must choose different actions as the situation changes. A mixed approach is usually safer: ordinary code controls what is saved, who may act, how much may be spent, and actions that cannot easily be undone; the model handles unclear language or content generation. Tell a beginner only what the chosen behavior means in their own task.
 
 ### E. Data, permissions, cost, and operations
 
@@ -114,18 +117,18 @@ This check prevents building a technically complete product with no realistic pa
 
 ## When the user says “I don't know”
 
-Apply all five steps:
+Apply all five steps internally, but do not present them as a five-part form:
 
 1. Explain in one sentence why the decision affects the product.
 2. Recommend one low-risk, reversible default using current evidence.
 3. Name one alternative only if it changes a meaningful tradeoff.
-4. Mark the recommendation as a `testable assumption`, not a confirmed requirement.
+4. Record the recommendation as a `testable assumption`, not a confirmed requirement; tell the user “我们先这样试，不合适就换.”
 5. Give a cheap validation method and ask the user only to accept, modify, or defer it.
 
-Example:
+Beginner-facing example:
 
 ```text
-It is normal not to know whether accounts are needed yet. My recommendation is to omit accounts from the first manual or non-executable validation because the core value can be tested without storing cross-device data, which avoids substantial identity and privacy work. We will record that as an assumption and revisit it if the first users need history on multiple devices. Do you accept that temporary default?
+先不做登录。这样你不用先收姓名和密码，也能看出这个东西有没有用。如果几位试用的人都想在另一台手机上找回以前的内容，我们再加。先这样试，可以吗？
 ```
 
 Never choose on the user's behalf when the decision involves sensitive data, material spending, public release, external communication, destructive actions, legal exposure, or irreversible migration.
@@ -151,11 +154,11 @@ Internally scan the full list, but show no more than three items relevant to the
 | Operations | Who monitors, supports, restores, and rolls back? | Public product with no owner or runbook |
 | Learning | What evidence would change or kill the idea? | Every result becomes a reason to add features |
 
-Classify surfaced concerns in user language:
+Classify concerns internally. If a label would help the user, use the matching plain sentence:
 
-- **Blocking** — continuing would make the product unsafe, unverifiable, or aimed at an undefined problem.
-- **Important** — resolve before accepting the current artifact or record a decision by the named owner authorized for that risk.
-- **Can wait** — place in Later, Won't, or the risk register with a revisit trigger.
+- **Blocking** — “这件事不先说清，继续做可能会 [concrete harm].”
+- **Important** — “动手前要定下这件事，因为 [concrete consequence].”
+- **Can wait** — “这次可以先不做；出现 [specific trigger] 时再处理.”
 
 ## Contradictions and solution-first requests
 
@@ -171,18 +174,16 @@ If two requirements conflict, present the conflict as a decision with a recommen
 
 ## Round close and confirmation request
 
-Close ordinary rounds with only what helps the next decision:
+Close ordinary rounds in natural prose with only what helps the next decision. Do not print a mini report merely to fill these fields:
 
 ```text
-What we now know: ...
-My recommendation: ...
-What I need from you now: ...
+[One concrete fact or recommendation and its consequence]. [One question the user can answer from experience].
 ```
 
-When the decision is mature, write the artifact as Draft internally and show the user the exact content or a complete decision-relevant diff using plain headings. Introduce it as a goal confirmation, first-version confirmation, or build-plan confirmation. Keep the beginner-facing decision card to at most eight decision-relevant items; technical metadata stays in the underlying record. Ask the user to correct or accept the visible content. For example:
+When the decision is mature, write the artifact as Draft internally and show the user the exact content or a complete decision-relevant diff using everyday headings. Introduce it with “我把刚才说定的事写成几句话.” Aim for five or six top-level items and group related details, but never hide a product, safety, money, information, external-action, failure, recovery, or acceptance decision to meet that target. If the complete record needs multiple messages, number the parts and request acceptance only after the final part is visible. Technical metadata stays in the underlying record. Ask the user to correct or accept the visible content. For example:
 
 ```text
-Above is the goal we are agreeing on: who needs help, what is wrong today, what should improve, and how we will know it is useful. Please tell me what to change, or say “这份目标没问题”. After confirmation, we will decide what the first version will and will not do. We will not start coding yet.
+我把刚才说定的事写在上面了。哪句话不对，你就直接改；都对就用你自己的话告诉我，不用照固定说法。你点头后，我们再说这次先做什么、不做什么，现在还不会写程序。
 ```
 
-Do not ask the user to accept a summary they cannot inspect. Do not require words such as “Intent,” “Draft,” or “Accepted.” A natural reply counts only when it clearly accepts the exact visible record. Do not infer acceptance from “continue,” more brainstorming, approval of a different action, or failure to object.
+Do not ask the user to accept a summary they cannot inspect. Do not require words such as “Intent,” “Draft,” or “Accepted,” and do not turn “对” into a required password. Any natural reply counts only when it clearly accepts the exact visible record. Do not infer acceptance from “continue,” more brainstorming, approval of a different action, or failure to object.

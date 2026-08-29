@@ -32,7 +32,7 @@ Every artifact records its source of truth, preceding artifact or evidence, rele
 
 A conversational decision record is valid only when the exact Draft or complete decision-relevant diff was visible and the relevant owner explicitly accepted that version. Determine workflow authority from the highest contiguous accepted artifact chain; a later file cannot bridge an earlier missing or contradicted gate.
 
-User-facing acceptance does not require lifecycle jargon or a magic sentence. Introduce the visible record as the goal confirmation, first-version confirmation, or build-plan confirmation in the user's language. A natural reply such as “这份目标没问题” can be explicit acceptance when it unambiguously refers to that exact visible content. “Continue,” silence, enthusiasm, or approval of another action is not acceptance.
+User-facing acceptance does not require lifecycle jargon or a magic sentence. Introduce the visible record with everyday wording such as “我把刚才说定的事写成几句话,” “这次先做什么、不做什么,” or “准备先做哪一步，做完怎样亲手试.” Ask what is wrong and let the user reply naturally. “对，就是这个意思” or “没问题” can be explicit acceptance when it unambiguously refers to that exact visible content. “Continue,” silence, enthusiasm, or approval of another action is not acceptance.
 
 For personal product choices, the user is normally the decision owner. For organizational policy, legal, security, privacy, financial, or production risk, record a named authorized owner's role, scope, and approval evidence; stop if authority is unclear.
 
@@ -42,6 +42,7 @@ For `intent.md`, `spec.md`, and `plan.md`:
 
 1. Write the artifact with `Status: Draft` only when the stage is decision-mature.
 2. Show the exact artifact or a complete decision-relevant diff.
+   If plain-language presentation needs multiple messages, number every part, state the total, and do not request or record acceptance until the final part is visible. The acceptance must clearly refer to the complete set.
 3. Invite corrections and update the Draft visibly.
 4. Ask the relevant owner to accept that exact version in product language.
 5. Record the acceptance reference and change the same version to `Accepted`.

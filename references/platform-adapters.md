@@ -40,7 +40,7 @@ Select the highest supported profile from [`dz-manifest.json`](../dz-manifest.js
 - **Build:** may edit and run checks after the accepted build plan.
 - **Release:** may prepare and execute release work only after a separate, current approval.
 
-Do not announce the internal profile unless it changes what the user can receive. Say the consequence in ordinary language, such as “I can prepare the full build package here, but this chat cannot run the code.”
+Do not announce the internal profile unless it changes what the user can receive. Say the consequence in ordinary language, such as “I can write down everything another builder needs, but this chat cannot make or try it for you.”
 
 Downgrade immediately when a claimed capability is missing or fails. Never upgrade merely because the model knows how a tool normally works.
 
@@ -91,9 +91,9 @@ This repository also maintains a Codex-native execution mapping because DZ origi
 
 Before a session ends or work moves to another platform, provide one compact handoff containing:
 
-1. the current user goal and who it serves;
-2. the confirmed first-version boundary;
-3. the confirmed build approach, if reached;
+1. who needs help with which trouble;
+2. what everyone agreed to do and leave out this time;
+3. what everyone agreed to make first and how to try it, if reached;
 4. what was actually observed, changed, and tested;
 5. what remains unknown or unauthorized;
 6. the single recommended next action;

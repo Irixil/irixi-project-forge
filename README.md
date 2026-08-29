@@ -10,14 +10,14 @@ Irixi Project Forge 是一套面向非技术产品经理和初学者的跨平台
 
 工作流的短名称是 `dz`。
 
-DZ 不会把“帮我做一个应用”直接理解为立即写代码。它会先用大白话帮你确认真正的问题、第一批用户、想达到的结果、第一版做什么和不做什么，再一步一步开发和检查。
+DZ 不会把“帮我做一个应用”直接理解为立即写代码。它会先用大白话和你说清三件事：想帮谁解决哪件麻烦、这次先做什么和不做什么、准备先从哪一步动手并怎样亲手试。每说清一件都让你看一眼，对了才往下走。
 
 ### 最后会得到什么
 
 一个想法适合继续开发时，你最终会得到四样东西：
 
 1. 一个真正可以使用的应用或 Agent；
-2. 三份你能看懂并亲自确认的简短记录：为什么做、第一版做什么、准备怎么开发；
+2. 三份你能看懂并亲自确认的简短记录：想解决哪件麻烦、这次先做什么、准备怎样动手和试用；
 3. 可以复查的测试结果，说明哪些已经能用、哪些还没证明；
 4. 上线方法、已知风险，以及出问题时怎样恢复。
 
@@ -28,15 +28,27 @@ DZ 不会把“帮我做一个应用”直接理解为立即写代码。它会�
 ### 核心能力
 
 - 默认先说结论，使用短句和具体例子，不主动展示内部流程名、英文状态或文件名；
-- 普通对话保持在几个短段落内，每轮只问一个最关键的问题；
+- 普通回复要么最多两个短段落，要么最多四条，不混着堆；通常不超过约 180 个中文字，每轮只问一件事；
 - 自动判断当前 AI 只能聊天、能查看项目、能开发，还是还能上线，并据此调整做法；
 - 当你回答“不知道”时，提供专业建议、一个有意义的替代方案和低成本验证方法；
 - 区分已确认事实、建议、假设、未知项和明确不做的内容；
 - 主动指出用户采用、数据、AI 必要性、模型质量、权限、隐私、成本、失败恢复和运营方面的漏洞；
 - 不让非技术用户选择框架或为技术正确性背书；
-- 在“为什么做”“第一版做什么”“准备怎么开发”分别被你看过并确认前，不开始正式实现；
+- 在“想解决哪件麻烦”“这次做什么、不做什么”“准备先做哪一步、做完怎样试”分别被你看过并点头前，不开始正式制作；
 - 用真实路径和可复现证据判断完成，而不是只看 Mock、构建成功、部署命令或可访问网址；
 - 可以中途接管当前任务，保留有效工作，不强迫用户重新回答已经明确的问题。
+
+### DZ 怎么跟你说话
+
+“小白能懂”是硬要求，不是语气装可爱：
+
+- 默认你没学过产品和技术，不让你先学术语再做项目；
+- 一次只讲一件事，只说最重要的后果，只问一个能凭生活经验回答的问题；
+- 不直接扔出“目标、范围、边界、验证、部署、权限、数据”这类大词，而是说清谁做什么、会看到什么、哪里可能出问题；
+- 你说“没听懂”时，它会停下来，换成你这个项目里的一个具体例子，不会拿更多术语解释术语；
+- 语气尊重成年人，不哄人、不卖萌、不把简单说成啰嗦。
+
+每次回复前，DZ 会在心里检查：一个第一次接触这件事的人，能不能复述“会发生什么、为什么现在要管、我只要回答什么”。复述不了，就重写。
 
 ### 在不同 AI 上怎么用
 
@@ -51,10 +63,10 @@ DZ 不会把“帮我做一个应用”直接理解为立即写代码。它会�
 
 通用提示词是一份安全、可单文件使用的精简版。若要让 API 版获得与完整 Skill 相同的技术手册和产物模板，接入程序还应按 `dz-manifest.json` 的 `reference_sets` 提供按需读取，不要把所有资料一次性塞进上下文。
 
-`@dz`、`$dz` 或 `/dz` 只是部分平台的快捷入口。所有其他平台统一使用：
+入口取决于 DZ 是怎样装进去的：ChatGPT Desktop 的本地 Skill 和 ChatGPT 网页、桌面、手机里的 Plugin 都输入 `@` 选择 `dz`；Codex CLI 和 IDE 扩展用 `/skills` 选择，或直接输入 `$dz`。只有已经加载了通用提示词的其他 AI 平台才使用：
 
 ```text
-DZ启动：我想做……请用大白话，每次只问一个问题。
+DZ启动：我想做……我完全不懂产品和技术。请用短句和具体例子，一次只问我一件事。
 ```
 
 ### 自动适配接口（给平台开发者，普通用户可跳过）
@@ -96,33 +108,33 @@ intent.md → spec.md → plan.md + code → verification.md → review/release.
 
 `PROJECT.md` 只保存当前状态和产物链接，不代替完整的 Intent、Specification、Plan 或验证证据。
 
-这些英文名称和文件名是 DZ 在项目内部使用的记录。和初学者沟通时，DZ 默认只说“确认目标”“确认第一版范围”“确认开发方案”“检查是否真的能用”和“准备上线”。
+这些英文名称和文件名只在项目内部使用。和小白沟通时，DZ 默认只说“想帮谁解决哪件麻烦”“这次做什么、不做什么”“先做哪一步、做完怎样试”“让它真的做一遍”和“放到网上给别人用前再检查一次”。
 
 ### 中途调用与任务接管
 
 你可以在同一个对话或开发任务进行到一半时调用 DZ。它不会自动从头开始，也不会因为缺少流程文档就删除已有代码。
 
-DZ 会先只看不改，用几句话说明：
+DZ 会先只看不改，用四句短话说明：
 
-1. 当前已经做到哪里；
-2. 哪些内容和代码可以继续使用；
-3. 还有哪件事没有确认或没有测试证明；
-4. 建议接下来只做什么，并只问你一个问题。
+1. 别人已经做出了什么；
+2. 哪些具体东西可以留下；
+3. 哪件事还没人点头，或还没人亲手试过；
+4. 现在先做哪一小步，并只问你一个问题。
 
-如果代码已经存在但缺少项目记录，DZ 不会删除代码。它会把已有代码当成“可能有用、但还要核对的工作”，补清目标、第一版范围和开发方案，再保留符合要求的部分继续检查。
+如果代码已经存在但缺少说明，DZ 不会删除代码。它会先把“想解决哪件麻烦、这次做什么和不做什么、准备怎样动手和试用”补清楚，再留下对得上的部分继续检查。
 
-如果目标、第一版范围和开发方案已经确认，而当前只是修复一个范围内的问题，DZ 会直接继续修改或测试，不会让你重新回答产品是给谁用的。只有修复会改变体验、数据、权限、成本或主要技术方案时，才重新确认受影响的部分。
+如果前面三件事已经说定，而现在只是修一个小问题，DZ 会直接继续，不会让你从头再讲。只有这次修改会改变别人怎样使用、会保存什么内容、谁能查看或修改、要花多少钱，或会换掉主要做法时，才重新问受影响的那一件事。
 
 中途接管示例：
 
 ```text
-@dz 接管当前任务。先梳理我们已经决定了什么、代码和测试做到哪一步、哪些工作可以保留、最早缺少哪项确认，然后从单一下一步继续，不要让我重新解释已经说过的内容。
+@dz 接着做现在这个东西。先别改。用四句短话告诉我：别人做出了什么、哪些能留、还缺什么、现在先干什么。已经说过的别再问。
 ```
 
 在使用 `$` 调用 Skill 的 Codex 界面中：
 
 ```text
-$dz Take over the current task. In plain language, tell me where we are, what can be kept, what is still missing, and the one thing we should do next.
+$dz 接着做现在这个东西。别从头问。用短句告诉我哪些已经做好、哪些还没亲手试过，以及现在只做哪一小步。
 ```
 
 ### 三份技术手册的接入
@@ -175,28 +187,28 @@ ln -s "/absolute/path/to/dz" "$HOME/.agents/skills/dz"
 从模糊想法开始：
 
 ```text
-@dz 我有一个 AI 产品想法，但不懂技术。请用简短的大白话带我一步一步做，每次只问一个最重要的问题。先帮我确认目标、第一版范围和开发方案，再开始写代码。
+@dz 我想做一个帮小店整理顾客留言的东西。我不懂产品和技术。请用短句和具体例子，一次只问我一件事。先把要做的事说清，再动手。
 ```
 
-导入已有 PRD：
+读已有说明：
 
 ```text
-$dz 阅读这份 PRD。保留已经说清楚的内容，用大白话告诉我还缺什么，并且一次只带我解决一件事。
+@dz 读一下这份说明。已经说清的别再问。直接告诉我哪件事还没说清，一次只问一件事。
 ```
 
 恢复已有项目：
 
 ```text
-$dz 接着做这个项目。不要从头问，用简短的话告诉我已经做到哪里、什么可以保留、还缺什么，以及唯一的下一步。
+@dz 接着做这个东西。不要从头问。用四句短话告诉我：别人做出了什么、哪些能留、还缺什么、现在先干什么。
 ```
 
 检查上线准备：
 
 ```text
-$dz 先不要上线。请检查它是否真的能安全使用，再用大白话告诉我哪些已经准备好、哪些必须先解决。
+@dz 先别放到网上给别人用。请让它真的做一遍，再告诉我：现在能做什么、还有什么没试、出问题怎样恢复。
 ```
 
-ChatGPT Desktop 出现 `@` Skill 选择器时选择 `@dz`。Codex CLI 和 IDE 扩展通常使用 `$dz`。根据 [OpenAI Codex Skills 文档](https://developers.openai.com/codex/skills)，本地独立 Skills 可用于 ChatGPT Desktop、Codex CLI 和 IDE 扩展；若要在 ChatGPT Web 或移动端分发，需要把 Skill 打包进 Plugin。
+在 ChatGPT 里输入 `@` 并选择 `dz`；本地独立 Skill 只出现在 ChatGPT Desktop，打包成 Plugin 后也可用于 ChatGPT 网页和手机。Codex CLI 与 IDE 扩展用 `/skills` 选择或输入 `$dz`。以上入口来自 [OpenAI 官方 Skills 文档](https://developers.openai.com/codex/skills)。
 
 ### 目录结构
 
@@ -233,7 +245,7 @@ dz/
 
 ### 验证
 
-Skill 使用 Codex Skill validator 和 JSON 检查验证结构，并定义十三组新上下文行为测试：
+Skill 使用 Codex Skill validator 和 JSON 检查验证结构，并定义十四组新上下文行为测试：
 
 1. 模糊的“服务所有人”想法；
 2. 区块链、RAG 和多 Agent 技术堆砌；
@@ -246,8 +258,9 @@ Skill 使用 Codex Skill validator 和 JSON 检查验证结构，并定义十三
 9. 已有确认产物时接管一个范围内缺陷修复；
 10. 没有仓库、只有长对话的中途接管；
 11. 产物过期、代码版本变化和旧验证证据不能混用的接管；
-12. 面向非技术初学者时必须简短、浅显，只问一个问题，不暴露内部术语；
-13. 同一套 DZ 在聊天型、可开发型和可上线型平台上自动选择合适做法；相同能力不因平台品牌不同而改变。
+12. 面向小白时必须简短、具体，只问一个问题；听不懂时必须换成当前事情里的例子；
+13. 同一套 DZ 在聊天型、可开发型和可上线型平台上自动选择合适做法；相同能力不因平台品牌不同而改变；
+14. 中途接手时也必须用四句短话说清已经做了什么、什么能留、什么没试、下一步做什么。
 
 行为测试定义见 [`references/forward-tests.md`](references/forward-tests.md)。
 
@@ -265,14 +278,14 @@ Irixi Project Forge is a cross-platform AI product workflow for nontechnical pro
 
 Its short name is `dz`.
 
-DZ does not interpret “build me an app” as permission to code immediately. In plain language, it first helps establish the real problem, first users, desired outcome, and what the first version will and will not do, then builds and checks the product step by step.
+DZ does not interpret “build me an app” as permission to code immediately. It first settles three things in everyday language: who needs help with which trouble, what to do and leave out this time, and what to make first and personally try afterward. You see and approve each one before the work moves on.
 
 ### What you get
 
 When an idea is worth building, a DZ project should leave you with four things:
 
 1. An application or agent that can actually be used.
-2. Three short records you can understand and confirm: why it should exist, what the first version includes, and how it will be built.
+2. Three short records you can understand and confirm: which trouble to solve, what to do this time, and how to make and try it.
 3. Reproducible test results showing what works and what is still unproven.
 4. A launch approach, known risks, and a recovery plan.
 
@@ -283,15 +296,27 @@ In simple terms: DZ guides the work and the current execution-capable AI does th
 ### Core capabilities
 
 - Leads with the answer, uses short sentences and concrete examples, and hides internal state names, English lifecycle labels, and filenames by default.
-- Keeps ordinary replies short and asks one highest-value question per round.
+- Uses either at most two short paragraphs or at most four bullets without mixing both, normally stays under about 120 English words, and asks one question per round.
 - Detects whether the current AI can only chat, inspect a project, build it, or also release it, then adjusts the workflow automatically.
 - Recommends a professional default, a meaningful alternative, and a cheap validation method when the user is unsure.
 - Separates confirmed facts, recommendations, assumptions, unknowns, and explicit non-goals.
 - Challenges adoption, data, AI necessity, quality, permission, privacy, cost, recovery, and operational blind spots.
 - Does not ask a beginner to choose frameworks or certify technical correctness.
-- Does not begin formal implementation until the user has separately confirmed why the product should exist, what the first version includes, and how it will be built.
+- Does not begin formal implementation until the user has separately confirmed which trouble to solve, what to do and leave out this time, and what to make first and how to try it.
 - Judges completion by reproducible real-path evidence, not a mock, green build, deploy command, or reachable URL alone.
 - Can take over midway, preserve valid work, and avoid repeating decisions already supported by the current task.
+
+### How DZ talks to you
+
+“A complete beginner can understand it” is a hard requirement, not a childish tone:
+
+- DZ assumes no product or technical vocabulary and does not make you learn terms before making progress.
+- It discusses one decision, one important consequence, and one question at a time.
+- Instead of labels such as “scope,” “validation,” “deployment,” “permissions,” or “data boundary,” it says who does what, what they will see, and what could actually go wrong.
+- If you say you do not understand, it stops and uses one concrete scene from your project. It does not explain jargon with more jargon.
+- It speaks to you as a capable adult: respectful, direct, and brief.
+
+Before every reply, DZ silently checks whether someone new to the subject could repeat back what will happen, why it matters now, and the one answer DZ needs. If not, it rewrites the reply.
 
 ### Using DZ on different AI platforms
 
@@ -306,10 +331,10 @@ Every platform uses the same DZ workflow. Any AI that accepts text can use it; w
 
 The universal prompt is a safe, single-file compact edition. To give an API host the same handbook detail and artifact templates as the full Skill, expose the manifest's `reference_sets` through on-demand retrieval instead of concatenating every resource into every request.
 
-`@dz`, `$dz`, and `/dz` are shortcuts on some hosts. Everywhere else, use:
+The entry point depends on how DZ was installed. In ChatGPT, type `@` to select `dz`: this covers a local Skill in ChatGPT Desktop and a packaged Plugin on ChatGPT web, desktop, or mobile. In Codex CLI or the IDE extension, run `/skills` or type `$dz`. Only on another AI host that has already loaded the universal prompt, use:
 
 ```text
-DZ启动：I want to build ... Please use plain language and ask one question at a time.
+DZ启动：I want to build ... I know nothing about product or software work. Use short sentences and concrete examples, and ask me one thing at a time.
 ```
 
 ### Automatic adapter interface (for host developers; ordinary users can skip this)
@@ -349,33 +374,33 @@ intent.md → spec.md → plan.md + code → verification.md → review/release.
 
 `PROJECT.md` is a status dashboard and artifact index, not a replacement for Intent, Specification, Plan, or verification evidence.
 
-Those English names and filenames are internal project records. With a beginner, DZ normally says “confirm the goal,” “confirm the first-version boundary,” “confirm the build approach,” “check that it really works,” and “prepare to go live.”
+Those English names and filenames stay inside the project. With a beginner, DZ says “who needs help with which trouble,” “what to do and leave out this time,” “what to make first and how to try it,” “make it do the real job once,” and “check it again before putting it online for other people.”
 
 ### Mid-task takeover
 
 You can invoke DZ halfway through the same conversation or development task. It does not automatically restart and does not delete existing code merely because workflow artifacts are missing.
 
-DZ first inspects without changing anything, then explains in a few short blocks:
+DZ first inspects without changing anything, then uses four short lines:
 
-1. Where the task is now.
-2. What existing work can be kept.
-3. What is still unconfirmed or unproven.
-4. The single recommended next action and one question for the user.
+1. What the previous person actually made.
+2. Which specific parts can stay.
+3. What nobody has agreed or personally tried yet.
+4. The one small thing to do now, followed by one question.
 
-When code exists without project records, DZ preserves it as potentially useful work that still needs checking. It reconstructs the goal, first-version boundary, and build approach, asks the user to confirm them in ordinary language, then keeps aligned work and continues testing.
+When code exists without a clear explanation, DZ preserves it as potentially useful work that still needs checking. It writes down which trouble to solve, what to do and leave out this time, and what to make and try first. It asks the user whether those exact sentences are right, then keeps the parts that match.
 
 When those decisions already exist and the task is a bounded defect, DZ resumes from implementation or testing without restarting product discovery. It reopens only the earliest decision affected by a change to experience, data, permissions, cost, architecture, or another material boundary.
 
 Take over in ChatGPT Desktop:
 
 ```text
-@dz Take over the current task. In plain language, tell me where we are, what can be kept, what is still missing, and the one thing we should do next. Do not make me repeat known context.
+@dz Continue this work. Do not change anything yet. In four short lines, tell me what was made, what can stay, what is missing, and what one small thing to do now. Do not ask me to repeat known facts.
 ```
 
 Take over where Skills use `$` invocation:
 
 ```text
-$dz Take over the current task. Preserve useful work, explain the real situation simply, and continue from one clear next step.
+$dz Continue this work without starting over. Use short sentences to tell me what is already done, what nobody has personally tried, and the one small thing to do now.
 ```
 
 ### Integration with the three handbooks
@@ -428,28 +453,28 @@ If an update is not detected, restart Codex and open a fresh task.
 Start from a rough idea:
 
 ```text
-$dz I have an AI product idea but I am not technical. Guide me step by step in plain, concise language, ask one important question at a time, and confirm the goal, first-version boundary, and build approach before coding.
+@dz I want to make something that helps a small shop sort customer messages. I know nothing about product or software work. Use short sentences and concrete examples. Ask me one thing at a time, and make sure we understand the job before writing code.
 ```
 
-Bring an existing PRD:
+Read an existing description:
 
 ```text
-$dz Read this PRD, keep what is already clear, explain only the important gaps in plain language, and guide me through one decision at a time.
+@dz Read this description. Do not ask again about things it already explains. Tell me the one important thing that is still unclear, then ask one question.
 ```
 
 Resume an existing project:
 
 ```text
-$dz Continue this project without starting over. Tell me simply where it stands, what can be kept, what is missing, and the one next action.
+@dz Continue this work without starting over. In four short lines, tell me what was made, what can stay, what is missing, and what one small thing to do now.
 ```
 
 Audit release readiness:
 
 ```text
-$dz Do not deploy yet. Check whether this is genuinely safe and usable, then explain in plain language what is ready and what must be fixed first.
+@dz Do not put this online for other people yet. Make it do the real job once, then tell me what works now, what nobody has tried, and how to restore it if something goes wrong.
 ```
 
-Choose `@dz` when the ChatGPT Desktop `@` Skill picker is available. Codex CLI and the IDE extension commonly use `$dz`. According to the [OpenAI Codex Skills documentation](https://developers.openai.com/codex/skills), standalone local Skills are available in ChatGPT Desktop, Codex CLI, and the IDE extension. Web and mobile distribution requires packaging the Skill in a Plugin.
+In ChatGPT, type `@` and select `dz`: a standalone local Skill appears in ChatGPT Desktop, while a packaged Plugin also works on ChatGPT web and mobile. In Codex CLI or the IDE extension, run `/skills` or type `$dz`. These entry points follow the [official OpenAI Skills documentation](https://developers.openai.com/codex/skills).
 
 ### Structure
 
@@ -486,7 +511,7 @@ dz/
 
 ### Validation
 
-The package is checked with the Codex Skill validator and JSON validation, and defines thirteen fresh-context behavioral test families:
+The package is checked with the Codex Skill validator and JSON validation, and defines fourteen fresh-context behavioral test families:
 
 1. a vague “product for everyone” idea;
 2. fashionable blockchain, RAG, and multi-agent over-scoping;
@@ -499,8 +524,9 @@ The package is checked with the Codex Skill validator and JSON validation, and d
 9. takeover of an in-scope defect under accepted artifacts;
 10. takeover of a long discussion with no repository;
 11. takeover involving stale artifacts, a changed revision, and revision-bound evidence;
-12. concise plain-language guidance for a nontechnical beginner, with one question and no exposed internal jargon;
-13. automatic capability-aware behavior across chat-only, build-capable, and release-capable hosts, with identical behavior for identical capabilities regardless of brand.
+12. concise, concrete guidance for a complete beginner, with one question and a same-project example after confusion;
+13. automatic capability-aware behavior across chat-only, build-capable, and release-capable hosts, with identical behavior for identical capabilities regardless of brand;
+14. a mid-task beginner takeover that names what was made, what can stay, what has not been personally tried, and the one next action in four short lines.
 
 See [`references/forward-tests.md`](references/forward-tests.md) for the behavioral oracles.
 

@@ -8,7 +8,7 @@ PLAN → DESIGN → BUILD → TEST → DEPLOY → MAINTAIN
   └──────────── new accepted intent ────────┘
 ```
 
-Use natural product language with users. Internal state and gate names exist to prevent skipping, not to make a beginner learn process terminology. Keep them internal unless the user asks for technical detail. In ordinary conversation say “confirm the goal,” “confirm what the first version includes,” “confirm how we will build it,” “check that it really works,” and “prepare to go live.” Follow the communication contract in [guided-dialogue.md](guided-dialogue.md).
+Use everyday language with users. Internal state and gate names exist to prevent skipping, not to make a beginner learn process terminology. Keep them internal unless the user asks for technical detail. In ordinary conversation say “先弄清想帮谁解决哪件麻烦,” “说清这次做什么、不做什么,” “说清先做哪一步、做完怎样试,” “让它真的做一遍,” and “放到网上给别人用前再检查一次.” Follow the communication contract in [guided-dialogue.md](guided-dialogue.md).
 
 ## Entry routing
 
@@ -272,7 +272,7 @@ Fast Track is allowed only when all are true:
 - local, single-user, low-cost, reversible, no sensitive data, no external writes, no paid actions, and no production release;
 - success is objectively verifiable.
 
-It may shorten documents and hold three confirmations close together, but must still confirm intent, specification/boundary, and plan separately. The first real flow and evidence remain mandatory.
+It may shorten documents, but the three confirmations still happen separately: show one exact decision, ask one question, wait for the user's reply, and only then show the next decision in a later assistant turn. Never present or accept all three in one round. The first real flow and evidence remain mandatory.
 
 If the utility mutates local user files or data, the accepted specification and plan must include a preview or dry run, collision and idempotency behavior, an inspectable change manifest, a tested undo or rollback path, and fresh authorization for the real apply step. Test on disposable copies before originals.
 

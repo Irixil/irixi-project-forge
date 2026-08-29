@@ -43,18 +43,16 @@ Infer only the highest **contiguous** supported gate chain. A later artifact tha
 
 ## Produce a plain-language continuity summary
 
-The first substantive takeover response should be a compact, user-readable summary, not the new-idea interview scaffold. Keep the precise internal assessment, but do not expose its state codes or gate terminology by default:
+The first substantive takeover response should be a compact, user-readable summary, not the new-idea interview scaffold. Keep the precise internal assessment, but explain it so a complete beginner can repeat it back. Use concrete work and results, not category words:
 
 ```text
-I will continue from the current task rather than start over.
-
-Where we are now: [objective and work already done]
-What we can keep: [useful conversation, code, tests, or decisions]
-What is still missing: [earliest unconfirmed decision or missing proof, plus the one material risk or permission boundary]
-Next: [one recommended action]. I only need one answer from you: [question]
+别人已经做到：[name the visible result, not “progress”].
+这些可以留下：[name the useful part, not “work” or “assets”].
+还不能确定：[name the exact thing not agreed or not personally tried]. If skipped, [one concrete consequence].
+先做：[one small action]. [one question the user can answer]
 ```
 
-Do not list every file, replay the entire conversation, or print labels such as `TAKEOVER_AUDIT`, “gate-supported state,” `Intent`, or `Specification` unless the user asks for technical detail. Say “confirmed,” “may be true,” “conflicts with…,” or “still unknown” in the user's language. Keep an ordinary takeover reply to these four blocks and normally under about 350 Chinese characters or 220 English words. Ask one question; use up to three only during a genuine incident when they cannot be decided separately.
+Do not list every file, replay the entire conversation, or print labels such as `TAKEOVER_AUDIT`, “gate-supported state,” `Intent`, or `Specification` unless the user asks for technical detail. Avoid “现有进度,” “成果,” “验证,” “真实环境,” and “真人试用.” Say exactly what was made, what was tried, by whom, and what happened. For example, replace “两项检查通过” with the two observed results, and replace “还缺真人试用” with “还没请以后要用它的人亲手从头做到尾.” Keep the reply to four short lines or four bullets, normally under about 220 Chinese characters or 140 English words, and ask one question. Use up to three questions only during a genuine incident when delay increases harm and they cannot be decided separately.
 
 ## Route by takeover shape
 
