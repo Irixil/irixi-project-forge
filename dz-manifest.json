@@ -1,0 +1,105 @@
+{
+  "protocol_version": "1.0",
+  "workflow_version": "2026-08-29",
+  "id": "dz",
+  "name": "Irixi Project Forge",
+  "description": "A platform-neutral workflow that guides a nontechnical user from an idea or current project state to a verified product or an honest implementation handoff.",
+  "source": "https://github.com/Irixil/irixi-project-forge",
+  "raw_base_url": "https://raw.githubusercontent.com/Irixil/irixi-project-forge/main/",
+  "entrypoints": {
+    "agent_skill": "SKILL.md",
+    "universal_prompt": "portable/DZ-UNIVERSAL.md",
+    "adapter_guide": "adapters/README.md",
+    "adapter_rules": "references/platform-adapters.md",
+    "capability_schema": "adapters/dz-capabilities.schema.json",
+    "capability_example": "adapters/example-capabilities.json",
+    "openai_metadata": "agents/openai.yaml"
+  },
+  "reference_sets": {
+    "conversation": [
+      "references/guided-dialogue.md",
+      "references/takeover-resume.md"
+    ],
+    "workflow": [
+      "references/phase-gates.md",
+      "references/artifact-chain.md"
+    ],
+    "delivery": [
+      "references/handbook-routing.md"
+    ],
+    "agent_product": [
+      "references/agent-harness.md"
+    ],
+    "platform": [
+      "references/platform-adapters.md",
+      "references/codex-native.md"
+    ],
+    "artifact_templates": [
+      "references/artifacts/intent.md",
+      "references/artifacts/spec.md",
+      "references/artifacts/plan.md",
+      "references/artifacts/verification.md",
+      "references/artifacts/review-release.md",
+      "references/artifacts/feedback.md"
+    ]
+  },
+  "invocation_hints": [
+    "@dz",
+    "$dz",
+    "DZ启动"
+  ],
+  "capability_envelope": {
+    "opening_tag": "<DZ_HOST_CAPABILITIES>",
+    "closing_tag": "</DZ_HOST_CAPABILITIES>",
+    "trusted_roles": [
+      "system",
+      "developer",
+      "host-runtime"
+    ]
+  },
+  "selection_order": [
+    "release",
+    "build",
+    "collaborate",
+    "guide"
+  ],
+  "profiles": {
+    "guide": {
+      "required_capabilities": {},
+      "behavior": "Clarify, challenge, confirm decisions, review supplied material, and produce a copyable handoff. Never claim to have inspected, built, tested, deployed, or remembered anything the host cannot access."
+    },
+    "collaborate": {
+      "required_capabilities": {
+        "file_read": "yes"
+      },
+      "behavior": "Inspect available project evidence and prepare precise decisions or changes. Do not claim execution that the host cannot perform."
+    },
+    "build": {
+      "required_capabilities": {
+        "file_read": "yes",
+        "file_write": "yes",
+        "command_execution": "yes"
+      },
+      "behavior": "After the three user confirmations, implement small slices and collect reproducible evidence with the host's native tools."
+    },
+    "release": {
+      "required_capabilities": {
+        "file_read": "yes",
+        "file_write": "yes",
+        "command_execution": "yes",
+        "external_write": "yes",
+        "deployment": "yes",
+        "approval_flow": "yes"
+      },
+      "behavior": "Prepare and verify release work, but deploy only after scope-specific human approval."
+    }
+  },
+  "non_negotiable_behavior": {
+    "plain_language": true,
+    "ordinary_questions_per_turn": 1,
+    "separate_prebuild_confirmations": 3,
+    "capability_truthfulness": true,
+    "external_action_requires_current_authority": true,
+    "preserve_valid_midtask_work": true
+  }
+}

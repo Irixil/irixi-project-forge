@@ -1,0 +1,25 @@
+{
+  "protocol_version": "1.0",
+  "host": {
+    "name": "example-api-host",
+    "model": "provider/model-name",
+    "surface": "api"
+  },
+  "capabilities": {
+    "persistent_state": "session",
+    "file_read": "no",
+    "file_write": "no",
+    "command_execution": "no",
+    "version_control": "no",
+    "browser": "no",
+    "tool_calling": "yes",
+    "subagents": "no",
+    "external_write": "no",
+    "deployment": "no",
+    "approval_flow": "no",
+    "network": "restricted"
+  },
+  "notes": [
+    "The application resends conversation history on every request."
+  ]
+}

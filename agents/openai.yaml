@@ -1,7 +1,7 @@
 interface:
   display_name: "Irixi Project Forge"
-  short_description: "Start or resume products with verified gates"
-  default_prompt: "Use $dz to start or take over this product task, reconstruct the current state, challenge missing assumptions, and continue from the earliest unsupported AI-native SDLC gate."
+  short_description: "Guide ideas to usable products across AI platforms"
+  default_prompt: "Use $dz in plain, concise language. Detect this host's real capabilities, then guide my idea or current project to one clear next step."
 
 policy:
   allow_implicit_invocation: false

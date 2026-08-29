@@ -32,6 +32,8 @@ Every artifact records its source of truth, preceding artifact or evidence, rele
 
 A conversational decision record is valid only when the exact Draft or complete decision-relevant diff was visible and the relevant owner explicitly accepted that version. Determine workflow authority from the highest contiguous accepted artifact chain; a later file cannot bridge an earlier missing or contradicted gate.
 
+User-facing acceptance does not require lifecycle jargon or a magic sentence. Introduce the visible record as the goal confirmation, first-version confirmation, or build-plan confirmation in the user's language. A natural reply such as “这份目标没问题” can be explicit acceptance when it unambiguously refers to that exact visible content. “Continue,” silence, enthusiasm, or approval of another action is not acceptance.
+
 For personal product choices, the user is normally the decision owner. For organizational policy, legal, security, privacy, financial, or production risk, record a named authorized owner's role, scope, and approval evidence; stop if authority is unclear.
 
 ## Exact-Draft acceptance protocol
@@ -75,7 +77,7 @@ Create this only when the project location is known and the user asks to formali
 - Assumptions:
 - Blocking concern:
 - Next user action:
-- Next Codex action:
+- Next delivery action:
 
 ## Evidence and blockers
 - Evidence:
@@ -86,7 +88,7 @@ Create this only when the project location is known and the user asks to formali
 
 Update the dashboard at transitions, material decisions, pauses, handoffs, or new evidence. Do not copy full artifacts into it.
 
-During a mid-task takeover, the chat-level Task Continuity Map comes first. Update `PROJECT.md` only when writing is authorized and routing is clear. If code exists without accepted artifacts, record the implementation as candidate or unverified work; do not falsify past acceptance or discard it automatically.
+During a mid-task takeover, the plain-language continuity summary comes first. Update `PROJECT.md` only when writing is authorized and routing is clear. If code exists without accepted artifacts, record the implementation as candidate or unverified work; do not falsify past acceptance or discard it automatically.
 
 ## Change routing
 

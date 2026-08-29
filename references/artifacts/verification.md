@@ -35,4 +35,4 @@ Update throughout Build and finalize in Test. This is evidence, not a human-acce
 - Ready for independent review: yes / no
 ```
 
-Never replace exact outputs or inspectable evidence with “Codex checked it.” Label mocks, simulations, and real systems distinctly. Mark Passed only when every Must item has evidence and no critical finding remains.
+Never replace exact outputs or inspectable evidence with “the AI checked it.” Label mocks, simulations, and real systems distinctly. Mark Passed only when every Must item has evidence and no critical finding remains.

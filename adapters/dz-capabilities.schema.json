@@ -1,0 +1,159 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://github.com/Irixil/irixi-project-forge/blob/main/adapters/dz-capabilities.schema.json",
+  "title": "DZ Host Capability Card",
+  "description": "A host-supplied, non-secret description of what the current AI surface can actually do. DZ uses it to choose a safe workflow profile.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "protocol_version",
+    "host",
+    "capabilities"
+  ],
+  "properties": {
+    "protocol_version": {
+      "const": "1.0"
+    },
+    "host": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "name",
+        "surface"
+      ],
+      "properties": {
+        "name": {
+          "type": "string",
+          "minLength": 1
+        },
+        "model": {
+          "type": "string"
+        },
+        "surface": {
+          "enum": [
+            "chat",
+            "desktop",
+            "ide",
+            "cli",
+            "api",
+            "agent",
+            "unknown"
+          ]
+        }
+      }
+    },
+    "capabilities": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "persistent_state",
+        "file_read",
+        "file_write",
+        "command_execution",
+        "version_control",
+        "browser",
+        "tool_calling",
+        "subagents",
+        "external_write",
+        "deployment",
+        "approval_flow"
+      ],
+      "properties": {
+        "persistent_state": {
+          "enum": [
+            "none",
+            "session",
+            "project",
+            "unknown"
+          ]
+        },
+        "file_read": {
+          "$ref": "#/$defs/support"
+        },
+        "file_write": {
+          "$ref": "#/$defs/support"
+        },
+        "command_execution": {
+          "$ref": "#/$defs/support"
+        },
+        "version_control": {
+          "$ref": "#/$defs/support"
+        },
+        "browser": {
+          "$ref": "#/$defs/support"
+        },
+        "tool_calling": {
+          "$ref": "#/$defs/support"
+        },
+        "subagents": {
+          "$ref": "#/$defs/support"
+        },
+        "external_write": {
+          "$ref": "#/$defs/support"
+        },
+        "deployment": {
+          "$ref": "#/$defs/support"
+        },
+        "approval_flow": {
+          "$ref": "#/$defs/support"
+        },
+        "network": {
+          "enum": [
+            "none",
+            "restricted",
+            "available",
+            "unknown"
+          ]
+        }
+      }
+    },
+    "notes": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      },
+      "maxItems": 20
+    }
+  },
+  "allOf": [
+    {
+      "if": {
+        "properties": {
+          "capabilities": {
+            "properties": {
+              "deployment": {
+                "const": "yes"
+              }
+            },
+            "required": [
+              "deployment"
+            ]
+          }
+        },
+        "required": [
+          "capabilities"
+        ]
+      },
+      "then": {
+        "properties": {
+          "capabilities": {
+            "properties": {
+              "external_write": {
+                "const": "yes"
+              }
+            }
+          }
+        }
+      }
+    }
+  ],
+  "$defs": {
+    "support": {
+      "enum": [
+        "yes",
+        "no",
+        "unknown"
+      ]
+    }
+  }
+}

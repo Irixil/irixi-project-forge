@@ -20,7 +20,7 @@ A hybrid product is often the most robust option: keep deterministic business ru
 
 ## Start every agent with a minimal card
 
-Codex drafts the card; the user confirms the product behavior, while a named authorized owner confirms any triggered organizational or regulated action boundary. For a low-risk first version, begin with this card rather than requiring a complete governance worksheet.
+The delivery AI drafts the card; the user confirms the product behavior, while a named authorized owner confirms any triggered organizational or regulated action boundary. For a low-risk first version, begin with this card rather than requiring a complete governance worksheet.
 
 ```markdown
 ## Minimal Agent Card
@@ -32,7 +32,7 @@ Codex drafts the card; the user confirms the product behavior, while a named aut
 - 3–5 representative validation cases:
 ```
 
-Explain the card in product language. A beginner should not be asked to invent tool schemas, retry algorithms, or security controls. Codex recommends those boundaries and asks the relevant decision owner to confirm their effect. A statement such as "give the agent every permission" is not a valid replacement for the action-specific permission and recovery design.
+Explain the card in product language. A beginner should not be asked to invent tool schemas, retry algorithms, or security controls. The delivery AI recommends those boundaries and asks the relevant decision owner to confirm their effect. A statement such as "give the agent every permission" is not a valid replacement for the action-specific permission and recovery design.
 
 Before the specification gate, challenge whether the requested autonomy is necessary. Search, analysis, ranking, and drafting can often run with broad read-only freedom, while sending, publishing, applying, scheduling, buying, deleting, changing permissions, or mutating infrastructure normally require deterministic checks and a meaningful confirmation boundary.
 

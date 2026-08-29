@@ -20,7 +20,7 @@ Pause new implementation mutations until the takeover route is clear. Do not und
 Inspect only what is available and relevant:
 
 1. The current user's latest request and the visible conversation: original goal, corrections, explicit decisions, rejected options, promised next action, approvals, tool results, failures, and unfinished questions.
-2. Repository guidance and state: `AGENTS.md`, `PROJECT.md`, `docs/sdlc`, README, Git status and diff, branch or worktree, structure, relevant source and tests, run instructions, and current plan.
+2. Repository guidance and state the host can access: `AGENTS.md`, `CLAUDE.md`, `GEMINI.md`, or another active instruction file; `PROJECT.md`; `docs/sdlc`; README; version-control status and diff; branch or isolated workspace; relevant source and tests; run instructions; and current plan.
 3. Evidence: exact commands and outputs, test or eval results, screenshots or browser evidence, review findings, release records, and known failures.
 4. Operational state when relevant: running task or terminal state, migrations, external side effects, deployment environment, and rollback readiness.
 
@@ -41,29 +41,20 @@ Classify every important item as `supported`, `inferred`, `contradicted`, or `mi
 
 Infer only the highest **contiguous** supported gate chain. A later artifact that looks accepted cannot bridge a missing or contradicted Intent, Specification, or Plan.
 
-## Produce a Task Continuity Map
+## Produce a plain-language continuity summary
 
-The first substantive takeover response should be a compact, user-readable map, not the new-idea interview scaffold:
+The first substantive takeover response should be a compact, user-readable summary, not the new-idea interview scaffold. Keep the precise internal assessment, but do not expose its state codes or gate terminology by default:
 
 ```text
-I am taking over the current task, not restarting it.
+I will continue from the current task rather than start over.
 
-Current objective: ...
-Current work item: ...
-Observed work state: ...
-Gate-supported workflow state: ...
-Already established and reusable: ...
-Existing changes: keep / review / unknown, with reason
-Evidence available: ...
-Unverified or contradicted: ...
-Authorization still in scope: ...
-Earliest missing or reopened gate: ...
-Most important current risk: ...
-Recommended next action: ...
-Your one needed decision or input: ...
+Where we are now: [objective and work already done]
+What we can keep: [useful conversation, code, tests, or decisions]
+What is still missing: [earliest unconfirmed decision or missing proof, plus the one material risk or permission boundary]
+Next: [one recommended action]. I only need one answer from you: [question]
 ```
 
-Do not list every file or replay the entire conversation. Show the facts that change routing and the next decision. Ask no more than three primary questions and normally only one.
+Do not list every file, replay the entire conversation, or print labels such as `TAKEOVER_AUDIT`, “gate-supported state,” `Intent`, or `Specification` unless the user asks for technical detail. Say “confirmed,” “may be true,” “conflicts with…,” or “still unknown” in the user's language. Keep an ordinary takeover reply to these four blocks and normally under about 350 Chinese characters or 220 English words. Ask one question; use up to three only during a genuine incident when they cannot be decided separately.
 
 ## Route by takeover shape
 
@@ -112,7 +103,7 @@ Do not list every file or replay the entire conversation. Show the facts that ch
 - Preserve previously accepted exact artifacts unless current evidence reopens them.
 - Preserve valid implementation work whenever it can satisfy the accepted contract safely.
 - A missing artifact requires retrospective alignment, not retrospective fiction. Never invent past approval.
-- A takeover map is not another formal gate. Once routing is supported, proceed with the selected stage and ask only for decisions that actually block it.
+- The continuity summary is not another formal confirmation point. Once routing is supported, proceed with the selected stage and ask only for decisions that actually block it.
 - Keep just-in-time boundaries for credentials, sensitive data, paid calls, external writes, destructive actions, migrations, and release.
 - At handoff or pause, update `PROJECT.md` and the current evidence artifact only when writing is authorized, so a later task can resume without reconstructing everything again.
 
@@ -125,5 +116,5 @@ Takeover is complete when:
 - existing changes have a keep/review decision rather than being ignored;
 - the earliest missing or reopened gate is named;
 - current evidence and authorization boundaries are explicit;
-- the user sees one recommended next action;
+- the user sees one recommended next action in plain language;
 - the workflow has resumed at that action without unnecessary repetition.

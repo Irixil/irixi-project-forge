@@ -8,7 +8,7 @@ PLAN → DESIGN → BUILD → TEST → DEPLOY → MAINTAIN
   └──────────── new accepted intent ────────┘
 ```
 
-Use natural product language with users. Internal state and gate names exist to prevent skipping, not to make a beginner learn process terminology.
+Use natural product language with users. Internal state and gate names exist to prevent skipping, not to make a beginner learn process terminology. Keep them internal unless the user asks for technical detail. In ordinary conversation say “confirm the goal,” “confirm what the first version includes,” “confirm how we will build it,” “check that it really works,” and “prepare to go live.” Follow the communication contract in [guided-dialogue.md](guided-dialogue.md).
 
 ## Entry routing
 
@@ -157,7 +157,7 @@ Make the work inspectable before coding, then build one independently acceptable
 
 ### Gate: Plan approved
 
-Show the exact Draft artifact or a complete decision-relevant diff. The user explicitly confirms that version's product impact, material cost, new platforms or accounts, deferred capabilities, and phase order. The named authorized owner confirms any organizational or regulated risk boundary. Codex owns technical quality and must not transfer technical sign-off to the user. Only then mark that plan version Accepted and begin implementation.
+Show the exact Draft artifact or a complete decision-relevant diff. The user explicitly confirms that version's product impact, material cost, new platforms or accounts, deferred capabilities, and phase order. The named authorized owner confirms any organizational or regulated risk boundary. An execution-capable delivery AI owns technical quality and must not transfer technical sign-off to the user. A chat-only AI must label technical quality as unverified. Only then may an execution-capable host begin implementation.
 
 ### Implementation loop
 

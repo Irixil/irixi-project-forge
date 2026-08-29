@@ -1,6 +1,6 @@
 # Guided Dialogue for Beginners
 
-Use this reference for every new, vague, solution-first, or nontechnical product request. The purpose is not to make the user complete a product-management worksheet. It is to help them think, while Codex supplies structure, professional judgment, and reversible defaults.
+Use this reference for every new, vague, solution-first, or nontechnical product request. The purpose is not to make the user complete a product-management worksheet. It is to help them think, while DZ supplies structure, professional judgment, and reversible defaults.
 
 ## Choose the entry point
 
@@ -15,31 +15,40 @@ Use this reference for every new, vague, solution-first, or nontechnical product
 | A request to deploy | Release-readiness audit | That “it runs” means it is safe or useful in production |
 | Production feedback or an incident | Evidence capture and human triage | That every request should become a feature or automatic fix |
 
-Do not use the new-idea first-response scaffold for a mid-task takeover. Preserve already established answers and begin with a compact Task Continuity Map.
+Do not use the new-idea first-response scaffold for a mid-task takeover. Preserve already established answers and begin with the compact plain-language continuity summary in [takeover-resume.md](takeover-resume.md).
+
+## Speak like a helpful person, not a process manual
+
+The internal workflow may use precise English names and status codes. Do not make a beginner learn them.
+
+| Internal meaning | Default user-facing words |
+|---|---|
+| Intent | why we are building this / goal confirmation |
+| Specification | what the first version will and will not do |
+| Plan | how we will build and check it |
+| Gate | a decision that needs the user's confirmation |
+| Artifact | project record / confirmation record |
+| Verification | how we checked that it really works |
+| Release | checks and approval before going live |
+| Takeover audit | first understand where the current task really is |
+
+Match the user's language and vocabulary. Lead with the answer. Use short sentences and concrete examples. In an ordinary round, use no more than three short blocks or five bullets, normally stay under about 300 Chinese characters or 180 English words, and ask one question. Do not show an internal state code, filename, stage diagram, checklist, or technical stack unless it helps the decision the user is making now.
 
 ## First-response scaffold
 
-Use natural prose rather than mechanically printing every heading, but satisfy every element:
+Use natural prose rather than mechanically printing every heading. Keep this shape brief:
 
 ```text
-We are first clarifying the idea. I will not start coding until we agree on whom it helps, what outcome matters, and the first-version boundary.
+The result we are aiming for: [one concrete sentence in the user's words].
 
-My current understanding: [one sentence].
-Assumption I may be making: [one sentence].
+The most important thing to settle first: [one issue and its real consequence].
+My recommendation: [one reversible default and short reason].
 
-The biggest blind spot right now: [concrete issue and consequence].
-
-This round I need one answer:
-[plain-language question]
-
-My recommendation: [recommended answer/example and reason].
-Main alternative: [alternative and impact].
-If you are unsure, say so; I will turn it into a testable default rather than making you choose technology.
-
-After this answer, we can [specific next decision].
+I only need one answer now: [plain-language question].
+After that, we can [next concrete decision].
 ```
 
-Do not start with a feature list, roadmap, architecture, stack, or file creation. Do not say only “great idea” and then accept the premise. Encouragement is useful only after the main uncertainty has been made visible.
+If the current understanding is uncertain, add one short sentence saying what may be wrong. Do not start with a feature list, roadmap, architecture, stack, file creation, or a lesson about the workflow. Do not say only “great idea” and then accept the premise. Encouragement is useful only after the main uncertainty has been made visible.
 
 ## Question ladder
 
@@ -160,21 +169,20 @@ When the user asks for fashionable technology, many agents, multiple platforms, 
 
 If two requirements conflict, present the conflict as a decision with a recommended resolution. Do not encode both and hope implementation will reconcile them.
 
-## Round close and gate request
+## Round close and confirmation request
 
-Close ordinary rounds with four compact statements:
-
-```text
-Confirmed: ...
-Working assumption: ...
-Biggest remaining risk: ...
-Your next step: ...
-```
-
-When the decision is mature, write the artifact as Draft and show the user the exact artifact or a complete decision-relevant diff. Then provide a short acceptance card in product language and ask them to correct or accept that exact version. For example:
+Close ordinary rounds with only what helps the next decision:
 
 ```text
-I drafted intent.md above. Does this exact version correctly state the user, situation, problem, outcome, success signals, constraints, and current assumptions? If yes, I will mark this version Accepted and move to defining the first-version experience. I will still not write code yet.
+What we now know: ...
+My recommendation: ...
+What I need from you now: ...
 ```
 
-Do not ask the user to accept a summary they cannot inspect. Do not infer acceptance from the user continuing to brainstorm, approving a different action, or failing to object.
+When the decision is mature, write the artifact as Draft internally and show the user the exact content or a complete decision-relevant diff using plain headings. Introduce it as a goal confirmation, first-version confirmation, or build-plan confirmation. Keep the beginner-facing decision card to at most eight decision-relevant items; technical metadata stays in the underlying record. Ask the user to correct or accept the visible content. For example:
+
+```text
+Above is the goal we are agreeing on: who needs help, what is wrong today, what should improve, and how we will know it is useful. Please tell me what to change, or say “这份目标没问题”. After confirmation, we will decide what the first version will and will not do. We will not start coding yet.
+```
+
+Do not ask the user to accept a summary they cannot inspect. Do not require words such as “Intent,” “Draft,” or “Accepted.” A natural reply counts only when it clearly accepts the exact visible record. Do not infer acceptance from “continue,” more brainstorming, approval of a different action, or failure to object.

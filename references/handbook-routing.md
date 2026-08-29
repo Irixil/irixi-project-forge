@@ -94,7 +94,7 @@ The accepted intent and spec should cover:
 6. model, latency, per-task cost, monthly budget, provider, and compliance constraints;
 7. sensitive data, expected users, file limits, deployment location, and other nonfunctional boundaries.
 
-Do not ask a beginner to define databases, API prefixes, message queues, or framework versions. Codex derives those after these product questions are answered.
+Do not ask a beginner to define databases, API prefixes, message queues, or framework versions. An execution-capable delivery AI derives those after these product questions are answered.
 
 ## Choose the build path
 

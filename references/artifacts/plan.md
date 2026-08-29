@@ -48,4 +48,4 @@ Read accepted intent and specification, repository rules, code, and environment.
 - Remaining ambiguity:
 ```
 
-Acceptance means the user has inspected and accepted this exact Draft's product impact, platforms, material cost, deferred capabilities, and stage order. Any triggered organizational or regulated risk boundary requires its named authorized owner. Codex remains accountable for technical correctness through implementation, tests, and independent review.
+Acceptance means the user has inspected and accepted this exact Draft's product impact, platforms, material cost, deferred capabilities, and stage order. Any triggered organizational or regulated risk boundary requires its named authorized owner. An execution-capable delivery AI remains accountable for technical correctness through implementation, tests, and independent review; a chat-only AI must hand this responsibility to a capable execution environment.
