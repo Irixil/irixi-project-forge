@@ -2,6 +2,8 @@
 
 This directory is for AI hosts and application developers. End users do not need to fill in a capability card.
 
+There is no supported-platform allowlist. WorkBuddy, Kimi, Zhipu, DeepSeek, Claude, Gemini, Codex, a private model, and an unknown future host all use the same loader flow. The `host.name` field is diagnostic only; select behavior exclusively from validated capabilities.
+
 ## Loader flow
 
 1. Fetch [`dz-manifest.json`](../dz-manifest.json), then load its `adapter_rules` and `capability_schema` entries.

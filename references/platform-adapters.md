@@ -1,6 +1,6 @@
 # Platform Adapters and Capability Negotiation
 
-Use this reference whenever DZ is loaded outside Codex, through an API, or on an unknown AI surface.
+Use this reference whenever DZ is loaded on any AI surface.
 
 ## One workflow, different hands
 
@@ -59,48 +59,33 @@ Capability adaptation never removes the three product confirmations or weakens s
 
 ## Loading forms
 
-### Agent Skills hosts
+Do not create a separate product workflow for each vendor. WorkBuddy, Kimi, Zhipu, DeepSeek, Claude, Gemini, a private model, and any future host all use the same DZ core. A brand may change installation steps, but it never changes the decision sequence, communication contract, evidence standard, or safety boundary.
+
+Choose one loading form by what the host accepts:
+
+### Native Skill loading
 
 Use the repository bundle beginning at `SKILL.md`. The host discovers the skill, loads referenced files progressively, and maps generic actions to its native tools. Platform metadata files such as `agents/openai.yaml` are optional adapters, not the workflow core.
 
-### Claude
-
-Claude Code documents project and personal Skill directories built around `SKILL.md`; the directory name provides direct `/dz` invocation, and the model may also match the Skill automatically. Claude's web and desktop products document custom Skill upload as a packaged archive. Use the same core bundle, but do not assume Claude Code's local tools or permission behavior exist in an ordinary Claude chat:
-
-- [Claude Code Skills](https://code.claude.com/docs/en/slash-commands)
-- [Claude custom Skills](https://support.claude.com/en/articles/12512180-use-skills-in-claude)
-
-### Gemini CLI
-
-Gemini CLI documents Agent Skills in project and user directories, including the shared `.agents/skills` convention. Reuse the same core bundle and let Gemini's activation and user confirmation flow select it. Do not promise that Gemini web chat has the same local Skill support or that a custom `/dz` command can bypass Skill activation:
-
-- [Gemini CLI Agent Skills](https://github.com/google-gemini/gemini-cli/blob/main/docs/cli/skills.md)
-- [Gemini CLI Skill activation](https://geminicli.com/docs/tools/activate-skill/)
-
-### API integrations
+### System, developer, or project instructions
 
 Load [`portable/DZ-UNIVERSAL.md`](../portable/DZ-UNIVERSAL.md) as the stable system or developer instruction, then append a validated capability card. The application—not the model—must retain conversation state, execute tools, validate tool arguments, enforce permissions, and store project records.
 
-For DeepSeek's Chat Completions API, official documentation supports `system` messages and tool calls, while multi-round state must be resent by the caller on every request. This makes the universal prompt plus a host-managed capability card the reliable adapter:
+This is also the API integration path. The host application owns conversation history, tool execution, permissions, and persistence even when the model API offers some of those primitives.
 
-- [DeepSeek Chat Completions API](https://api-docs.deepseek.com/api/create-chat-completion/)
-- [DeepSeek multi-round conversation](https://api-docs.deepseek.com/guides/multi_round_chat/)
-- [DeepSeek tool calls](https://api-docs.deepseek.com/guides/tool_calls/)
+### File upload or project knowledge
 
-### Chat-only websites
+Upload `portable/DZ-UNIVERSAL.md`. When the host supports multiple knowledge files or retrieval, also expose only the manifest reference set needed for the current decision. Do not load every handbook into every turn.
 
-Upload or paste `portable/DZ-UNIVERSAL.md`, then start with `DZ启动：` and the idea or current project summary. If the site cannot preserve instructions across sessions, export the handoff at the end and attach it next time. Do not claim permanent installation unless the platform documents it.
+### Plain chat
 
-### DeepSeek Harness
+Paste `portable/DZ-UNIVERSAL.md`, then start with `DZ启动：` and the idea or current project summary. If the site cannot preserve instructions across sessions, export the handoff at the end and paste or attach it next time. Do not claim permanent installation or execution ability the chat does not provide.
 
-DeepSeek Harness currently documents local `SKILL.md` discovery, including a shared `~/.agents/skills` root, but its repository labels the product a developer preview and its Skill plugin is an explicit opt-in. Treat this as an experimental native adapter, not a stable promise:
+Even a text-only host can run the full product-decision flow. It stops at an honest handoff when it cannot build, test, or deploy.
 
-- [DeepSeek Harness](https://github.com/deepseek-ai/deepseek-harness)
-- [DeepSeek Harness filesystem Skills](https://github.com/deepseek-ai/deepseek-harness/blob/master/packages/skill/skill-filesystem/README.md)
+### Codex execution adapter
 
-### Codex and ChatGPT
-
-Use the native Skill bundle and OpenAI metadata. Official OpenAI documentation describes Skills as reusable workflows built on the open Agent Skills standard and distinguishes standalone Skill availability from Plugin distribution. Use [codex-native.md](codex-native.md) for the exact Codex mapping and [OpenAI's Skill documentation](https://learn.chatgpt.com/docs/build-skills) for current installation surfaces.
+This repository also maintains a Codex-native execution mapping because DZ originated as a Codex Skill. Use the native Skill bundle and OpenAI metadata, then read [codex-native.md](codex-native.md). Codex is an execution example, not the definition of the core workflow.
 
 ## Portable handoff
 

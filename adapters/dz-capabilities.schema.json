@@ -24,7 +24,8 @@
       "properties": {
         "name": {
           "type": "string",
-          "minLength": 1
+          "minLength": 1,
+          "description": "Informational host label for diagnostics only. It must never select workflow behavior."
         },
         "model": {
           "type": "string"

@@ -6,7 +6,7 @@
 
 ### 简介
 
-Irixi Project Forge 是一套面向非技术产品经理和初学者的跨平台 AI 产品工作流。它既可以作为 Codex Skill 使用，也可以加载到支持 Agent Skills、系统提示词或项目指令的其他 AI 中。它能从一个模糊想法开始，也能在讨论、开发、测试甚至上线准备进行到一半时接手并继续。
+Irixi Project Forge 是一套面向非技术产品经理和初学者的跨平台 AI 产品工作流。只要一个 AI 能接收文字，它就能运行 DZ 的核心流程；能否查看项目、开发、测试或上线，再由它实际拥有的工具决定。DZ 能从一个模糊想法开始，也能在讨论、开发、测试甚至上线准备进行到一半时接手并继续。
 
 工作流的短名称是 `dz`。
 
@@ -40,29 +40,26 @@ DZ 不会把“帮我做一个应用”直接理解为立即写代码。它会�
 
 ### 在不同 AI 上怎么用
 
-DZ 是“同一个大脑，加不同平台接头”。确认目标、控制边界和说大白话的规则不变；读文件、写代码、测试和上线的方式随平台能力变化。
+所有平台都使用同一套 DZ 流程。只要能接收文字，就可以使用；能否读取项目、写代码、运行测试或上线，只看当前平台实际开放的工具，不看品牌。WorkBuddy、Kimi、智谱、DeepSeek、Claude、Gemini、Codex、私有模型和以后出现的新平台都不需要分别开发不同版本。后文的 Codex 只是一个完整接入示例。
 
-| 使用环境 | 加载方式 | DZ 能做到什么 |
+| 平台提供的入口 | 统一加载方式 | 实际结果 |
 |---|---|---|
-| Codex、ChatGPT Desktop、Codex CLI 或 IDE | 安装完整 Skill 目录 | 使用当前平台提供的文件、终端、浏览器、评审和部署能力 |
-| Claude Code | 把同一个目录安装到 Claude 的 Skills 目录，使用 `/dz` 或让 Claude 自动匹配 | 保留完整流程，并使用 Claude Code 当前开放的工具 |
-| Claude 网页或桌面聊天 | 把 Skill 目录打包上传到自定义 Skills | 可以自动匹配工作流；能否开发取决于该会话实际开放的工具 |
-| Gemini CLI | 安装或链接同一个 Agent Skill 目录 | 保留完整流程；Skill 激活仍受 Gemini CLI 的确认和工具能力限制 |
-| DeepSeek Harness | 加载同一个 Skill 目录 | 可以原生发现 `SKILL.md`，但官方仍标为开发者预览，暂按实验支持处理 |
-| DeepSeek API 或其他支持系统提示词的 API | 把 [`portable/DZ-UNIVERSAL.md`](portable/DZ-UNIVERSAL.md) 作为系统指令，并传入能力说明 | 流程完整；对话保存、工具执行和权限控制由接入程序负责 |
-| 普通网页聊天 | 上传或粘贴通用提示词，用 `DZ启动：` 开始 | 可以脑暴、确认边界和生成交接包；没有开发工具时不会假装已经写完或测过 |
-
-这些安装方式分别参考 [OpenAI Skills](https://learn.chatgpt.com/docs/build-skills)、[Claude Code Skills](https://code.claude.com/docs/en/slash-commands)、[Claude 自定义 Skills](https://support.claude.com/en/articles/12512180-use-skills-in-claude)、[Gemini CLI Agent Skills](https://github.com/google-gemini/gemini-cli/blob/main/docs/cli/skills.md) 和 [DeepSeek Harness Skills](https://github.com/deepseek-ai/deepseek-harness/blob/master/packages/skill/skill-filesystem/README.md)。平台更新后应重新核对官方说明。
+| 支持 Skill 或 `SKILL.md` | 安装完整仓库目录 | 使用完整流程，并自动调用该平台真正开放的工具 |
+| 支持系统提示词、项目指令或 API | 加载 [`portable/DZ-UNIVERSAL.md`](portable/DZ-UNIVERSAL.md)，再传入能力说明 | 使用同一流程；接入程序负责保存对话、执行工具和控制权限 |
+| 支持文件上传或知识库 | 上传通用提示词，并按需加入相关参考文件 | 使用同一流程；能否动手开发取决于会话工具 |
+| 只能普通聊天 | 粘贴通用提示词，用 `DZ启动：` 开始 | 完成脑暴、确认边界和交接；不会假装已经开发或测试 |
 
 通用提示词是一份安全、可单文件使用的精简版。若要让 API 版获得与完整 Skill 相同的技术手册和产物模板，接入程序还应按 `dz-manifest.json` 的 `reference_sets` 提供按需读取，不要把所有资料一次性塞进上下文。
 
-`@dz` 和 `$dz` 是部分平台的快捷入口，不是所有 AI 的统一命令。没有 Skill 入口时使用：
+`@dz`、`$dz` 或 `/dz` 只是部分平台的快捷入口。所有其他平台统一使用：
 
 ```text
 DZ启动：我想做……请用大白话，每次只问一个问题。
 ```
 
-### 自动适配接口
+### 自动适配接口（给平台开发者，普通用户可跳过）
+
+普通用户不需要配置下面这些内容；能粘贴通用提示词就可以使用 DZ。
 
 仓库提供一套公开适配入口：
 
@@ -75,11 +72,13 @@ DZ启动：我想做……请用大白话，每次只问一个问题。
 
 加载器能提供能力说明时，DZ 直接选择最合适的做法。没有说明时，DZ 只根据眼前真实可见的工具做安全判断；无法确认的能力一律按“没有”处理。能调用工具不等于获得授权，发布、付费、删除、外部写入和生产操作仍需单独确认。
 
-这不是一个能强行控制所有 AI 网站的魔法接口。目标平台至少要允许读取 Skill、系统提示词或上传文件；否则只能手动粘贴通用提示词。
+平台名字只用于显示和排查问题，绝不能参与流程选择。相同能力的 WorkBuddy、Kimi、智谱或任何未知 AI，必须得到相同的 DZ 工作方式。
+
+这不是一个能强行控制所有 AI 网站的魔法接口。目标平台至少要允许读取 Skill、系统提示词、项目指令或上传文件；否则只能手动粘贴通用提示词。
 
 ### AI 原生 SDLC
 
-DZ 以 Anthropic 的 [AI-Native SDLC Playbook](https://claude.com/blog/the-ai-native-sdlc-playbook) 为纲领。流程本身不绑定模型，Codex、DeepSeek 或其他 AI 只替换执行接头：
+DZ 以 Anthropic 的 [AI-Native SDLC Playbook](https://claude.com/blog/the-ai-native-sdlc-playbook) 为纲领。流程本身不绑定模型，当前 AI 只替换执行接头：
 
 ```text
 PLAN        DESIGN       BUILD          TEST              DEPLOY             MAINTAIN
@@ -145,7 +144,7 @@ DZ 同时修正了一些不应成为通用规则的高风险捷径：
 - 检查日志、监控和分析是否泄露敏感数据；
 - 发布前重新核对当前云厂商文档、资格、价格、限制和运行时版本。
 
-### Codex 原生适配
+### 接入示例：Codex
 
 DZ 使用 Codex 自身的执行机制，而不是复制 Claude 专属命令：
 
@@ -159,7 +158,7 @@ DZ 使用 Codex 自身的执行机制，而不是复制 Claude 专属命令：
 
 详细映射见 [`references/codex-native.md`](references/codex-native.md)，开源执行底座见 [`openai/codex`](https://github.com/openai/codex)。
 
-### 在 Codex 中安装
+### 在 Codex 中安装（示例）
 
 把仓库克隆为 `dz`，然后放入或软链接到用户级 Skills 目录：
 
@@ -248,7 +247,7 @@ Skill 使用 Codex Skill validator 和 JSON 检查验证结构，并定义十三
 10. 没有仓库、只有长对话的中途接管；
 11. 产物过期、代码版本变化和旧验证证据不能混用的接管；
 12. 面向非技术初学者时必须简短、浅显，只问一个问题，不暴露内部术语；
-13. 同一套 DZ 在聊天型、可开发型和可上线型平台上自动选择合适做法，不虚构平台能力。
+13. 同一套 DZ 在聊天型、可开发型和可上线型平台上自动选择合适做法；相同能力不因平台品牌不同而改变。
 
 行为测试定义见 [`references/forward-tests.md`](references/forward-tests.md)。
 
@@ -262,7 +261,7 @@ Skill 使用 Codex Skill validator 和 JSON 检查验证结构，并定义十三
 
 ### Overview
 
-Irixi Project Forge is a cross-platform AI product workflow for nontechnical product managers and beginners. It can run as a Codex Skill or be loaded by another AI host that supports Agent Skills, system prompts, or project instructions. It can start from a rough idea or join halfway through discussion, implementation, testing, or release preparation and continue from the real state.
+Irixi Project Forge is a cross-platform AI product workflow for nontechnical product managers and beginners. Any AI that accepts text can run the DZ core; its actual tools determine whether it can inspect a project, build, test, or release. DZ can start from a rough idea or join halfway through discussion, implementation, testing, or release preparation and continue from the real state.
 
 Its short name is `dz`.
 
@@ -296,29 +295,26 @@ In simple terms: DZ guides the work and the current execution-capable AI does th
 
 ### Using DZ on different AI platforms
 
-DZ is one workflow brain with a thin connector for each host. Its product decisions, boundaries, and plain-language rules stay the same; file access, coding, testing, and release actions adapt to the host's real capabilities.
+Every platform uses the same DZ workflow. Any AI that accepts text can use it; whether it can read a project, write code, run tests, or release depends only on the tools actually available, never the brand. WorkBuddy, Kimi, Zhipu, DeepSeek, Claude, Gemini, Codex, private models, and future hosts do not need separate DZ versions. Codex appears later only as one complete integration example.
 
-| Environment | Loading form | What DZ can do |
+| What the host accepts | Unified loading form | Result |
 |---|---|---|
-| Codex, ChatGPT Desktop, Codex CLI, or IDE | Install the full Skill directory | Use the file, terminal, browser, review, and deployment abilities exposed by the current surface |
-| Claude Code | Install the same directory in Claude's Skills location, then use `/dz` or automatic matching | Keep the workflow and use the tools exposed by the current Claude Code environment |
-| Claude web or desktop chat | Upload the Skill bundle to custom Skills | Match the workflow automatically; hands-on delivery still depends on the tools exposed in that chat |
-| Gemini CLI | Install or link the same Agent Skill bundle | Keep the workflow; activation still follows Gemini CLI confirmation and tool boundaries |
-| DeepSeek Harness | Load the same Skill directory | Discover `SKILL.md` natively, but treat support as experimental while the official Harness remains a developer preview |
-| DeepSeek API or another API with system instructions | Use [`portable/DZ-UNIVERSAL.md`](portable/DZ-UNIVERSAL.md) as the system instruction and append a capability card | Keep the workflow; the application owns history, tool execution, and permission enforcement |
-| Plain web chat | Upload or paste the universal prompt and start with `DZ启动：` | Brainstorm, confirm boundaries, and create a handoff; without tools it will not pretend to have built or tested the product |
-
-These loading forms follow [OpenAI Skills](https://learn.chatgpt.com/docs/build-skills), [Claude Code Skills](https://code.claude.com/docs/en/slash-commands), [Claude custom Skills](https://support.claude.com/en/articles/12512180-use-skills-in-claude), [Gemini CLI Agent Skills](https://github.com/google-gemini/gemini-cli/blob/main/docs/cli/skills.md), and [DeepSeek Harness Skills](https://github.com/deepseek-ai/deepseek-harness/blob/master/packages/skill/skill-filesystem/README.md). Recheck official documentation as each host evolves.
+| Skills or `SKILL.md` | Install the full repository bundle | Keep the full workflow and automatically use only the tools actually exposed by that host |
+| System prompts, project instructions, or an API | Load [`portable/DZ-UNIVERSAL.md`](portable/DZ-UNIVERSAL.md), then append a capability card | Keep the same flow; the integration owns history, tool execution, and permissions |
+| File upload or a knowledge base | Upload the universal prompt and only the references needed now | Keep the same flow; hands-on delivery depends on the chat's actual tools |
+| Plain text chat only | Paste the universal prompt and start with `DZ启动：` | Brainstorm, confirm boundaries, and create a handoff without pretending to have built or tested anything |
 
 The universal prompt is a safe, single-file compact edition. To give an API host the same handbook detail and artifact templates as the full Skill, expose the manifest's `reference_sets` through on-demand retrieval instead of concatenating every resource into every request.
 
-`@dz` and `$dz` are shortcuts on some hosts, not universal AI commands. Without a Skill picker, use:
+`@dz`, `$dz`, and `/dz` are shortcuts on some hosts. Everywhere else, use:
 
 ```text
 DZ启动：I want to build ... Please use plain language and ask one question at a time.
 ```
 
-### Automatic adapter interface
+### Automatic adapter interface (for host developers; ordinary users can skip this)
+
+Ordinary users do not need to configure any of this. Pasting the universal prompt is enough to use DZ.
 
 The repository exposes a public adapter interface:
 
@@ -331,11 +327,13 @@ Public loader URL: [`dz-manifest.json`](https://raw.githubusercontent.com/Irixil
 
 When a loader supplies a validated capability card, DZ selects the best-supported behavior. Without one, DZ relies only on tools and environment facts it can truly see; unknown abilities are treated as unavailable. Tool access is never authorization: publishing, spending, deletion, external writes, and production changes still require separate approval.
 
+The host name is diagnostic only and must never influence routing. WorkBuddy, Kimi, Zhipu, or any unknown AI with the same capabilities must receive the same DZ behavior.
+
 This interface cannot force an arbitrary AI website to load DZ. The host must support a Skill, system instruction, project instruction, or file upload; otherwise the universal prompt must be pasted manually.
 
 ### AI-native SDLC
 
-DZ follows Anthropic's [AI-Native SDLC Playbook](https://claude.com/blog/the-ai-native-sdlc-playbook). The workflow is model-neutral; Codex, DeepSeek, or another AI changes only the execution connector:
+DZ follows Anthropic's [AI-Native SDLC Playbook](https://claude.com/blog/the-ai-native-sdlc-playbook). The workflow is model-neutral; the current AI changes only the execution connector:
 
 ```text
 PLAN        DESIGN       BUILD          TEST              DEPLOY             MAINTAIN
@@ -399,7 +397,7 @@ DZ also corrects shortcuts that should not become universal defaults:
 - audit logs, monitoring, and analytics for sensitive-data leakage;
 - recheck current provider documentation, eligibility, pricing, limits, and runtime versions before release.
 
-### Codex-native adaptation
+### Integration example: Codex
 
 DZ uses Codex-native mechanisms rather than copying Claude-specific commands:
 
@@ -413,7 +411,7 @@ DZ uses Codex-native mechanisms rather than copying Claude-specific commands:
 
 See [`references/codex-native.md`](references/codex-native.md) and the open-source [`openai/codex`](https://github.com/openai/codex) harness.
 
-### Installation on Codex
+### Installation on Codex (example)
 
 Clone the repository as `dz`, then place or symlink it into the user Skills directory:
 
@@ -502,7 +500,7 @@ The package is checked with the Codex Skill validator and JSON validation, and d
 10. takeover of a long discussion with no repository;
 11. takeover involving stale artifacts, a changed revision, and revision-bound evidence;
 12. concise plain-language guidance for a nontechnical beginner, with one question and no exposed internal jargon;
-13. automatic capability-aware behavior across chat-only, build-capable, and release-capable hosts without invented abilities.
+13. automatic capability-aware behavior across chat-only, build-capable, and release-capable hosts, with identical behavior for identical capabilities regardless of brand.
 
 See [`references/forward-tests.md`](references/forward-tests.md) for the behavioral oracles.
 

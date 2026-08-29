@@ -6,6 +6,12 @@
   "description": "A platform-neutral workflow that guides a nontechnical user from an idea or current project state to a verified product or an honest implementation handoff.",
   "source": "https://github.com/Irixil/irixi-project-forge",
   "raw_base_url": "https://raw.githubusercontent.com/Irixil/irixi-project-forge/main/",
+  "compatibility": {
+    "host_allowlist": false,
+    "minimum_host_requirement": "accepts text instructions",
+    "routing_basis": "observed capabilities, never vendor or model name",
+    "generic_entrypoint": "portable/DZ-UNIVERSAL.md"
+  },
   "entrypoints": {
     "agent_skill": "SKILL.md",
     "universal_prompt": "portable/DZ-UNIVERSAL.md",
@@ -30,8 +36,10 @@
     "agent_product": [
       "references/agent-harness.md"
     ],
-    "platform": [
-      "references/platform-adapters.md",
+    "host_adapter": [
+      "references/platform-adapters.md"
+    ],
+    "codex_adapter": [
       "references/codex-native.md"
     ],
     "artifact_templates": [
@@ -48,6 +56,7 @@
     "$dz",
     "DZ启动"
   ],
+  "generic_invocation": "DZ启动：",
   "capability_envelope": {
     "opening_tag": "<DZ_HOST_CAPABILITIES>",
     "closing_tag": "</DZ_HOST_CAPABILITIES>",

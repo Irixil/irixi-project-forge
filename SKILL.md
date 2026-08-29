@@ -59,7 +59,7 @@ Read only what the current decision requires:
   - production feedback: [artifacts/feedback.md](references/artifacts/feedback.md)
 - Technical, frontend, validation, or deployment recommendation: read [handbook-routing.md](references/handbook-routing.md). If the user supplies a different handbook revision, read it and compare its provenance before changing the baseline.
 - Product may be an agent: read [agent-harness.md](references/agent-harness.md) before accepting that architecture.
-- Choose how to operate on Codex, another Agent Skills host, an API, or a chat-only AI: read [platform-adapters.md](references/platform-adapters.md). When the current platform is Codex or the task concerns Codex capabilities, also read [codex-native.md](references/codex-native.md).
+- Choose how to operate on any current AI host: read [platform-adapters.md](references/platform-adapters.md). Never route by vendor or model name. When the current host is Codex or the task concerns Codex capabilities, also read [codex-native.md](references/codex-native.md).
 - Maintain this Skill or change material behavior: read and execute [forward-tests.md](references/forward-tests.md) in fresh contexts before release.
 
 ## Stage and artifact sequence
