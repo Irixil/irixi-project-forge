@@ -1,7 +1,7 @@
 interface:
   display_name: "Irixi Project Forge"
-  short_description: "Forge ideas into verified apps and agents"
-  default_prompt: "Use $dz to turn my idea into a scoped, verified app or agent."
+  short_description: "Guide beginners from idea to verified product"
+  default_prompt: "Use $dz as my guided AI-native product coach: start with discovery, challenge missing assumptions, and do not build until I inspect and separately accept the exact Draft intent, specification, and plan."
 
 policy:
   allow_implicit_invocation: false

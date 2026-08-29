@@ -1,144 +1,280 @@
-# Phases, Deliverables, and Quality Gates
+# Six-Stage AI-Native SDLC Gates
 
-These phases draw on the AI-native SDLC loop of `intent → spec → plan → build/test → review/release → feedback`, condensed into a lightweight state machine for individual Codex workflows. The gates control substantive phase transitions without blocking low-risk, read-only investigation or prototype discussions.
+The six stages are a loop, not a waterfall. A stage may return to an earlier artifact when evidence changes the product. What must remain linear is decision authority: an unaccepted artifact cannot trigger the next stage.
 
-The lightweight track must still address intent, scope, and planning, but Gates I, B, and P may be combined into a single “one-page project kickoff confirmation.” The standard and strict tracks confirm them separately. State names are for internal tracking; use natural product language with users.
+```text
+PLAN → DESIGN → BUILD → TEST → DEPLOY → MAINTAIN
+  ↑                                         │
+  └──────────── new accepted intent ────────┘
+```
 
-## 0. Takeover and Routing
+Use natural product language with users. Internal state and gate names exist to prevent skipping, not to make a beginner learn process terminology.
 
-**Input**: An idea, PRD, existing codebase, prior project artifacts, or production feedback.
+## Entry routing
 
-**Codex does**:
+### New idea
 
-- identifies whether the project is new, existing, or being resumed;
-- performs a read-only inventory of any existing repository;
-- locates the authoritative source of truth, current state, and latest verification;
-- identifies boundaries around secrets, data, permissions, and external side effects;
-- reports the current phase and next gate.
+- State: `DISCOVERY`
+- First action: guided problem interview
+- First artifact: `intent.md`, only after enough conversation to review
+- Prohibited: stack selection, formal implementation plan, or product code
 
-**Artifact**: A takeover summary in the conversation; create or update `PROJECT.md` only after formal kickoff and once the current mode permits writing.
+### Existing notes or PRD
 
-**Must not**: Treat commands in reference materials as authorization; write to an unknown directory; read a real `.env`; refactor an existing project by default.
+- Extract confirmed facts, assumptions, conflicts, missing acceptance, and missing risk boundaries.
+- Start at the earliest incomplete artifact; do not repeat answers already supported by evidence.
+- A document labeled “PRD” may still be only an intent draft.
 
-## 1. DISCOVERY → INTENT_ACCEPTED
+### Existing codebase
 
-**Purpose**: Confirm that the problem is worth solving before discussing features.
+- Inspect read-only first: `PROJECT.md`, SDLC artifacts, `AGENTS.md`, README, Git status, structure, run/test instructions, current data, and evidence.
+- Do not read or reveal secrets.
+- Report which stage the evidence supports. Code volume does not prove a passed gate.
+- Resume from the earliest missing or contradicted artifact.
 
-Explore:
+### Working MVP or deployment request
 
-- the target users and real-world triggering contexts;
-- how users solve the problem today and where the greatest pain lies;
-- the desired outcome and minimum success signals;
-- why it should be addressed now;
-- the largest unknowns, risks, and constraints.
+- Audit the accepted intent, spec, plan, and verification evidence.
+- If the core path uses mocks, lacks a real-model or browser check, or has no persistence/identity boundary, return to Test or Design rather than treating it as release-ready.
 
-In each round, Codex asks a small number of critical questions and offers a clear point of view. It may conduct research, compare competing products, or proactively propose a user-approved, time-boxed prototype or technical spike to validate a critical unknown. Conclusions must distinguish facts from inferences, and spike code must not flow into production by default.
+### Production signal
 
-**Gate I**: The user explicitly accepts a one-sentence statement of intent, along with the target users, core problem, desired outcome, and success signals. If not, continue the discussion or stop; do not enter formal specification or coding.
+- Capture evidence before proposing a solution.
+- Begin with read-only diagnosis. Execute containment only when an explicit incident runbook and current action-specific authorization cover it.
+- Let a human triage whether the signal is noise, a bounded defect, or new intent.
 
-## 2. INTENT_ACCEPTED → BOUNDARY_LOCKED
+## Stage 1 — PLAN: problem discovery and intent
 
-**Purpose**: Turn the product vision into an MVP contract that supports explicit tradeoffs and objective acceptance.
+### Purpose
 
-Define:
+Capture what is wanted, why, for whom, under which constraints, in the originator's own terms.
 
-- the core scenario and primary user flow;
-- Must / Later / Non-goals;
-- critical screens, inputs, outputs, states, and recovery;
-- constraints involving data, privacy, permissions, platform, time, cost, and models;
-- measurable or observable acceptance criteria;
-- whether the product is a conventional application, deterministic workflow, Agent, or hybrid.
+### Required work
 
-If interaction itself determines the value, define a representative screen or vertical slice first. If the core value lies in the processing pipeline, define the primary backend path and a minimal verification interface first. If the product includes an agent, complete the Minimal Agent Card and expand to the Full Agent Harness Canvas only when a risk trigger requires it.
+- identify the primary user and triggering situation;
+- understand the current workaround and pain;
+- define the desired observable outcome and initial success signals;
+- distinguish evidence, assumptions, and unknowns;
+- challenge solution-first framing and “everyone” audiences;
+- identify the largest value, data, permission, cost, and adoption uncertainties;
+- define a validation experiment and kill criterion when evidence is weak.
 
-**Gate B**: The user explicitly confirms the MVP scope, non-goals, critical experience, constraints, and acceptance criteria. The user does not need to approve technical details, but must understand what will be built, what will not be built, and what qualifies as good.
+### User experience
 
-## 3. BOUNDARY_LOCKED → PLAN_APPROVED
+Ask one question at a time by default. Give a recommendation or example. If the user is unsure, turn uncertainty into a reversible assumption and validation step. Explain that no code will be written yet.
 
-**Purpose**: Turn the product contract into an executable, verifiable technical approach.
+### Artifact
 
-Codex first inspects the code and environment without making changes, then produces a technical fit statement. The plan must include at least:
+`docs/sdlc/intent.md` in Draft, then Accepted status.
 
-- the minimum architecture and rationale for retaining existing choices;
-- file- or module-level impact;
-- contracts for data, state, models, tools, permissions, and interfaces;
-- a phased delivery sequence;
-- tests, real-world verification, and rollback methods for each phase;
-- dependencies, risks, costs, and actions requiring user authorization;
-- the first end-to-end thin slice.
+### Gate: Intent accepted
 
-Do not prebuild a full message bus, vector database, complex Agent runtime, team system, task queue, or cloud infrastructure by default. Add one only when the current acceptance requirements genuinely require it.
+Show the exact Draft artifact or a complete decision-relevant diff. The user corrects it or explicitly accepts that exact version, including:
 
-**Gate P**: The user confirms the approach’s business impact, major tradeoffs, cost risks, and phase sequence. Codex is responsible for technical correctness through verification and independent review; it must not shift technical sign-off responsibility to a non-technical user.
+- who experiences the problem;
+- in which concrete situation;
+- what is wrong with the current approach;
+- what outcome should improve;
+- how early success will be observed;
+- material constraints and the main uncertainty.
 
-## 4. PLAN_APPROVED → BUILDING
+Only after acceptance mark that artifact version Accepted and enter Design. Do not pass when the audience is undefined, success equals “the product is built,” or a solution is being treated as evidence of need.
 
-**Purpose**: Complete one independently acceptable thin slice at a time.
+## Stage 2 — DESIGN: product definition and specification
 
-For each phase:
+### Prerequisite
 
-1. Restate the phase goal, scope, and exclusions.
-2. Update the current plan, keeping no more than one primary step in progress.
-3. Implement the minimum necessary change.
-4. Run fast, deterministic checks.
-5. Perform real business-flow or interaction verification for the phase.
-6. Record evidence against the acceptance criteria.
-7. After a fix, repeat the verification.
-8. Update the project status and state the next phase.
+Read accepted `intent.md`.
 
-The original implementation Agent may continue fixing issues within the task. Use parallel work only for independent tasks; make changes to a shared state source or the same file sequentially.
+### Purpose
 
-**Phase gate**: The current slice has sufficient acceptance evidence and no hidden failures. Otherwise, remain in the current phase rather than using “we’ll add it later” to conceal a broken core path. The next reversible phase in an approved plan may proceed without mechanically waiting for renewed user confirmation. Exceptions are added scope, fees, credentials, external side effects, irreversible actions, and release.
+Compress requirements and experience design into a specification the implementation and verification stages can act on.
 
-## 5. BUILDING → VERIFYING → READY_TO_RELEASE
+### Required work
 
-**Purpose**: Use evidence to determine whether the product fulfills its original intent; add an independent perspective for standard, high-risk, or larger changes.
+- define the one-sentence product and primary end-to-end flow;
+- specify inputs, user-visible process, human confirmation points, outputs, and retained data;
+- select one primary terminal and one first-version business loop;
+- define Must, Later, and Won't;
+- design loading, empty, queued, running, waiting, partial, failure, permission, disconnect, cancel, and recovery behavior as applicable;
+- determine application, deterministic workflow, agent, or hybrid;
+- define acceptance criteria before implementation;
+- run a professional concern review across adoption, data, AI necessity, quality, safety, privacy, permissions, accessibility, cost, and operations;
+- route genuine high-uncertainty questions to a bounded experiment.
 
-Cover the following according to project risk:
+### User experience
 
-- **All projects**: Every business promise, the real primary flow, at least one relevant failure scenario, no shifting the goalposts by modifying acceptance tests, and consistency between documentation and behavior.
-- **UI projects**: Applicable states in a real browser, critical interactions, mobile behavior, keyboard use, and recovery.
-- **Agent projects**: Representative evals, a real model or tool smoke test, permissions, stopping conditions, and failure recovery.
-- **Production or high-risk projects**: Security, privacy, isolation, persistence, secrets, logging, backups, rollback, and independent review.
+Explain the proposed experience and tradeoffs in product language. The user decides product value, boundary, and ordinary product tradeoffs. A named authorized owner decides organizational policy, legal, security, privacy, financial, or production risk. Do not ask the user to choose frameworks.
 
-For lightweight, low-risk projects, the current Agent may perform reproducible checks and hand the result to the user for direct acceptance. For standard, high-risk, or larger changes, use a verifier with fresh context to conduct an end-to-end review against the product contract. Use Codex `/review` when the Git diff also warrants independent code review. By default, the reviewer reports only issues and evidence rather than making changes. The implementation Agent fixes confirmed issues and then repeats verification.
+### Artifact
 
-**Gate V**: All agreed must-have items pass; unverified items, known limitations, and risks are explicit; and, if the plan requires independent review, no high-priority findings remain unresolved.
+`docs/sdlc/spec.md` in Draft, plus a Minimal Agent Card when an agent is included.
 
-## 6. READY_TO_RELEASE → DONE
+### Gate: Specification accepted
 
-**Purpose**: Deliver with recoverability and observability in place.
+Show the exact Draft artifact or a complete decision-relevant diff. The user corrects it or explicitly accepts that exact version, including:
 
-Before release, check:
+- primary user flow and product result;
+- Must / Later / Won't boundary;
+- important states and failure recovery;
+- acceptance scenarios;
+- data, external-action, budget, and permission boundaries;
+- unresolved assumptions they are consciously carrying.
 
-- the target environment, domain, identity, and access boundaries;
-- that environment variables and secrets exist only in secure configuration;
-- data migration, backups, recovery, and file persistence;
-- monitoring, logs, traces, cost alerts, and error presentation;
-- that rollback commands or recovery steps have been verified;
-- post-release smoke testing and its responsible owner;
-- known limitations, the runbook, and candidates for follow-up.
+Only after acceptance mark that artifact version Accepted and enter technical planning. Blocking concerns must be resolved. Important unresolved concerns need a decision from the named owner authorized for that risk. Deferrable concerns belong in Later, Won't, or the risk register with a revisit trigger.
 
-**Gate R**: The user explicitly approves release or delivery. Codex may prepare the release up to the point where only approval remains, but it must not cross the production boundary automatically merely because tests pass.
+## Stage 3 — BUILD: technical planning and thin-slice implementation
 
-## 7. Maintenance Feedback Loop
+### Prerequisite
 
-Production feedback, metrics crossing their thresholds, incidents, tickets, or scheduled scans become new inputs:
+Read accepted `intent.md` and `spec.md`, current repository rules, code, environment, and supplied handbooks.
 
-1. Deterministic monitoring detects an anomaly.
-2. Codex performs read-only diagnosis within its authorized scope.
-3. A human triages the issue and accepts, rejects, or adjusts the new intent.
-4. Re-enter `DISCOVERY` or the appropriate phase.
-5. Add resolved real-world incidents to regression tests or evals.
-6. Update project rules or the Skill with stable lessons from recurring issues.
+### Purpose
 
-Do not let the model expand the maintenance scope indefinitely on its own, and do not automate the entire loop from the outset. Run each gate manually first, then gradually automate low-risk triggers.
+Make the work inspectable before coding, then build one independently acceptable business slice at a time.
 
-## Rollback and Change Rules
+### Planning work
 
-- New evidence invalidates the user problem: return to `DISCOVERY`.
-- A new request changes the MVP or acceptance criteria: return to `BOUNDARY_LOCKED`.
-- Implementation reveals a major architecture or cost change: return to `PLAN_APPROVED`.
-- Verification fails: return to the corresponding `BUILDING` phase and preserve the failure evidence.
-- Release fails: execute the verified rollback and return to `VERIFYING`.
-- The goal is impossible, required authorization is missing, or an external system is unavailable: save the state, enter `BLOCKED`, and state the recovery conditions.
+- perform read-only repository and environment intake;
+- choose backend-first or end-to-end vertical slice;
+- retain reasonable existing architecture;
+- apply mandatory baselines, default choices, and requirement-triggered modules;
+- specify files/modules, data, state, APIs, prompts, models, tools, permissions, budgets, and stopping conditions;
+- define the first real business loop;
+- specify fast checks, real acceptance evidence, risks, alternatives not chosen, and rollback;
+- make the plan complete enough for an engineer without chat history to implement.
+
+### Artifact before code
+
+`docs/sdlc/plan.md` in Draft.
+
+### Gate: Plan approved
+
+Show the exact Draft artifact or a complete decision-relevant diff. The user explicitly confirms that version's product impact, material cost, new platforms or accounts, deferred capabilities, and phase order. The named authorized owner confirms any organizational or regulated risk boundary. Codex owns technical quality and must not transfer technical sign-off to the user. Only then mark that plan version Accepted and begin implementation.
+
+### Implementation loop
+
+For each approved thin slice:
+
+1. Restate the user-visible result and exclusions.
+2. Implement the smallest necessary change.
+3. Run fast deterministic checks.
+4. Exercise the real flow or interaction needed for that slice.
+5. Fix confirmed failures and repeat the same evidence.
+6. Update `plan.md` only when implementation materially departs from it.
+7. Record evidence in `verification.md`.
+
+The next reversible slice may proceed under the approved plan. Stop for scope changes, new credentials, material cost, sensitive data, external writes, destructive or irreversible actions, incompatible migrations, or release.
+
+## Stage 4 — TEST: continuous feedback and independent verification
+
+### Prerequisite
+
+Read accepted `spec.md`, accepted `plan.md`, the implementation revision, and current evidence.
+
+### Purpose
+
+Determine whether the real product fulfills the accepted promises. The implementation session's self-check is necessary but not always sufficient.
+
+### Evidence layers
+
+- **Deterministic:** unit, schema, state, parser, permission, idempotency, failure-injection, build, lint, type, and integration checks.
+- **Real behavior:** real model/tool/network, real browser/backend/device, or safe real integration for every distinct critical contract.
+- **Fresh context:** independent verification against intent, spec, and plan for public, agentic, sensitive, costly, larger, or otherwise standard-risk work.
+
+### Mandatory rules
+
+- Freeze acceptance criteria from `spec.md`; changing them reopens Design.
+- Protect checks from being weakened merely to pass.
+- Label mocks and real systems separately.
+- Preserve failures and exact reproduction evidence.
+- Verify at least one relevant failure and recovery path, not only the happy path.
+- For UI, inspect applicable states, responsive targets, keyboard behavior, console/network, refresh, disconnect, and recovery.
+- For agents, verify representative cases, permissions, budgets, stopping conditions, tool misuse, and human takeover.
+- For production, verify identity isolation, persistence, backup/restore, observability, cost controls, and rollback.
+
+### Artifacts
+
+`docs/sdlc/verification.md` and, when applicable, `docs/sdlc/review.md` or a linked review record.
+
+### Gate: Reviewed and verifiable
+
+- Every Must criterion has inspectable evidence.
+- No unresolved critical finding remains.
+- Unverified paths and known limitations are explicit.
+- The implementation matches accepted intent, spec, and plan, or accepted revisions exist.
+
+## Stage 5 — DEPLOY: controlled release
+
+### Prerequisite
+
+Read accepted artifacts, passed verification, review results, and the current deployment provider's authoritative documentation.
+
+### Purpose
+
+Prepare all release work while preserving a human production boundary.
+
+### Required work
+
+- name the exact target environment and audience;
+- explain the release plan, required accounts, user actions, and cost in plain language;
+- use least-privilege, short-lived credentials and secure secret entry;
+- verify target-runtime compatibility, identity isolation, durable data and files, migrations, backup and restore, logging and alerts, privacy, cost limits, smoke tests, and rollback;
+- prepare provider-specific deployment only after provider selection;
+- ensure any paid resource or public exposure receives informed approval;
+- give the beginner click-by-click instructions for unavoidable console actions, one screen at a time.
+
+### Artifact
+
+`docs/sdlc/release.md`.
+
+### Gate: Production release approved
+
+A named release owner with authority for that environment explicitly approves it after seeing passed evidence, unresolved risks, cost, and rollback. For a personal project this may be the user. Record the approver role, scope, and approval evidence; stop if authority is unclear. Earlier requests such as “just deploy it” do not count as informed final approval if readiness information was unavailable at the time.
+
+After release, a successful command or reachable URL proves only part of the path. Run the real production core flow, access-isolation check, persistence/recovery check where relevant, and monitoring check before marking Released.
+
+## Stage 6 — MAINTAIN: observe, learn, and restart the loop
+
+### Purpose
+
+Keep the product aligned with user outcomes and turn real failures into durable improvements.
+
+### Start manually
+
+- define a small metric set: success, quality, failure, latency, cost, adoption, and human takeover as relevant;
+- collect user feedback and incident evidence;
+- triage findings as dismiss, monitor, bounded fix, or new intent;
+- add shipped incidents to tests or evals;
+- update stable repository instructions only for recurring cross-task lessons;
+- introduce deterministic monitoring before model-driven diagnosis;
+- automate only low-risk, reversible actions after the manual path and rollback are rehearsed.
+
+### Artifact
+
+`docs/sdlc/feedback/<record>.md`; human-triaged product changes create a new `intent.md` and re-enter Plan.
+
+Monitoring may diagnose read-only and present a feedback or proposed-intent Draft without persisting it. Writing that record, creating code, a branch, commit, PR, external write, or production change must re-enter the applicable gates and receive fresh authorization; monitoring cannot inherit that authority by triggering itself.
+
+## Fast Track boundary
+
+Fast Track is allowed only when all are true:
+
+- the user explicitly requests it;
+- the product is a small utility, not a new uncertain product concept;
+- local, single-user, low-cost, reversible, no sensitive data, no external writes, no paid actions, and no production release;
+- success is objectively verifiable.
+
+It may shorten documents and hold three confirmations close together, but must still confirm intent, specification/boundary, and plan separately. The first real flow and evidence remain mandatory.
+
+If the utility mutates local user files or data, the accepted specification and plan must include a preview or dry run, collision and idempotency behavior, an inspectable change manifest, a tested undo or rollback path, and fresh authorization for the real apply step. Test on disposable copies before originals.
+
+## Reopening rules
+
+- Evidence contradicts the problem or value: reopen Intent.
+- A request changes experience, scope, data, permissions, or acceptance: reopen Specification.
+- A new architecture, provider, cost, or migration appears: reopen Plan.
+- Verification fails: return to the responsible Build slice and preserve evidence.
+- Review finds a critical issue: fix and re-verify before Deploy.
+- Release fails: follow rollback and return to Test.
+- Production feedback changes the goal: human triage creates new Intent.

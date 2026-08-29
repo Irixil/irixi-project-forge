@@ -20,17 +20,21 @@ A hybrid product is often the most robust option: keep deterministic business ru
 
 ## Start every agent with a minimal card
 
-Codex drafts the card; the user only needs to confirm what the agent can do, when it must ask the user, and what happens if something goes wrong. For a low-risk first version, begin with this card rather than requiring a complete governance worksheet.
+Codex drafts the card; the user confirms the product behavior, while a named authorized owner confirms any triggered organizational or regulated action boundary. For a low-risk first version, begin with this card rather than requiring a complete governance worksheet.
 
 ```markdown
 ## Minimal Agent Card
 - Objective and verifiable stopping condition:
 - Data or environment the agent can observe:
 - Available tools and actions:
-- Actions that require prior user confirmation:
+- Actions that require action-specific human confirmation and the required owner role:
 - Recovery after failure, timeout, or an uncertain result:
 - 3–5 representative validation cases:
 ```
+
+Explain the card in product language. A beginner should not be asked to invent tool schemas, retry algorithms, or security controls. Codex recommends those boundaries and asks the relevant decision owner to confirm their effect. A statement such as "give the agent every permission" is not a valid replacement for the action-specific permission and recovery design.
+
+Before the specification gate, challenge whether the requested autonomy is necessary. Search, analysis, ranking, and drafting can often run with broad read-only freedom, while sending, publishing, applying, scheduling, buying, deleting, changing permissions, or mutating infrastructure normally require deterministic checks and a meaningful confirmation boundary.
 
 ## When to expand to the full canvas
 
@@ -107,6 +111,7 @@ Use the full canvas if any of the following applies:
 - Validate structured outputs, bound retries, and define an explicit exit condition.
 - Give long-running work a stable task ID, explicit states, and recoverable storage; persist context while waiting for human input.
 - Put external writes, spending, message sending, deletion, permission changes, and infrastructure changes behind deterministic policy and human gates.
+- Treat authorization as scoped to an action, target, environment, amount, and time. Do not convert a broad statement made during design into standing production authority.
 - A worktree isolates only code changes; the sandbox and approvals still govern network access, credentials, and system access.
 - Store in memory only verified information that is stable across sessions and genuinely reusable; the current user request always takes precedence.
 - Convert fixed orchestration into scripts only after it has proven stable through repeated use. Keep exploratory brainstorming model-driven instead of prematurely encoding it as a large node graph.

@@ -16,7 +16,8 @@ Official source: [Build skills](https://developers.openai.com/codex/skills)
 |---|---|---|
 | Skill | Cross-project methods, phases, interview patterns, and quality gates | One-off state for a particular project |
 | `AGENTS.md` | Stable commands, architecture, conventions, and prohibited actions that Codex must follow whenever it enters the repository | The current milestone or a long-form PRD |
-| `PROJECT.md` | The current project's intent, boundaries, plan, decisions, risks, and evidence | Automatically enforcing rules |
+| `PROJECT.md` | A compact status dashboard and links to the accepted SDLC artifacts | Replacing intent, specification, plan, evidence, or enforcement |
+| `docs/sdlc/*.md` | Versioned intent, specification, plan, verification, review, release, and feedback records | Stable repository-wide instructions |
 | Tests / evals / CI | Repeatable behavioral and quality constraints | Product goals and value judgments |
 | Git / PR | Versions, diffs, authorship, acceptance, and rollback history | Complete business context |
 
@@ -60,24 +61,28 @@ Anthropic's playbook uses versioned artifacts to connect planning, design, build
 
 - the artifact chain `intent → specification → plan → implementation/testing → review/release → feedback`;
 - a substantive gate is crossed only after the preceding artifact has been accepted;
-- agents gather, synthesize, execute, and verify, while people make value judgments, own risk, and approve production changes;
+- agents gather, synthesize, execute, and verify, while people make value judgments and named authorized owners approve triggered risk and production changes;
 - the original implementation agent continues making fixes, while the final verifier uses an independent context;
 - skills provide guidance, while deterministic tools enforce requirements;
 - automatic triggers are introduced gradually only after the manual feedback loop has matured.
 
-For personal projects, this skill reduces the number of documents by keeping intent, specification, plan, and evidence in one version-controlled `PROJECT.md` by default. Split them only when the project becomes complex; the meaning of the artifact chain remains the same.
+This skill now keeps the artifact boundaries explicit even for personal projects: `intent.md`, `spec.md`, and `plan.md` represent different human decisions, while verification, review, and release capture different kinds of evidence and authority. `PROJECT.md` remains a compact dashboard pointing to the current accepted version of each artifact. Fast Track may shorten the documents, but it does not merge the confirmations.
+
+Anthropic's `CLAUDE.md` role maps to Codex's repository-level `AGENTS.md`: stable commands, architecture, conventions, protected areas, and recurring mistakes. Current product state and phase decisions remain in the SDLC artifacts.
 
 Source: [The AI-Native SDLC playbook](https://claude.com/blog/the-ai-native-sdlc-playbook)
 
 ## Practical design lessons from three local handbooks
 
 - Begin with a technical-fit statement before implementing the current phase.
+- Begin before the technical handbooks when the user has only an idea: discover the user problem, desired outcome, evidence, success signals, and MVP boundary first. The handbooks assume a PRD or comparable product contract already exists.
 - Treat security, privacy, recoverability, and honest validation as mandatory baselines; the technology stack is only a replaceable default.
 - Choose a backend-first approach or an end-to-end vertical slice based on product value.
 - Separate fast regression tests with mocks from acceptance tests with a real model or real browser.
 - Keep the agent's model, prompt, tools, state, budgets, and human-confirmation points traceable.
 - Design the frontend for the complete task lifecycle and its recovery paths.
 - Deployment must cover secrets, identity isolation, persistence, observability, and rollback. Delegate provider-specific steps to a deployment skill when needed.
+- Treat provider examples as changeable defaults. Prefer least privilege and secure secret entry; ephemeral disk plus a warm instance is not durable storage; and a reachable URL is not full production evidence.
 
 ## Practical design lessons from the local Agent Harness tutorial
 
@@ -92,7 +97,7 @@ This workflow does not carry over Claude-specific APIs, environment variables, H
 
 ## Automation maturity
 
-1. **Human-initiated:** The user accepts intent, boundaries, the plan, and the release one by one; Codex executes and validates.
+1. **Human-initiated:** The user accepts intent, boundaries, and the plan one by one; the named authorized release owner approves production; Codex executes and validates.
 2. **Semi-automated:** Stable checks move into scripts, CI, code review, and repeatable commands.
 3. **Controlled parallelism:** Clear tasks use subagents or worktrees, while a person can still review every result carefully.
 4. **Event-triggered:** Monitoring or external events create intents for triage; they do not automatically expand production permissions.
