@@ -51,7 +51,7 @@ You will be able to [one visible action and result in the user's own situation].
 First we need to know [one concrete unknown], because otherwise [one real consequence]. I suggest [one safe starting choice]. [one plain-language question]
 ```
 
-If the current understanding is uncertain, say in one short sentence what may have been misunderstood. Do not start with a feature list, roadmap, architecture, stack, file creation, or a lesson about the workflow. Do not say only “great idea” and then accept the premise. Encouragement is useful only after the main uncertainty has been made visible.
+If the current understanding is uncertain, say in one short sentence what may have been misunderstood. Do not start with a feature list, roadmap, architecture, stack, GitHub search, repository recommendation, file creation, or a lesson about the workflow. Existing projects become useful only after the needed user behavior is clear. Do not say only “great idea” and then accept the premise. Encouragement is useful only after the main uncertainty has been made visible.
 
 ## Question ladder
 
@@ -143,6 +143,7 @@ Internally scan the full list, but show no more than three items relevant to the
 | Adoption | Can the user be reached, and why would behavior change? | “Everyone” is the audience or distribution is absent |
 | Outcome | Can success be observed independently of feature completion? | Success is “the app exists” |
 | AI necessity | Is a model or agent better than rules, search, or a template? | Technology named before the problem |
+| Existing parts | Is this small behavior already available as a safe platform feature, maintained package, licensed module, or useful pattern? | Rebuilding a common capability, or copying an entire repository for one part |
 | Data | Does suitable data exist, stay current, and have valid usage rights? | Scraping, confidential data, or weak provenance |
 | Quality | Who judges output and against which representative cases? | “It should be smart” with no acceptance examples |
 | Failure | What harm follows from wrong, partial, late, or duplicated output? | Advice, money, reputation, safety, or external actions |
@@ -169,6 +170,8 @@ When the user asks for fashionable technology, many agents, multiple platforms, 
 3. Recommend the narrowest business loop that can test value.
 4. Assign excluded items to Later or Won't with a reason, not as an automatic phase-two promise.
 5. If the user insists, preserve their authority over product direction but do not abandon professional judgment; state the cost, evidence gap, and acceptance impact clearly.
+
+When the user asks to find or copy a similar GitHub project, first restate the small behavior the product actually needs. Only after the exact first decision record is visible and accepted, use [reuse-scout.md](reuse-scout.md) to look for a fitting part. Do not let a repository's feature list expand the product, and do not ask the beginner to judge project health, dependency weight, or license compatibility.
 
 If two requirements conflict, present the conflict as a decision with a recommended resolution. Do not encode both and hope implementation will reconcile them.
 

@@ -18,6 +18,8 @@ Use an independent verifier for standard, public, sensitive, agentic, costly, or
 - plan.md:
 - verification.md:
 - Policies or repository rules:
+- Existing-parts evidence, provenance, licenses, notices, and dependency/security review:
+- Authorized legal/open-source compliance owner, exact version/use/distribution scope, conclusion, and evidence when triggered:
 
 ## Findings
 | Severity | Area | Finding | Evidence | Required resolution | Status |
@@ -45,6 +47,7 @@ Prepare this before requesting production approval. Approval authorizes deployme
 > Source of truth: This file
 > Target environment and audience:
 > Reviewed revision:
+> Release artifact digest and resolved lockfile digest:
 
 ## Release scope and evidence
 - User-visible changes:
@@ -58,6 +61,9 @@ Prepare this before requesting production approval. Approval authorizes deployme
 - File storage and ownership:
 - Logging, trace IDs, alerts, privacy, and cost controls:
 - Dependencies, service limits, and target-runtime compatibility:
+- Shipped SPDX/CycloneDX SBOM bound to the release digest, or minimum manual inventory and tooling limitation; immutable source/resolved package pins; fetched artifact integrity; repository-to-package mapping:
+- Actual use/distribution mode, source/attribution/NOTICE/source-offer duties, their shipped locations and evidence, continuing duties for earlier distributed versions:
+- Current advisories, external services and information flows, internal owner, update rule, and removal path:
 
 ## Deployment and rollback
 - Deployment procedure:
@@ -71,6 +77,7 @@ Prepare this before requesting production approval. Approval authorizes deployme
 - Named authorized approver confirmed: yes / no
 - Approval scope and environment:
 - Approval record:
+- Legal/open-source compliance owner, exact shipped parts/use/distribution scope, conclusion, and evidence when triggered; unresolved rights block release:
 
 ## Deployment record
 - Start/end time and operator:
@@ -83,8 +90,9 @@ Prepare this before requesting production approval. Approval authorizes deployme
 - Real core flow:
 - Persistence or recovery check:
 - Monitoring and alert check:
+- Required notices and source/source-offer access check:
 - Rollback readiness:
 - Final result and follow-up:
 ```
 
-After informed approval, set Deploying and perform the deployment. Set Released only after applicable post-release checks pass. A reachable URL proves routing only. If release fails, use the verified rollback, record evidence, set Rolled back, and return to Test.
+After informed approval, set Deploying and perform the deployment. Set Released only after applicable post-release checks pass. A reachable URL proves routing only. If release fails, use the verified rollback, record evidence, set Rolled back, and return to Test. Missing or conflicting reuse rights, source provenance, or required legal/open-source compliance authority are blockers, never entries under “accepted risks.”

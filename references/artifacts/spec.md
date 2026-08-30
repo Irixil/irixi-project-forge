@@ -35,6 +35,7 @@ Read accepted `intent.md` before drafting.
 ## Users, roles, data, and permissions
 - Roles and access boundaries:
 - Data sources, rights, sensitivity, retention, and deletion:
+- User-visible third-party effects: new account, spending, information sent elsewhere, attribution, failure behavior, or exit limitation:
 - External writes, spending, publication, or destructive actions:
 - Human confirmation points:
 
@@ -68,4 +69,4 @@ Read accepted `intent.md` before drafting.
 - Technical assumptions requiring an approved spike:
 ```
 
-Acceptance means the user has inspected and accepted this exact Draft's experience, Must/Later/Won't boundary, acceptance criteria, and ordinary product tradeoffs. Any triggered organizational policy, legal, security, privacy, financial, or production boundary requires acceptance by its named authorized owner. Neither person certifies frameworks or code quality.
+Acceptance means the user has inspected and accepted this exact Draft's experience, Must/Later/Won't boundary, acceptance criteria, and ordinary product tradeoffs. Any triggered organizational policy, legal or open-source compliance, security, privacy, financial, or production boundary requires acceptance by its named authorized owner. Neither person certifies frameworks or code quality.

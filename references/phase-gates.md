@@ -63,6 +63,7 @@ Capture what is wanted, why, for whom, under which constraints, in the originato
 - define the desired observable outcome and initial success signals;
 - distinguish evidence, assumptions, and unknowns;
 - challenge solution-first framing and “everyone” audiences;
+- anchor the needed behavior independently of any named repository, package, framework, or competitor;
 - identify the largest value, data, permission, cost, and adoption uncertainties;
 - define a validation experiment and kill criterion when evidence is weak.
 
@@ -107,6 +108,8 @@ Compress requirements and experience design into a specification the implementat
 - determine application, deterministic workflow, agent, or hybrid;
 - define acceptance criteria before implementation;
 - run a professional concern review across adoption, data, AI necessity, quality, safety, privacy, permissions, accessibility, cost, and operations;
+- after the required behavior is anchored, decompose meaningful new capabilities and run the time-bounded quick discovery scan in [reuse-scout.md](reuse-scout.md); compare native, maintained-package, licensed-module, independent-pattern, and self-build options without importing another product's scope;
+- bring only user-visible third-party consequences—new accounts, spending, information sent elsewhere, attribution, failure behavior, or exit limits—into the Specification;
 - route genuine high-uncertainty questions to a bounded experiment.
 
 ### User experience
@@ -126,6 +129,7 @@ Show the exact Draft artifact or a complete decision-relevant diff. The user cor
 - important states and failure recovery;
 - acceptance scenarios;
 - data, external-action, budget, and permission boundaries;
+- any user-visible account, cost, information-sharing, attribution, or failure consequence introduced by an existing part;
 - unresolved assumptions they are consciously carrying.
 
 Only after acceptance mark that artifact version Accepted and enter technical planning. Blocking concerns must be resolved. Important unresolved concerns need a decision from the named owner authorized for that risk. Deferrable concerns belong in Later, Won't, or the risk register with a revisit trigger.
@@ -143,6 +147,7 @@ Make the work inspectable before coding, then build one independently acceptable
 ### Planning work
 
 - perform read-only repository and environment intake;
+- complete the deep paper review in [reuse-scout.md](reuse-scout.md) for the best one to three candidates; record the exact source and immutable commit or published artifact, relevant files permitted for review, actual use/distribution mode, license and notices, authorized compliance evidence when triggered, dependencies, integrity record, security and maintenance evidence, chosen disposition, integration boundary, owner, update rule, and exit path;
 - choose backend-first or end-to-end vertical slice;
 - retain reasonable existing architecture;
 - apply mandatory baselines, default choices, and requirement-triggered modules;
@@ -151,13 +156,15 @@ Make the work inspectable before coding, then build one independently acceptable
 - specify fast checks, real acceptance evidence, risks, alternatives not chosen, and rollback;
 - make the plan complete enough for an engineer without chat history to implement.
 
+The paper review is read-only. Before Plan acceptance, do not save a candidate repository, package, archive, or source into the workspace; extract, clone, install, execute build or lifecycle scripts, run examples, or copy code. Only a candidate that passes rights, origin, and paper-screen supply-chain hard gates may receive a technical-fit experiment in the Plan. That Plan must define one question, threshold, time and cost ceiling, discard condition, and a proven non-privileged sandbox or container with no user-home, project, credential, host-socket, cloud-metadata, secret, or sensitive-data access; network denied by default; controlled install scripts; bounded resources; and recorded attempted actions. A temporary directory or worktree is insufficient. If the host cannot prove the boundary, do not execute the candidate.
+
 ### Artifact before code
 
 `docs/sdlc/plan.md` in Draft.
 
 ### Gate: Plan approved
 
-Show the exact Draft artifact or a complete decision-relevant diff. The user explicitly confirms that version's product impact, material cost, new platforms or accounts, deferred capabilities, and phase order. The named authorized owner confirms any organizational or regulated risk boundary. An execution-capable delivery AI owns technical quality and must not transfer technical sign-off to the user. A chat-only AI must label technical quality as unverified. Only then may an execution-capable host begin implementation.
+Show the exact Draft artifact or a complete decision-relevant diff. The user explicitly confirms that version's product impact, material cost, new platforms or accounts, deferred capabilities, and phase order. The named authorized owner confirms any triggered organizational policy, legal or open-source compliance, security, privacy, financial, regulated, or production risk boundary for the exact version and intended use. Unresolved reuse rights cannot be accepted as ordinary risk. An execution-capable delivery AI owns technical quality and must not transfer technical sign-off to the user. A chat-only AI must label technical quality as unverified. Only then may an execution-capable host begin implementation.
 
 ### Implementation loop
 
@@ -199,6 +206,7 @@ Determine whether the real product fulfills the accepted promises. The implement
 - For UI, inspect applicable states, responsive targets, keyboard behavior, console/network, refresh, disconnect, and recovery.
 - For agents, verify representative cases, permissions, budgets, stopping conditions, tool misuse, and human takeover.
 - For production, verify identity isolation, persistence, backup/restore, observability, cost controls, and rollback.
+- For adopted third-party parts, verify immutable source or exact resolved package plus artifact integrity, provenance, required licenses/notices/source delivery and their shipped locations, an SBOM or minimum dependency inventory bound to the tested artifact, relevant advisories, actual information and network flow, our own happy/failure/recovery tests, and the documented disable or replacement path.
 
 ### Artifacts
 
@@ -227,6 +235,7 @@ Prepare all release work while preserving a human production boundary.
 - explain the release plan, required accounts, user actions, and cost in plain language;
 - use least-privilege, short-lived credentials and secure secret entry;
 - verify target-runtime compatibility, identity isolation, durable data and files, migrations, backup and restore, logging and alerts, privacy, cost limits, smoke tests, and rollback;
+- verify the shipped third-party inventory or SBOM is bound to the exact release artifact digest, along with immutable pins, required source/attribution/notices and their delivery evidence, current dependency or advisory review, external services and information flows, authorized compliance conclusion when triggered, internal owner, update rule, removal path, and continuing duties for already distributed versions;
 - prepare provider-specific deployment only after provider selection;
 - ensure any paid resource or public exposure receives informed approval;
 - give the beginner click-by-click instructions for unavoidable console actions, one screen at a time.
@@ -237,7 +246,7 @@ Prepare all release work while preserving a human production boundary.
 
 ### Gate: Production release approved
 
-A named release owner with authority for that environment explicitly approves it after seeing passed evidence, unresolved risks, cost, and rollback. For a personal project this may be the user. Record the approver role, scope, and approval evidence; stop if authority is unclear. Earlier requests such as “just deploy it” do not count as informed final approval if readiness information was unavailable at the time.
+A named release owner with authority for that environment explicitly approves it after seeing passed evidence, unresolved risks, cost, and rollback. Any triggered legal or open-source compliance boundary also requires the named authorized owner to approve the exact shipped parts, versions, use, and distribution mode; missing reuse rights block release and cannot be recorded as accepted risk. For a personal project the user may be release owner, but do not assume they have organizational or legal authority they have not established. Record each approver's role, scope, and evidence; stop if authority is unclear. Earlier requests such as “just deploy it” do not count as informed final approval if readiness information was unavailable at the time.
 
 After release, a successful command or reachable URL proves only part of the path. Run the real production core flow, access-isolation check, persistence/recovery check where relevant, and monitoring check before marking Released.
 
@@ -280,7 +289,7 @@ If the utility mutates local user files or data, the accepted specification and 
 
 - Evidence contradicts the problem or value: reopen Intent.
 - A request changes experience, scope, data, permissions, or acceptance: reopen Specification.
-- A new architecture, provider, cost, or migration appears: reopen Plan.
+- A new architecture, provider, cost, migration, third-party part, material dependency or license change appears: reopen Plan. Also reopen Specification when users would see a different behavior, account, cost, information flow, attribution duty, or acceptance promise.
 - Verification fails: return to the responsible Build slice and preserve evidence.
 - Review finds a critical issue: fix and re-verify before Deploy.
 - Release fails: follow rollback and return to Test.

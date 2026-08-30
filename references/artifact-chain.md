@@ -95,7 +95,7 @@ During a mid-task takeover, the plain-language continuity summary comes first. U
 
 - Evidence challenges the problem or outcome: revise and re-accept intent.
 - Experience, MVP, data, permissions, or acceptance changes: revise and re-accept spec.
-- Architecture, provider, material cost, migration, or delivery order changes: revise and re-accept plan.
+- Architecture, provider, material cost, migration, delivery order, adopted third-party part, material dependency, license, or integration-boundary changes: revise and re-accept plan. Also revise Specification when users would see a changed behavior, account, cost, information flow, attribution duty, or acceptance promise.
 - A check fails: preserve evidence, return to the responsible slice, then repeat the same check.
 - Critical review finding: resolve and re-verify before release preparation.
 - Release fails: use the verified rollback, record evidence, and return to verification.

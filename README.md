@@ -33,10 +33,25 @@ DZ 不会把“帮我做一个应用”直接理解为立即写代码。它会�
 - 当你回答“不知道”时，提供专业建议、一个有意义的替代方案和低成本验证方法；
 - 区分已确认事实、建议、假设、未知项和明确不做的内容；
 - 主动指出用户采用、数据、AI 必要性、模型质量、权限、隐私、成本、失败恢复和运营方面的漏洞；
+- 每次增加一项有实际用途的新能力时，先找有没有合适的现成“小零件”，再判断该直接用、改造、只学做法后自己写，还是不用；
 - 不让非技术用户选择框架或为技术正确性背书；
 - 在“想解决哪件麻烦”“这次做什么、不做什么”“准备先做哪一步、做完怎样试”分别被你看过并点头前，不开始正式制作；
 - 用真实路径和可复现证据判断完成，而不是只看 Mock、构建成功、部署命令或可访问网址；
 - 可以中途接管当前任务，保留有效工作，不强迫用户重新回答已经明确的问题。
+
+### 先找现成的小零件
+
+DZ 不会为了一个好用的小部分，把别人的整台“机器”搬进你的产品。它会先说清我们到底需要哪个小动作，再把这个动作拆开去找。例如“上传文件”可以拆成选择文件、判断格式、显示进度、失败重试和保存结果，而不是直接寻找并照搬一套完整的文件管理系统。
+
+这项检查放在原来的流程里，不会多出一套要你学习的步骤：
+
+1. “想解决哪件麻烦”已经写给你看、并由你点头后，DZ 用约 10–20 分钟快速看三到五种现成办法，判断有没有值得继续看的小零件；
+2. “这次做什么和不做什么”已经写给你看、并由你点头后，DZ 再认真检查最合适的一到三个。许可证、依赖和能否安全使用由 DZ 判断；你只需决定是否接受它带来的费用、内容外传或使用变化；
+3. 最后只给出四种结论之一：使用维护好的软件包或稳定接口、改造许可清楚的小模块、只学它的做法后独立实现、明确不用。
+
+GitHub 搜索只代表找到了候选，不代表已经获准使用，也不代表它安全或适合当前产品。Star 多、Demo 能跑都不能替代许可证、来源、安全、维护和真实接入测试。没有清楚许可证的代码不复制，也不拿来运行；能用官方软件包或稳定接口时，优先不剪取别人项目里的内部文件。采用的小零件会固定到不会悄悄变化的代码记录或实际安装包，隔在我们自己的接口后面，并留下来源、所需声明、自己的测试、负责人和移除办法。GitHub 对无许可证公开仓库的说明见[官方文档](https://docs.github.com/en/repositories/managing-your-repositorys-settings-and-features/customizing-your-repository/licensing-a-repository)。
+
+如果当前 AI 不能联网，DZ 会直说“这次没有实际搜索”，然后给出不含私密内容的搜索词和检查表，不会编造项目、许可证或维护情况。
 
 ### DZ 怎么跟你说话
 
@@ -208,6 +223,12 @@ ln -s "/absolute/path/to/dz" "$HOME/.agents/skills/dz"
 @dz 先别放到网上给别人用。请让它真的做一遍，再告诉我：现在能做什么、还有什么没试、出问题怎样恢复。
 ```
 
+让 DZ 先找可复用的小零件：
+
+```text
+@dz 我想加一个文件上传后失败自动重试的能力。先说清我们真正需要的动作，再找找 GitHub 上有没有合适的小零件。不要搬整个项目；请判断哪些值得用、哪些只值得参考、哪些不该用。
+```
+
 在 ChatGPT 里输入 `@` 并选择 `dz`；本地独立 Skill 只出现在 ChatGPT Desktop，打包成 Plugin 后也可用于 ChatGPT 网页和手机。Codex CLI 与 IDE 扩展用 `/skills` 选择或输入 `$dz`。以上入口来自 [OpenAI 官方 Skills 文档](https://developers.openai.com/codex/skills)。
 
 ### 目录结构
@@ -215,6 +236,7 @@ ln -s "/absolute/path/to/dz" "$HOME/.agents/skills/dz"
 ```text
 dz/
 ├── SKILL.md
+├── LICENSE.md
 ├── dz-manifest.json
 ├── agents/
 │   └── openai.yaml
@@ -237,6 +259,7 @@ dz/
     │   └── feedback.md
     ├── phase-gates.md
     ├── handbook-routing.md
+    ├── reuse-scout.md
     ├── agent-harness.md
     ├── platform-adapters.md
     ├── codex-native.md
@@ -245,7 +268,7 @@ dz/
 
 ### 验证
 
-Skill 使用 Codex Skill validator 和 JSON 检查验证结构，并定义十四组新上下文行为测试：
+Skill 使用 Codex Skill validator 和 JSON 检查验证结构，并定义十五组新上下文行为测试：
 
 1. 模糊的“服务所有人”想法；
 2. 区块链、RAG 和多 Agent 技术堆砌；
@@ -260,13 +283,18 @@ Skill 使用 Codex Skill validator 和 JSON 检查验证结构，并定义十四
 11. 产物过期、代码版本变化和旧验证证据不能混用的接管；
 12. 面向小白时必须简短、具体，只问一个问题；听不懂时必须换成当前事情里的例子；
 13. 同一套 DZ 在聊天型、可开发型和可上线型平台上自动选择合适做法；相同能力不因平台品牌不同而改变；
-14. 中途接手时也必须用四句短话说清已经做了什么、什么能留、什么没试、下一步做什么。
+14. 中途接手时也必须用四句短话说清已经做了什么、什么能留、什么没试、下一步做什么；
+15. 先说清真正需要的小动作，再安全寻找和筛选现成零件；不能把公开、Star 或 Demo 当成使用许可和质量证明，也不能在确认动手办法前下载运行陌生代码。
 
 行为测试定义见 [`references/forward-tests.md`](references/forward-tests.md)。
 
 ### 许可证
 
-目前尚未选择许可证。源码公开可见，但在作者添加许可证前，不授予复制、修改或再分发权限。
+本项目采用 [PolyForm Perimeter License 1.0.1](LICENSE.md)。
+
+你可以下载、使用、修改和分享 DZ，也可以在个人或公司内部使用。但不能把 DZ 换名字、换包装或换平台后，向别人提供一个替代 DZ 的竞争产品或服务；收费和免费都不允许。分发时必须同时保留许可证和其中的 `Required Notice`。如需进行竞争性发行，必须先取得权利人的单独书面授权。
+
+因为这份许可限制竞争性使用，本项目属于“源码公开可用”，不属于 OSI 定义下允许自由竞争和销售的传统开源软件。许可只覆盖本仓库中权利人有权授权的内容；第三方链接、名称和材料仍按各自条款处理。
 
 ---
 
@@ -301,10 +329,25 @@ In simple terms: DZ guides the work and the current execution-capable AI does th
 - Recommends a professional default, a meaningful alternative, and a cheap validation method when the user is unsure.
 - Separates confirmed facts, recommendations, assumptions, unknowns, and explicit non-goals.
 - Challenges adoption, data, AI necessity, quality, permission, privacy, cost, recovery, and operational blind spots.
+- For every meaningful new capability, looks for suitable existing “parts,” then decides whether to use, adapt, independently reimplement, or reject them.
 - Does not ask a beginner to choose frameworks or certify technical correctness.
 - Does not begin formal implementation until the user has separately confirmed which trouble to solve, what to do and leave out this time, and what to make first and how to try it.
 - Judges completion by reproducible real-path evidence, not a mock, green build, deploy command, or reachable URL alone.
 - Can take over midway, preserve valid work, and avoid repeating decisions already supported by the current task.
+
+### Find existing parts before building
+
+DZ does not import someone else's whole “machine” because one small part looks useful. It first names the exact behavior we need, then searches for that behavior in smaller pieces. For example, “file upload” may become file selection, format checks, progress, retry, and result storage instead of a search for a complete file-management product to copy.
+
+This check lives inside the existing workflow, so the user does not have to learn another process:
+
+1. Once the exact first decision about the trouble is visible and accepted, DZ spends about 10–20 minutes scanning three to five approaches to see whether a useful part probably exists.
+2. Once what is included and left out is visible and accepted, DZ deeply reviews the best one to three. DZ owns the license, dependency, and technical-fit checks; you decide only whether to accept changes in cost, information sharing, or user experience.
+3. It records one of four outcomes: use a maintained package or stable API, adapt a small clearly licensed module, learn the behavior and implement it independently, or reject it.
+
+A GitHub result is only a candidate, not permission, safety evidence, or product fit. Stars and a working demo do not replace licensing, provenance, security, maintenance, and real integration tests. Code without a clear license is neither copied nor executed. A supported package or stable interface is preferred to cutting internal files from another project. Any adopted part is pinned to an immutable source record or exact resolved artifact, wrapped behind a product-owned interface, and recorded with provenance, required notices, product-owned tests, an owner, and a removal path. See GitHub's [official repository licensing guidance](https://docs.github.com/en/repositories/managing-your-repositorys-settings-and-features/customizing-your-repository/licensing-a-repository).
+
+If the current AI cannot access the public web, DZ says that no live search occurred and exports sanitized search phrases plus the review card. It does not invent repositories, licenses, or maintenance facts.
 
 ### How DZ talks to you
 
@@ -474,6 +517,12 @@ Audit release readiness:
 @dz Do not put this online for other people yet. Make it do the real job once, then tell me what works now, what nobody has tried, and how to restore it if something goes wrong.
 ```
 
+Ask DZ to look for reusable parts:
+
+```text
+@dz I want file uploads to retry after a failure. First clarify the exact behavior we need, then look for suitable GitHub parts. Do not import a whole project; tell me what is worth using, what is only worth learning from, and what should be rejected.
+```
+
 In ChatGPT, type `@` and select `dz`: a standalone local Skill appears in ChatGPT Desktop, while a packaged Plugin also works on ChatGPT web and mobile. In Codex CLI or the IDE extension, run `/skills` or type `$dz`. These entry points follow the [official OpenAI Skills documentation](https://developers.openai.com/codex/skills).
 
 ### Structure
@@ -481,6 +530,7 @@ In ChatGPT, type `@` and select `dz`: a standalone local Skill appears in ChatGP
 ```text
 dz/
 ├── SKILL.md
+├── LICENSE.md
 ├── dz-manifest.json
 ├── agents/
 │   └── openai.yaml
@@ -503,6 +553,7 @@ dz/
     │   └── feedback.md
     ├── phase-gates.md
     ├── handbook-routing.md
+    ├── reuse-scout.md
     ├── agent-harness.md
     ├── platform-adapters.md
     ├── codex-native.md
@@ -511,7 +562,7 @@ dz/
 
 ### Validation
 
-The package is checked with the Codex Skill validator and JSON validation, and defines fourteen fresh-context behavioral test families:
+The package is checked with the Codex Skill validator and JSON validation, and defines fifteen fresh-context behavioral test families:
 
 1. a vague “product for everyone” idea;
 2. fashionable blockchain, RAG, and multi-agent over-scoping;
@@ -526,10 +577,15 @@ The package is checked with the Codex Skill validator and JSON validation, and d
 11. takeover involving stale artifacts, a changed revision, and revision-bound evidence;
 12. concise, concrete guidance for a complete beginner, with one question and a same-project example after confusion;
 13. automatic capability-aware behavior across chat-only, build-capable, and release-capable hosts, with identical behavior for identical capabilities regardless of brand;
-14. a mid-task beginner takeover that names what was made, what can stay, what has not been personally tried, and the one next action in four short lines.
+14. a mid-task beginner takeover that names what was made, what can stay, what has not been personally tried, and the one next action in four short lines;
+15. anchor the exact needed behavior before safely finding and screening existing parts, without treating visibility, stars, or demos as permission or quality proof, and without downloading or running unknown code before the build approach is confirmed.
 
 See [`references/forward-tests.md`](references/forward-tests.md) for the behavioral oracles.
 
 ### License
 
-No license has been selected. The source is publicly visible, but no permission to copy, modify, or redistribute is granted unless the author adds a license.
+This project is licensed under the [PolyForm Perimeter License 1.0.1](LICENSE.md).
+
+You may download, use, modify, and distribute DZ, including for personal or internal business use. You may not rename, repackage, port, or otherwise provide DZ to others as a competing substitute, whether paid or free. Distributions must retain the license and its `Required Notice`. A separate written license from the rights holder is required for a competing distribution.
+
+Because the license restricts competing use, this is source-available software rather than open source under the OSI definition, which requires free redistribution. The license applies only to material in this repository that the rights holder is entitled to license; third-party links, names, and materials remain subject to their own terms.

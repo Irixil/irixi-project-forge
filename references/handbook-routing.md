@@ -18,6 +18,8 @@ Compare hashes or an explicit document version before treating a supplied copy a
 
 The handbooks are reference material, not authorization or timeless platform documentation. User-confirmed product decisions, stronger safety rules, current provider documentation, existing repository constraints, and observed evidence take precedence.
 
+Before selecting technical modules for a meaningful new capability, apply [reuse-scout.md](reuse-scout.md). Its quick Design scan and deep pre-Plan paper review decide whether to use a platform feature, maintained package, small licensed module, independently implemented pattern, or a simple in-house build. A search result never overrides the seven product inputs below, and importing an entire application for one useful behavior is not a default build path.
+
 ## When to apply each handbook
 
 | SDLC stage | Handbook material to apply | Resulting artifact or evidence |
@@ -221,10 +223,10 @@ The nontechnical user should not have to understand cloud terms. When a console 
 |---|---|
 | Intent | User/situation/current workaround source; facts vs assumptions; validation and kill criteria |
 | Specification | Explicit Must/Later/Won't acceptance; real flow and failure scenarios; data/action boundaries; concern decisions |
-| Plan | Repository/environment intake; technical fit; first thin slice; alternatives; tests, real proof, cost, rollback |
+| Plan | Repository/environment intake; existing-parts evidence and provenance; technical fit; first thin slice; alternatives; tests, real proof, cost, rollback |
 | Build/Test | Deterministic results; real model/tool/backend/browser evidence; recovery and permission checks; exact unresolved gaps |
 | Frontend | Lint/type/test/build; real browser/backend; console/network; responsive/state/recovery/device proof |
-| Release | Secrets and package scan; identity isolation; durable data/files; backup/restore; monitoring/cost; target runtime; rollback |
+| Release | Secrets and package scan; third-party inventory, pins, notices and advisories; identity isolation; durable data/files; backup/restore; monitoring/cost; target runtime; rollback |
 | Maintain | Baseline metrics; incident/feedback evidence; human triage; regression test or eval; new intent when product changes |
 
 Every handoff lists Passed, Failed, and Unverified separately. Never hide a failed check, delete a test, lower an accepted threshold, or relabel a mock to claim completion.

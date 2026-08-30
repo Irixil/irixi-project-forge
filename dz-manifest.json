@@ -1,11 +1,16 @@
 {
   "protocol_version": "1.0",
-  "workflow_version": "2026-08-29",
+  "workflow_version": "2026-08-30",
   "id": "dz",
   "name": "Irixi Project Forge",
   "description": "A platform-neutral workflow that guides a nontechnical user from an idea or current project state to a verified product or an honest implementation handoff.",
   "source": "https://github.com/Irixil/irixi-project-forge",
   "raw_base_url": "https://raw.githubusercontent.com/Irixil/irixi-project-forge/main/",
+  "license": {
+    "name": "PolyForm Perimeter License 1.0.1",
+    "path": "LICENSE.md",
+    "url": "https://polyformproject.org/licenses/perimeter/1.0.1"
+  },
   "compatibility": {
     "host_allowlist": false,
     "minimum_host_requirement": "accepts text instructions",
@@ -31,7 +36,8 @@
       "references/artifact-chain.md"
     ],
     "delivery": [
-      "references/handbook-routing.md"
+      "references/handbook-routing.md",
+      "references/reuse-scout.md"
     ],
     "agent_product": [
       "references/agent-harness.md"
@@ -118,6 +124,11 @@
     "decision_completeness_overrides_length_target": true,
     "separate_prebuild_confirmations": 3,
     "capability_truthfulness": true,
+    "anchor_before_reuse_search": true,
+    "public_repository_is_not_reuse_permission": true,
+    "third_party_parts_require_provenance_tests_and_exit_path": true,
+    "third_party_experiment_requires_passed_hard_gates_and_security_isolation": true,
+    "third_party_release_requires_exact_artifact_compliance_evidence": true,
     "external_action_requires_current_authority": true,
     "preserve_valid_midtask_work": true
   }
