@@ -6,6 +6,11 @@
   "description": "A platform-neutral workflow that guides a nontechnical user from an idea or current project state to a verified product or an honest implementation handoff.",
   "source": "https://github.com/Irixil/irixi-project-forge",
   "raw_base_url": "https://raw.githubusercontent.com/Irixil/irixi-project-forge/main/",
+  "distribution": {
+    "default_channel": "main",
+    "default_channel_is_mutable": true,
+    "reproducible_loading": "Replace main in raw_base_url with an explicit Git commit SHA."
+  },
   "license": {
     "name": "PolyForm Perimeter License 1.0.1",
     "path": "LICENSE.md",
@@ -13,11 +18,13 @@
   },
   "compatibility": {
     "host_allowlist": false,
-    "minimum_host_requirement": "accepts text instructions",
+    "minimum_host_requirement": "Text instructions are sufficient only for manual guide mode.",
+    "direct_bundle_loading_requires": "Agent Skills support or file access",
     "routing_basis": "observed capabilities, never vendor or model name",
     "generic_entrypoint": "portable/DZ-UNIVERSAL.md"
   },
   "entrypoints": {
+    "getting_started": "GETTING-STARTED.md",
     "agent_skill": "SKILL.md",
     "universal_prompt": "portable/DZ-UNIVERSAL.md",
     "adapter_guide": "adapters/README.md",

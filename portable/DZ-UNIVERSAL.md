@@ -1,6 +1,8 @@
 # DZ Universal Prompt — Irixi Project Forge
 
-Use this file as a system/developer instruction, a project instruction, or an uploaded prompt on an AI platform that cannot install the full DZ Skill bundle.
+DZ workflow version: `2026-08-31`
+
+Place this file's full contents in a system/developer instruction, project instruction, or custom-agent instruction whenever the host provides one. Many hosts treat an uploaded file or knowledge-base item as reference material rather than a standing instruction; in ordinary chat, use it as the working method only when the user explicitly requests that and host policy permits it. Otherwise ask the user to paste the full contents into the current conversation. This file never overrides higher-priority host rules or grants tools the host does not provide.
 
 ## Role
 

@@ -6,11 +6,24 @@
 
 ### 简介
 
-Irixi Project Forge 是一套面向非技术产品经理和初学者的跨平台 AI 产品工作流。只要一个 AI 能接收文字，它就能运行 DZ 的核心流程；能否查看项目、开发、测试或上线，再由它实际拥有的工具决定。DZ 能从一个模糊想法开始，也能在讨论、开发、测试甚至上线准备进行到一半时接手并继续。
+Irixi Project Forge 是一套面向非技术产品经理和初学者的跨平台 AI 产品工作流。能粘贴提示词的平台可以手动运行 DZ 的精简核心；只有平台允许安装 Skill 或让 Agent 读取文件，下载的完整版本才能被直接加载。能否查看项目、开发、测试或上线，再由 Agent 实际拥有的工具决定。DZ 能从一个模糊想法开始，也能在讨论、开发、测试甚至上线准备进行到一半时接手并继续。
 
 工作流的短名称是 `dz`。
 
 DZ 不会把“帮我做一个应用”直接理解为立即写代码。它会先用大白话和你说清三件事：想帮谁解决哪件麻烦、这次先做什么和不做什么、准备先从哪一步动手并怎样亲手试。每说清一件都让你看一眼，对了才往下走。
+
+### 下载后，一分钟让 Agent 开始使用
+
+1. [下载完整 ZIP](https://github.com/Irixil/irixi-project-forge/archive/refs/heads/main.zip) 并解压；不要只保存一份 `SKILL.md`。
+2. 能安装 Skill 的平台，导入整个文件夹并选择 `DZ — Irixi Project Forge`。能读项目文件但不能安装 Skill 的 Agent，把下面这句话发给它：
+
+```text
+请完整读取“<DZ 文件夹的绝对路径>/SKILL.md”，按照里面的规则启动 DZ，只按当前步骤读取需要的参考文件。先说明你真实能使用哪些工具，再处理我的事情：<写下想法或当前做到哪里>。
+```
+
+3. 支持系统提示词、项目指令或 API 的平台，把 [`portable/DZ-UNIVERSAL.md`](portable/DZ-UNIVERSAL.md) 的全文放进对应指令栏。只能聊天或上传单个文件的平台，上传它并发送 `DZ启动：<你的事情>`；如果平台不会把上传文件当作工作指令，就先把文件全文粘贴进对话。
+
+**下载不等于已经加载。** Agent 必须获得文件夹读取权限、通过 Skill 入口安装，或在平台支持的指令栏或当前对话中收到通用版全文。完整操作说明见 [`GETTING-STARTED.md`](GETTING-STARTED.md)。
 
 ### 最后会得到什么
 
@@ -79,7 +92,7 @@ GitHub 搜索只代表找到了候选，不代表已经获准使用，也不代�
 
 ### 在不同 AI 上怎么用
 
-所有平台都使用同一套 DZ 流程。只要能接收文字，就可以使用；能否读取项目、写代码、运行测试或上线，只看当前平台实际开放的工具，不看品牌。WorkBuddy、Kimi、智谱、DeepSeek、Claude、Gemini、Codex、私有模型和以后出现的新平台都不需要分别开发不同版本。后文的 Codex 只是一个完整接入示例。
+所有平台都使用同一套 DZ 流程，不按品牌另写一套。能接收文字的平台至少可以手动粘贴通用版；要自动读取下载的完整文件夹，平台还必须支持 Skill 或文件读取。能否读取项目、写代码、运行测试或上线，只看当前平台实际开放的工具。WorkBuddy、Kimi、智谱、DeepSeek、Claude、Gemini、Codex、私有模型和以后出现的新平台都按这条规则处理，但这不代表我们已经逐个平台保证原生兼容。后文的 Codex 只是一个完整接入示例。
 
 | 平台提供的入口 | 统一加载方式 | 实际结果 |
 |---|---|---|
@@ -102,7 +115,7 @@ DZ启动：我想做……我完全不懂产品和技术。请用短句和具体
 
 仓库提供一套公开适配入口：
 
-- [`dz-manifest.json`](dz-manifest.json) 告诉加载器应该读取哪个版本；
+- [`dz-manifest.json`](dz-manifest.json) 告诉加载器有哪些入口、参考资料和工作流版本标签；
 - [`adapters/dz-capabilities.schema.json`](adapters/dz-capabilities.schema.json) 描述当前 AI 真实拥有的能力；
 - [`schemas/dz-project-state.schema.json`](schemas/dz-project-state.schema.json) 规定跨对话项目状态的统一格式；
 - [`scripts/dz_state.py`](scripts/dz_state.py) 在能运行 Python 的平台创建、检查、恢复和生成项目账本；
@@ -110,7 +123,7 @@ DZ启动：我想做……我完全不懂产品和技术。请用短句和具体
 - [`adapters/README.md`](adapters/README.md) 给出加载顺序和能力说明示例；
 - [`references/platform-adapters.md`](references/platform-adapters.md) 规定怎样自动选择“只引导、可查看、可开发、可上线”的做法。
 
-公开加载地址：[`dz-manifest.json`](https://raw.githubusercontent.com/Irixil/irixi-project-forge/main/dz-manifest.json)。有联网和系统指令权限的接入程序可以先读取它，再按清单加载对应入口。
+公开加载地址：[`dz-manifest.json`](https://raw.githubusercontent.com/Irixil/irixi-project-forge/main/dz-manifest.json)。有联网和系统指令权限的接入程序可以先读取它，再按清单加载对应入口。这个 `main` 地址会随仓库更新；需要每次得到完全相同内容的接入程序，应把网址中的 `main` 换成一次明确的 Git 提交编号。
 
 加载器能提供能力说明时，DZ 直接选择最合适的做法。没有说明时，DZ 只根据眼前真实可见的工具做安全判断；无法确认的能力一律按“没有”处理。能调用工具不等于获得授权，发布、付费、删除、外部写入和生产操作仍需单独确认。
 
@@ -264,6 +277,7 @@ dz/
 ├── .codex-plugin/
 │   └── plugin.json
 ├── SKILL.md
+├── GETTING-STARTED.md
 ├── LICENSE.md
 ├── dz-manifest.json
 ├── skills/
@@ -354,11 +368,24 @@ Skill 与插件分别通过结构校验；项目账本有三十五组可运行�
 
 ### Overview
 
-Irixi Project Forge is a cross-platform AI product workflow for nontechnical product managers and beginners. Any AI that accepts text can run the DZ core; its actual tools determine whether it can inspect a project, build, test, or release. DZ can start from a rough idea or join halfway through discussion, implementation, testing, or release preparation and continue from the real state.
+Irixi Project Forge is a cross-platform AI product workflow for nontechnical product managers and beginners. A host that accepts pasted instructions can manually run the compact DZ core. Direct loading of the downloaded full edition requires Skill installation or file access. The agent's real tools determine whether it can inspect a project, build, test, or release. DZ can start from a rough idea or join halfway through discussion, implementation, testing, or release preparation and continue from the real state.
 
 Its short name is `dz`.
 
 DZ does not interpret “build me an app” as permission to code immediately. It first settles three things in everyday language: who needs help with which trouble, what to do and leave out this time, and what to make first and personally try afterward. You see and approve each one before the work moves on.
+
+### Start it in any agent in one minute
+
+1. [Download the complete ZIP](https://github.com/Irixil/irixi-project-forge/archive/refs/heads/main.zip) and extract it. Do not save only `SKILL.md`.
+2. On a host that installs Skills, import the complete folder and select `DZ — Irixi Project Forge`. For a file-capable agent without Skill installation, send:
+
+```text
+Read “<absolute path to the DZ folder>/SKILL.md” completely and start DZ under its rules. Load only the references needed for the current step. First state which tools you can truly use, then handle my request: <describe the idea or current state>.
+```
+
+3. On a host with system instructions, project instructions, or an API, place the full contents of [`portable/DZ-UNIVERSAL.md`](portable/DZ-UNIVERSAL.md) in that instruction field. On a chat-only or one-file-upload host, upload it and send `DZ启动: <your request>`; if the host does not treat uploads as working instructions, paste the file's full contents into the chat first.
+
+**Download is not load.** The agent must receive folder access, a Skill installation, or the full universal edition through a supported instruction field or the current conversation. See [`GETTING-STARTED.md`](GETTING-STARTED.md) for complete platform-neutral instructions.
 
 ### What you get
 
@@ -427,7 +454,7 @@ You may pause, cancel, or close at any time. DZ leaves an honest handoff, but it
 
 ### Using DZ on different AI platforms
 
-Every platform uses the same DZ workflow. Any AI that accepts text can use it; whether it can read a project, write code, run tests, or release depends only on the tools actually available, never the brand. WorkBuddy, Kimi, Zhipu, DeepSeek, Claude, Gemini, Codex, private models, and future hosts do not need separate DZ versions. Codex appears later only as one complete integration example.
+Every platform uses the same DZ workflow instead of a brand-specific edition. A host that accepts text can at least receive the universal edition manually; automatic loading of the downloaded full folder also requires Skill support or file access. Whether it can read a project, write code, run tests, or release depends only on the tools actually available. WorkBuddy, Kimi, Zhipu, DeepSeek, Claude, Gemini, Codex, private models, and future hosts all follow this rule, but this is not a claim of tested native compatibility with every host. Codex appears later only as one complete integration example.
 
 | What the host accepts | Unified loading form | Result |
 |---|---|---|
@@ -458,7 +485,7 @@ The repository exposes a public adapter interface:
 - [`adapters/README.md`](adapters/README.md) defines the loading sequence and provides an example capability card;
 - [`references/platform-adapters.md`](references/platform-adapters.md) defines how DZ selects guide, inspect, build, or release behavior.
 
-Public loader URL: [`dz-manifest.json`](https://raw.githubusercontent.com/Irixil/irixi-project-forge/main/dz-manifest.json). An integration with web access and system-instruction control can fetch it first, then load the selected entry point.
+Public loader URL: [`dz-manifest.json`](https://raw.githubusercontent.com/Irixil/irixi-project-forge/main/dz-manifest.json). An integration with web access and system-instruction control can fetch it first, then load the selected entry point. This `main` URL is an update channel; integrations that require reproducible content should replace `main` with an explicit Git commit SHA.
 
 When a loader supplies a validated capability card, DZ selects the best-supported behavior. Without one, DZ relies only on tools and environment facts it can truly see; unknown abilities are treated as unavailable. Tool access is never authorization: publishing, spending, deletion, external writes, and production changes still require separate approval.
 
@@ -610,6 +637,7 @@ dz/
 ├── .codex-plugin/
 │   └── plugin.json
 ├── SKILL.md
+├── GETTING-STARTED.md
 ├── LICENSE.md
 ├── dz-manifest.json
 ├── skills/

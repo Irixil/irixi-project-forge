@@ -6,7 +6,7 @@ There is no supported-platform allowlist. WorkBuddy, Kimi, Zhipu, DeepSeek, Clau
 
 ## Loader flow
 
-1. Fetch [`dz-manifest.json`](../dz-manifest.json), then load its `adapter_rules` and `capability_schema` entries. For user-facing invocation, prefer the explicit `invocation_surfaces` mapping over the legacy flat `invocation_hints` list.
+1. Fetch [`dz-manifest.json`](../dz-manifest.json), then load its `adapter_rules` and `capability_schema` entries. The public `main` URL is the update channel; replace `main` with an explicit Git commit SHA when a deployment must load reproducible content. For user-facing invocation, prefer the explicit `invocation_surfaces` mapping over the legacy flat `invocation_hints` list.
 2. Choose `agent_skill` when the host supports Agent Skills; otherwise choose `universal_prompt`. Expose the manifest's reference sets through retrieval or load only the set needed for the current decision; do not blindly concatenate every file.
 3. Build a capability card from trusted host configuration and the actual tool registry.
 4. Validate it against the capability schema. If the version, fields, or values fail validation, discard the entire card without injecting its raw content. Use only independently observable host facts, set everything else to `unknown`, and fall back to `guide`.
