@@ -1,0 +1,27 @@
+{
+  "name": "dz",
+  "version": "1.0.0",
+  "description": "A plain-language, resumable workflow for turning product ideas or unfinished projects into tested applications and agents.",
+  "author": {
+    "name": "Irixi",
+    "url": "https://github.com/Irixil"
+  },
+  "homepage": "https://github.com/Irixil/irixi-project-forge#readme",
+  "repository": "https://github.com/Irixil/irixi-project-forge",
+  "license": "PolyForm-Perimeter-1.0.1",
+  "keywords": ["product", "workflow", "sdlc", "agent", "beginner"],
+  "skills": "./skills/",
+  "interface": {
+    "displayName": "DZ — Irixi Project Forge",
+    "shortDescription": "Build products step by step in plain language",
+    "longDescription": "DZ guides a nontechnical user from an idea or unfinished project through product decisions, staged implementation, evidence, risk decisions, release, and resumable handoff.",
+    "developerName": "Irixi",
+    "category": "Productivity",
+    "capabilities": ["Interactive", "Write"],
+    "defaultPrompt": [
+      "Use DZ to turn my idea into the next small, testable product step.",
+      "Use DZ to resume this unfinished project without starting over."
+    ],
+    "brandColor": "#5B4BDB"
+  }
+}

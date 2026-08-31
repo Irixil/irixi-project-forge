@@ -16,6 +16,8 @@ Read accepted intent and specification, repository rules, code, and environment.
 - Path: backend-first / end-to-end vertical slice
 - Recommended stack and product impact:
 - Required modules and triggering requirements:
+- Applicable handbook routes: general build / frontend / release / maintain; reason for every route marked not applicable:
+- Required work-item IDs created from each applicable route in `handbook-routing.md`:
 - Explicitly deferred infrastructure:
 
 ## Existing-parts review
@@ -64,3 +66,5 @@ Read accepted intent and specification, repository rules, code, and environment.
 ```
 
 Acceptance means the user has inspected and accepted this exact Draft's product impact, platforms, material cost, deferred capabilities, and stage order. Any triggered organizational policy, legal or open-source compliance, security, privacy, financial, regulated, or production risk boundary requires its named authorized owner and evidence for the exact version and use. Plan acceptance cannot create missing reuse rights or waive a hard gate. An execution-capable delivery AI remains accountable for technical correctness through implementation, tests, and independent review; a chat-only AI must hand this responsibility to a capable execution environment.
+
+Immediately after acceptance, create required project-ledger work items for every applicable general-build, frontend, release, and maintain route item. Do not leave the handbook only as prose in this Plan.

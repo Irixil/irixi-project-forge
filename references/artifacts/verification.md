@@ -8,7 +8,7 @@ Update throughout Build and finalize in Test. This is evidence, not a human-acce
 > Status: In progress | Passed | Blocked | Superseded
 > Source of truth: This file
 > Based on: Accepted spec and plan
-> Implementation revision, built artifact digest, resolved lockfile digest, and environment:
+> Accepted decision-contract digest, target epoch, implementation revision, built artifact digest, resolved lockfile digest, and environment:
 
 ## Environment
 - Runtime, model, browser/device, backend, data set, and relevant configuration versions:
@@ -33,10 +33,16 @@ Update throughout Build and finalize in Test. This is evidence, not a human-acce
 ## Unverified and limitations
 - Item — reason — impact — next action:
 
+## User-requested pause or closure
+- Continue / pause / cancel / close with unverified work:
+- User-visible reason and decision reference:
+- Product verdict preserved as verified / partially verified / implemented but unverified / cancelled:
+- Smallest future check and resume condition:
+
 ## Final verdict
 - Must items passed:
 - Critical findings open:
 - Ready for independent review: yes / no
 ```
 
-Never replace exact outputs or inspectable evidence with “the AI checked it.” Label mocks, simulations, and real systems distinctly. Mark Passed only when every Must item has evidence and no critical finding remains.
+Never replace exact outputs or inspectable evidence with “the AI checked it.” Label mocks, simulations, and real systems distinctly. Bind every Passed row to its exact accepted-decision contract, criterion, explicit target epoch, non-empty durable evidence artifact and digest, tested revision, environment, and method. All Must rows pass on that target with no unresolved Failed or Unverified gap. A same-target pass may resolve such a same-target gap; a new target epoch reruns every Must row even when revision text is unchanged. Mark Passed only when every Must item has evidence and no critical finding remains. An authorized owner may still knowingly continue or release an exact accepted residual-risk scope, but that finding stays visible and the artifact remains below Passed. The user may stop before Passed; preserve the honest status and provide a handoff instead of refusing to end. Local model-written ledger fields are consistency records, not trusted attestations unless a host-controlled runner issued them. Risk acceptance never changes a Failed or Unverified result.

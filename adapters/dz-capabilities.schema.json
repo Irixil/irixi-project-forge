@@ -98,6 +98,14 @@
         "approval_flow": {
           "$ref": "#/$defs/support"
         },
+        "project_state": {
+          "$ref": "#/$defs/support",
+          "description": "Whether the host can persist and restore DZ project state across sessions."
+        },
+        "lifecycle_hooks": {
+          "$ref": "#/$defs/support",
+          "description": "Whether the host can run deterministic checks before/after actions and before stopping."
+        },
         "network": {
           "enum": [
             "none",

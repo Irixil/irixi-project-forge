@@ -14,7 +14,7 @@ DZ 不会把“帮我做一个应用”直接理解为立即写代码。它会�
 
 ### 最后会得到什么
 
-一个想法适合继续开发时，你最终会得到四样东西：
+一个想法适合继续开发，并且当前平台真的能读写项目、运行和检查时，你最终会得到四样东西：
 
 1. 一个真正可以使用的应用或 Agent；
 2. 三份你能看懂并亲自确认的简短记录：想解决哪件麻烦、这次先做什么、准备怎样动手和试用；
@@ -23,7 +23,9 @@ DZ 不会把“帮我做一个应用”直接理解为立即写代码。它会�
 
 如果在前期发现这个想法不值得做，DZ 会直接说明原因和更省钱的替代办法，不会为了交付代码而硬做。
 
-简单理解：DZ 负责带路，当前有执行能力的 AI 负责动手；在 Codex 中，动手的就是 Codex。Agent Harness 教程只在幕后提供“怎样记住进度、拆开任务、检查结果”的经验。DZ 已经把这些经验写进自己的规则；每次使用时不会重新运行教程，也不要求用户阅读它。
+如果当前平台只能聊天，DZ 会完成讨论、三次确认和一份可交给开发型 AI 的接力说明；它不会假装已经做出或试过应用。
+
+简单理解：DZ 负责带路，当前有执行能力的 AI 负责动手；在 Codex 中，动手的就是 Codex。Hubo Agent Harness 是设计参考，不是运行依赖。DZ 已把其中“保存状态、拆开任务、拿证据说话、中断后恢复”的做法变成自己的规则和可运行项目账本；使用 DZ 时不会重新运行教程，也不要求用户阅读它。
 
 ### 核心能力
 
@@ -37,7 +39,9 @@ DZ 不会把“帮我做一个应用”直接理解为立即写代码。它会�
 - 不让非技术用户选择框架或为技术正确性背书；
 - 在“想解决哪件麻烦”“这次做什么、不做什么”“准备先做哪一步、做完怎样试”分别被你看过并点头前，不开始正式制作；
 - 用真实路径和可复现证据判断完成，而不是只看 Mock、构建成功、部署命令或可访问网址；
-- 可以中途接管当前任务，保留有效工作，不强迫用户重新回答已经明确的问题。
+- 可以中途接管当前任务，保留有效工作，不强迫用户重新回答已经明确的问题；
+- 每次有效动作后记录做了什么、证据在哪里、还差什么和下一步是什么；在能再次读取同一项目的环境里可以换对话恢复，普通聊天则带上导出的交接记录；
+- 把“这次工作能不能停”“用户是否决定收尾”“产品是否真的试过”分开，不用验收把用户困住。
 
 ### 先找现成的小零件
 
@@ -65,20 +69,28 @@ GitHub 搜索只代表找到了候选，不代表已经获准使用，也不代�
 
 每次回复前，DZ 会在心里检查：一个第一次接触这件事的人，能不能复述“会发生什么、为什么现在要管、我只要回答什么”。复述不了，就重写。
 
+### 风险不会变成死胡同
+
+发现隐私、费用、公开发布、数据丢失或恢复困难等风险时，DZ 不会只说“不行”。它会先用大白话告诉你：准备做什么、最坏会怎样、影响谁、风险有多大、更稳妥的做法是什么、出问题能不能恢复。
+
+要花钱、给外部发消息或写数据、删除、搬数据、公开发布、操作生产环境、使用敏感资料，或做其他会产生实际后果的动作时，不管风险被写成低、中还是高，都必须针对这一次具体动作单独确认。如果你确实有权决定并明确接受，DZ 就继续执行，同时把风险和没有试过的部分如实保留下来。账本会发出一张“一次性通行条”，只对应你看到的动作、当前版本、使用位置、金额上限和截止时间；任何一项改变或通行条到期，都要重新确认。动作完成、失败或取消也会用掉它。真正调用外部工具的平台还必须在 AI 不能改写的审批入口里执行同样限制。
+
+你随时可以暂停、取消或先收尾。DZ 会留下交接记录，但不会把“我先不做了”“网址能打开”或“我接受风险”写成“已经全部验证通过”。“DZ 已取消”只表示 DZ 不再发起新动作，不代表外部网站或已经启动的任务一定停下；能取消时只发送一次有时间限制的取消信号，再查一次是否停下，不会借着取消反复操作。只有缺少账号或工具、你无权替别人决定、平台本身不允许、必要条件不存在，或没有使用第三方内容的权利时，动作才会真正卡住。
+
 ### 在不同 AI 上怎么用
 
 所有平台都使用同一套 DZ 流程。只要能接收文字，就可以使用；能否读取项目、写代码、运行测试或上线，只看当前平台实际开放的工具，不看品牌。WorkBuddy、Kimi、智谱、DeepSeek、Claude、Gemini、Codex、私有模型和以后出现的新平台都不需要分别开发不同版本。后文的 Codex 只是一个完整接入示例。
 
 | 平台提供的入口 | 统一加载方式 | 实际结果 |
 |---|---|---|
-| 支持 Skill 或 `SKILL.md` | 安装完整仓库目录 | 使用完整流程，并自动调用该平台真正开放的工具 |
+| 支持 Skill 或 `SKILL.md` | 安装完整仓库目录 | 使用完整流程，并根据平台明确提供的工具决定能做什么 |
 | 支持系统提示词、项目指令或 API | 加载 [`portable/DZ-UNIVERSAL.md`](portable/DZ-UNIVERSAL.md)，再传入能力说明 | 使用同一流程；接入程序负责保存对话、执行工具和控制权限 |
 | 支持文件上传或知识库 | 上传通用提示词，并按需加入相关参考文件 | 使用同一流程；能否动手开发取决于会话工具 |
 | 只能普通聊天 | 粘贴通用提示词，用 `DZ启动：` 开始 | 完成脑暴、确认边界和交接；不会假装已经开发或测试 |
 
 通用提示词是一份安全、可单文件使用的精简版。若要让 API 版获得与完整 Skill 相同的技术手册和产物模板，接入程序还应按 `dz-manifest.json` 的 `reference_sets` 提供按需读取，不要把所有资料一次性塞进上下文。
 
-入口取决于 DZ 是怎样装进去的：ChatGPT Desktop 的本地 Skill 和 ChatGPT 网页、桌面、手机里的 Plugin 都输入 `@` 选择 `dz`；Codex CLI 和 IDE 扩展用 `/skills` 选择，或直接输入 `$dz`。只有已经加载了通用提示词的其他 AI 平台才使用：
+入口取决于 DZ 是怎样装进去的：在支持插件的界面中打开 `@` 菜单，选择“DZ — Irixi Project Forge”（选中后可能显示为 `@dz`）；在 Codex CLI 或 IDE 中，用 `/skills` 选择 `dz`，或直接输入 `$dz`。只有已经加载通用提示词的其他 AI 平台才使用：
 
 ```text
 DZ启动：我想做……我完全不懂产品和技术。请用短句和具体例子，一次只问我一件事。
@@ -92,6 +104,9 @@ DZ启动：我想做……我完全不懂产品和技术。请用短句和具体
 
 - [`dz-manifest.json`](dz-manifest.json) 告诉加载器应该读取哪个版本；
 - [`adapters/dz-capabilities.schema.json`](adapters/dz-capabilities.schema.json) 描述当前 AI 真实拥有的能力；
+- [`schemas/dz-project-state.schema.json`](schemas/dz-project-state.schema.json) 规定跨对话项目状态的统一格式；
+- [`scripts/dz_state.py`](scripts/dz_state.py) 在能运行 Python 的平台创建、检查、恢复和生成项目账本；
+- [`scripts/dz_codex_stop_hook.py`](scripts/dz_codex_stop_hook.py) 在账本仍显示“正在做”时向 Codex 请求一次续跑；是否真的继续还受 Hook 信任、策略和其他 Stop hook 影响；
 - [`adapters/README.md`](adapters/README.md) 给出加载顺序和能力说明示例；
 - [`references/platform-adapters.md`](references/platform-adapters.md) 规定怎样自动选择“只引导、可查看、可开发、可上线”的做法。
 
@@ -121,13 +136,15 @@ intent.md → spec.md → plan.md + code → verification.md → review/release.
 5. **Deploy**：检查访问控制、密钥、持久化、备份、监控、成本和回滚，输出 `review.md` 与 `release.md`。上线批准不等于上线成功。
 6. **Maintain**：把生产反馈、事故和指标转成可追踪证据，经人工判断后进入修复或新的 Intent。
 
-`PROJECT.md` 只保存当前状态和产物链接，不代替完整的 Intent、Specification、Plan 或验证证据。
+在能够读写项目并运行状态工具的环境里，DZ 用 `.dz/state.json` 保存当前快照，用 `.dz/journal.jsonl` 追加每次重要变化，并由状态工具生成 `PROJECT.md` 和 `docs/sdlc/work-items.md`。用户确认过的“为什么做、做成什么、怎么做”三份原文会合成一枚内容指纹，每项施工都绑在这枚指纹上；只要其中一份改变，旧施工和旧证明就不能悄悄沿用。每次检查前还要保存当前代码、构建或线上版本的真实观察证明，并生成一个新的检查批次；哪怕版本名字没变，重新设置检查对象也要重新跑完本批次的每条约定。旧结果只保留为历史。
+
+账本格式已升级到 `1.1`。旧的 `1.0` 项目必须先运行迁移；工具会备份旧快照和日志、保留历史，并把无法确定属于哪份决定或哪次检查的内容降为“还没证明”，不会替用户猜。这个本地工具能检查前后记录是否一致、证明文件是否被改动，却不能证明 AI 写下的“用户已同意”或“测试真的执行过”一定真实，因为能改项目的 AI 也可能改账本并调用工具。需要防篡改的批准或验证，必须由 AI 无法控制的平台审批入口和测试执行器签发。其他接入程序要保存同样结构；普通聊天只能导出可复制的交接记录。`PROJECT.md` 不代替完整决定或验证证据。
 
 这些英文名称和文件名只在项目内部使用。和小白沟通时，DZ 默认只说“想帮谁解决哪件麻烦”“这次做什么、不做什么”“先做哪一步、做完怎样试”“让它真的做一遍”和“放到网上给别人用前再检查一次”。
 
 ### 中途调用与任务接管
 
-你可以在同一个对话或开发任务进行到一半时调用 DZ。它不会自动从头开始，也不会因为缺少流程文档就删除已有代码。
+你可以在同一个对话或开发任务进行到一半时调用 DZ。能读取项目时，它先把项目账本和真实代码现状对一遍；不能读取时，只向你要最小交接记录。它不会自动从头开始，也不会因为缺少流程文档就删除已有代码。保存过项目日志的环境还能恢复到最后一次完整状态。
 
 DZ 会先只看不改，用四句短话说明：
 
@@ -140,7 +157,7 @@ DZ 会先只看不改，用四句短话说明：
 
 如果前面三件事已经说定，而现在只是修一个小问题，DZ 会直接继续，不会让你从头再讲。只有这次修改会改变别人怎样使用、会保存什么内容、谁能查看或修改、要花多少钱，或会换掉主要做法时，才重新问受影响的那一件事。
 
-中途接管示例：
+在支持 `@` 插件菜单的界面里，中途接管示例：
 
 ```text
 @dz 接着做现在这个东西。先别改。用四句短话告诉我：别人做出了什么、哪些能留、还缺什么、现在先干什么。已经说过的别再问。
@@ -160,7 +177,7 @@ DZ 整合了以下手册的流程：
 - *AI 产品 Vibe Coding 通用前端技术栈手册*；
 - *AI Agent 产品上线部署手册*。
 
-这些手册用于选择后端优先或端到端薄切片、确定必须项/默认项/按需项、设计异步任务状态、执行 Mock 加真实模型双层验证，以及检查生产就绪性。
+这三份手册不是可看可不看的参考。第三次确认完成后，DZ 会把适用内容拆成必须入账的施工项：所有项目走通用开发路线；有界面的项目增加代表页面、真实后台、浏览器和中断恢复路线；需要给别人使用时增加账号、隔离、密钥、存储、监控、费用、恢复、上线检查、README 和交接；上线后增加结果、故障、成本和反馈路线。每一项都要留下实际结果，不能只写“参考过手册”。具体框架和云平台仍是可替换的建议，不是强制答案。
 
 DZ 同时修正了一些不应成为通用规则的高风险捷径：
 
@@ -178,16 +195,19 @@ DZ 使用 Codex 自身的执行机制，而不是复制 Claude 专属命令：
 - 在当前界面支持时使用 Plan mode 做只读发现和规划；
 - 使用 `AGENTS.md` 保存稳定的仓库知识；
 - 使用 Skills 保存跨项目方法；
+- 使用 `.dz/state.json`、追加日志和工作账本保存跨对话进度；
+- 使用仓库内的状态工具检查暂停、恢复、风险决定和完成证据；
+- 插件安装时使用 Stop hook 在结束前检查账本；第一次发现仍在做会请求 Codex 再继续一次，但平台策略仍可能拒绝；第二次仍未收好则带警告放行并保留未完状态，避免死循环；
 - 使用当前计划跟踪已批准计划的执行；
 - 只对真正独立的任务使用子代理或 worktree；
 - 使用沙箱、审批、测试、eval、CI 和 review 形成分层控制；
 - 使用部署 Skill 或官方文档处理厂商特定步骤。
 
-详细映射见 [`references/codex-native.md`](references/codex-native.md)，开源执行底座见 [`openai/codex`](https://github.com/openai/codex)。
+仓库本身同时是一个可校验的 Codex 插件包和一个可单独安装的 Skill。插件会自带本机 Stop hook，但它只会请求一次收尾续跑，也不保证请求被 Codex 接受；本 hook 不会重复请求，因此不会由它自己造成死循环。它不是安全边界，持续记忆仍来自项目账本、项目规则和验证证据。详细映射见 [`references/codex-native.md`](references/codex-native.md)，hook 说明见 [`references/codex-stop-hook.md`](references/codex-stop-hook.md)，开源执行底座见 [`openai/codex`](https://github.com/openai/codex)。
 
 ### 在 Codex 中安装（示例）
 
-把仓库克隆为 `dz`，然后放入或软链接到用户级 Skills 目录：
+把仓库克隆为 `dz`，然后放入或软链接到用户级 Skills 目录。仓库中的 `.codex-plugin/plugin.json` 和 `skills/dz/` 同时提供插件结构；下面仍是最直接的本地 Skill 安装方式：
 
 ```bash
 git clone https://github.com/Irixil/irixi-project-forge.git dz
@@ -197,47 +217,74 @@ ln -s "/absolute/path/to/dz" "$HOME/.agents/skills/dz"
 
 如果更新后没有立即生效，请重启 Codex 并新建一个任务。
 
+本地 Skill 和插件安装二选一，避免两个 `dz` 版本互相遮挡。不要只复制 `skills/dz/` 内层目录，它需要同一仓库根目录中的完整工作流和参考文件。
+
+插件会从同一版本目录自动加载 Stop hook，并要求你在 Codex 的 `/hooks` 中核对后信任。若只装本地 Skill，hook 是可选项：按 [`assets/codex-hooks/README.md`](assets/codex-hooks/README.md) 人工检查并合并模板，绝不覆盖项目已有的 `.codex/hooks.json`。
+
+当前仓库已经是可校验的插件包，但还没有发布成可用 Marketplace 命令一键安装的市场源；因此本节只给出已经验证过的本地 Skill 安装方法。
+
 ### 使用方式
 
 从模糊想法开始：
 
 ```text
-@dz 我想做一个帮小店整理顾客留言的东西。我不懂产品和技术。请用短句和具体例子，一次只问我一件事。先把要做的事说清，再动手。
+$dz 我想做一个帮小店整理顾客留言的东西。我不懂产品和技术。请用短句和具体例子，一次只问我一件事。先把要做的事说清，再动手。
 ```
 
 读已有说明：
 
 ```text
-@dz 读一下这份说明。已经说清的别再问。直接告诉我哪件事还没说清，一次只问一件事。
+$dz 读一下这份说明。已经说清的别再问。直接告诉我哪件事还没说清，一次只问一件事。
 ```
 
 恢复已有项目：
 
 ```text
-@dz 接着做这个东西。不要从头问。用四句短话告诉我：别人做出了什么、哪些能留、还缺什么、现在先干什么。
+$dz 接着做这个东西。不要从头问。用四句短话告诉我：别人做出了什么、哪些能留、还缺什么、现在先干什么。
 ```
 
 检查上线准备：
 
 ```text
-@dz 先别放到网上给别人用。请让它真的做一遍，再告诉我：现在能做什么、还有什么没试、出问题怎样恢复。
+$dz 先别放到网上给别人用。请让它真的做一遍，再告诉我：现在能做什么、还有什么没试、出问题怎样恢复。
 ```
 
 让 DZ 先找可复用的小零件：
 
 ```text
-@dz 我想加一个文件上传后失败自动重试的能力。先说清我们真正需要的动作，再找找 GitHub 上有没有合适的小零件。不要搬整个项目；请判断哪些值得用、哪些只值得参考、哪些不该用。
+$dz 我想加一个文件上传后失败自动重试的能力。先说清我们真正需要的动作，再找找 GitHub 上有没有合适的小零件。不要搬整个项目；请判断哪些值得用、哪些只值得参考、哪些不该用。
 ```
 
-在 ChatGPT 里输入 `@` 并选择 `dz`；本地独立 Skill 只出现在 ChatGPT Desktop，打包成 Plugin 后也可用于 ChatGPT 网页和手机。Codex CLI 与 IDE 扩展用 `/skills` 选择或输入 `$dz`。以上入口来自 [OpenAI 官方 Skills 文档](https://developers.openai.com/codex/skills)。
+上面是 Codex 的写法。在支持插件 `@` 菜单的平台里，打开 `@` 菜单并选择“DZ — Irixi Project Forge”；选中后可看到 `@dz`。不同宿主的入口可能不同，但加载后执行的是同一套 DZ 规则。Codex 的 Skill 入口见 [OpenAI 官方 Skills 文档](https://developers.openai.com/codex/skills)。
 
 ### 目录结构
 
 ```text
 dz/
+├── .codex-plugin/
+│   └── plugin.json
 ├── SKILL.md
 ├── LICENSE.md
 ├── dz-manifest.json
+├── skills/
+│   └── dz/
+│       ├── SKILL.md
+│       └── agents/openai.yaml
+├── scripts/
+│   ├── dz_state.py
+│   └── dz_codex_stop_hook.py
+├── hooks/
+│   └── hooks.json
+├── schemas/
+│   └── dz-project-state.schema.json
+├── tests/
+│   ├── test_dz_state.py
+│   └── test_dz_codex_stop_hook.py
+├── assets/
+│   ├── project/AGENTS.md
+│   └── codex-hooks/
+│       ├── README.md
+│       └── hooks.json.example
 ├── agents/
 │   └── openai.yaml
 ├── adapters/
@@ -250,6 +297,7 @@ dz/
     ├── guided-dialogue.md
     ├── takeover-resume.md
     ├── artifact-chain.md
+    ├── project-state.md
     ├── artifacts/
     │   ├── intent.md
     │   ├── spec.md
@@ -263,12 +311,13 @@ dz/
     ├── agent-harness.md
     ├── platform-adapters.md
     ├── codex-native.md
+    ├── codex-stop-hook.md
     └── forward-tests.md
 ```
 
 ### 验证
 
-Skill 使用 Codex Skill validator 和 JSON 检查验证结构，并定义十五组新上下文行为测试：
+Skill 与插件分别通过结构校验；项目账本有三十五组可运行测试，Codex 收尾检查有十组，合计四十五组；另定义十八组新上下文行为测试：
 
 1. 模糊的“服务所有人”想法；
 2. 区块链、RAG 和多 Agent 技术堆砌；
@@ -284,7 +333,10 @@ Skill 使用 Codex Skill validator 和 JSON 检查验证结构，并定义十五
 12. 面向小白时必须简短、具体，只问一个问题；听不懂时必须换成当前事情里的例子；
 13. 同一套 DZ 在聊天型、可开发型和可上线型平台上自动选择合适做法；相同能力不因平台品牌不同而改变；
 14. 中途接手时也必须用四句短话说清已经做了什么、什么能留、什么没试、下一步做什么；
-15. 先说清真正需要的小动作，再安全寻找和筛选现成零件；不能把公开、Star 或 Demo 当成使用许可和质量证明，也不能在确认动手办法前下载运行陌生代码。
+15. 先说清真正需要的小动作，再安全寻找和筛选现成零件；不能把公开、Star 或 Demo 当成使用许可和质量证明，也不能在确认动手办法前下载运行陌生代码；
+16. 具体风险讲清并由有权决定的人接受后，继续执行该次动作，同时保留风险和未验证项；
+17. 暂停后停止动作，换对话从账本恢复，取消后保留文件且不谎称完成；
+18. 用户可以随时收尾，但构建成功、网址可访问或接受风险都不能冒充验证通过。
 
 行为测试定义见 [`references/forward-tests.md`](references/forward-tests.md)。
 
@@ -310,7 +362,7 @@ DZ does not interpret “build me an app” as permission to code immediately. I
 
 ### What you get
 
-When an idea is worth building, a DZ project should leave you with four things:
+When an idea is worth building and the current host can actually read, write, run, and check the project, a DZ project should leave you with four things:
 
 1. An application or agent that can actually be used.
 2. Three short records you can understand and confirm: which trouble to solve, what to do this time, and how to make and try it.
@@ -319,7 +371,9 @@ When an idea is worth building, a DZ project should leave you with four things:
 
 If early discovery shows that the idea is not worth building, DZ explains why and recommends a cheaper alternative instead of producing code for its own sake.
 
-In simple terms: DZ guides the work and the current execution-capable AI does the hands-on work; on Codex, that worker is Codex. The Agent Harness tutorial contributes behind-the-scenes lessons about remembering progress, splitting work, and checking results. DZ has already turned those lessons into its own rules; it does not rerun the tutorial or require the user to read it for every project.
+On a chat-only host, DZ completes the discussion, three confirmations, and a handoff for an execution-capable AI. It never pretends the application was built or tested.
+
+In simple terms: DZ guides the work and the current execution-capable AI does the hands-on work; on Codex, that worker is Codex. Hubo Agent Harness is a design reference, not a runtime dependency. DZ turns its lessons about durable state, small work items, evidence, and interruption recovery into DZ rules and an executable project ledger. It does not rerun the tutorial or require users to read it.
 
 ### Core capabilities
 
@@ -334,6 +388,8 @@ In simple terms: DZ guides the work and the current execution-capable AI does th
 - Does not begin formal implementation until the user has separately confirmed which trouble to solve, what to do and leave out this time, and what to make first and how to try it.
 - Judges completion by reproducible real-path evidence, not a mock, green build, deploy command, or reachable URL alone.
 - Can take over midway, preserve valid work, and avoid repeating decisions already supported by the current task.
+- Records each meaningful action, its evidence, remaining work, and next action. A fresh task can recover when it can reopen the same project; plain chat must carry the exported handoff.
+- Separates whether work may stop, whether the user chose to close, and whether the product is actually verified.
 
 ### Find existing parts before building
 
@@ -361,20 +417,28 @@ If the current AI cannot access the public web, DZ says that no live search occu
 
 Before every reply, DZ silently checks whether someone new to the subject could repeat back what will happen, why it matters now, and the one answer DZ needs. If not, it rewrites the reply.
 
+### Risk does not become a dead end
+
+When DZ finds privacy, spending, public-release, data-loss, or recovery risk, it does not stop at “no.” It explains the intended action, worst credible consequence, affected people, severity, safer option, and recovery path in ordinary language.
+
+Spending, external messages or writes, deletion, migration, public release, production access, sensitive-data use, and other materially consequential actions require fresh authorization for the exact action regardless of whether the displayed severity is low, medium, or high. If you have authority and knowingly accept it, DZ continues within that scope while preserving the risk and any unverified checks. The ledger issues a one-action lease bound to the reviewed action, accepted decisions, target ID, revision, environment, spending ceiling when applicable, and expiry. Any bound fact change or expiry requires fresh authorization; completion, failure, or cancellation consumes the lease. A real tool-using host must enforce the same action ID, bounds, and expiry through an approval boundary the model cannot rewrite.
+
+You may pause, cancel, or close at any time. DZ leaves an honest handoff, but it never turns “stop here,” a reachable URL, or accepted risk into “fully verified.” “DZ cancelled” means DZ starts no new action; it does not prove that an external job stopped. Where cancellation is available, DZ sends one time-bounded cancellation signal, checks status once, and does not keep acting under cancellation authority. An action is genuinely blocked only when an account or capability is missing, the user lacks authority, the host forbids it, a required external condition does not exist, or third-party rights are unavailable.
+
 ### Using DZ on different AI platforms
 
 Every platform uses the same DZ workflow. Any AI that accepts text can use it; whether it can read a project, write code, run tests, or release depends only on the tools actually available, never the brand. WorkBuddy, Kimi, Zhipu, DeepSeek, Claude, Gemini, Codex, private models, and future hosts do not need separate DZ versions. Codex appears later only as one complete integration example.
 
 | What the host accepts | Unified loading form | Result |
 |---|---|---|
-| Skills or `SKILL.md` | Install the full repository bundle | Keep the full workflow and automatically use only the tools actually exposed by that host |
+| Skills or `SKILL.md` | Install the full repository bundle | Keep the full workflow and decide what can be done from tools the host explicitly exposes |
 | System prompts, project instructions, or an API | Load [`portable/DZ-UNIVERSAL.md`](portable/DZ-UNIVERSAL.md), then append a capability card | Keep the same flow; the integration owns history, tool execution, and permissions |
 | File upload or a knowledge base | Upload the universal prompt and only the references needed now | Keep the same flow; hands-on delivery depends on the chat's actual tools |
 | Plain text chat only | Paste the universal prompt and start with `DZ启动：` | Brainstorm, confirm boundaries, and create a handoff without pretending to have built or tested anything |
 
 The universal prompt is a safe, single-file compact edition. To give an API host the same handbook detail and artifact templates as the full Skill, expose the manifest's `reference_sets` through on-demand retrieval instead of concatenating every resource into every request.
 
-The entry point depends on how DZ was installed. In ChatGPT, type `@` to select `dz`: this covers a local Skill in ChatGPT Desktop and a packaged Plugin on ChatGPT web, desktop, or mobile. In Codex CLI or the IDE extension, run `/skills` or type `$dz`. Only on another AI host that has already loaded the universal prompt, use:
+The entry point depends on the host. On a plugin surface, open the `@` menu and select “DZ — Irixi Project Forge” (the selected mention may appear as `@dz`). In Codex CLI or the IDE extension, use `/skills` to select `dz`, or type `$dz`. Only on another AI host that has already loaded the universal prompt, use:
 
 ```text
 DZ启动：I want to build ... I know nothing about product or software work. Use short sentences and concrete examples, and ask me one thing at a time.
@@ -388,6 +452,9 @@ The repository exposes a public adapter interface:
 
 - [`dz-manifest.json`](dz-manifest.json) tells a loader which entry point to use;
 - [`adapters/dz-capabilities.schema.json`](adapters/dz-capabilities.schema.json) describes what the current host can actually do;
+- [`schemas/dz-project-state.schema.json`](schemas/dz-project-state.schema.json) defines the cross-task project-state contract;
+- [`scripts/dz_state.py`](scripts/dz_state.py) creates, checks, recovers, and renders the project ledger where Python is available;
+- [`scripts/dz_codex_stop_hook.py`](scripts/dz_codex_stop_hook.py) requests one continuation attempt when the ledger still says work is active; trust, policy, and other Stop hooks still determine whether Codex continues;
 - [`adapters/README.md`](adapters/README.md) defines the loading sequence and provides an example capability card;
 - [`references/platform-adapters.md`](references/platform-adapters.md) defines how DZ selects guide, inspect, build, or release behavior.
 
@@ -415,13 +482,15 @@ intent.md → spec.md → plan.md + code → verification.md → review/release.
 5. **Deploy:** Review access, secrets, persistence, backup, monitoring, cost, and rollback in `review.md` and `release.md`. Release approval is not release completion.
 6. **Maintain:** Turn production feedback, incidents, and metrics into evidence, then route human-triaged changes into a bounded fix or new Intent.
 
-`PROJECT.md` is a status dashboard and artifact index, not a replacement for Intent, Specification, Plan, or verification evidence.
+Where the host can read and write the project and run the state tool, DZ stores the current snapshot in `.dz/state.json`, appends important changes to `.dz/journal.jsonl`, and uses the tool to generate `PROJECT.md` plus `docs/sdlc/work-items.md`. The exact accepted Intent, Specification, and Plan form one combined contract digest to which delivery work is bound; changing any one prevents silent reuse. Before evidence is recorded, DZ saves inspectable proof of the observed code, build, or deployment and creates a fresh target epoch. Resetting the target requires every criterion to run again even when the visible revision and environment text are unchanged. Old results remain history.
+
+State schema `1.1` requires an explicit migration from `1.0`. The tool first backs up the legacy snapshot and journal, preserves history, and downgrades records that cannot honestly be tied to the current contract and target instead of guessing. The local ledger checks consistency and artifact integrity; it is not trusted proof of human approval or test execution when the same AI can write its files and invoke its CLI. Tamper-resistant approvals and Passed claims require a host-controlled approval surface and runner outside the model's write authority. Other integrations must persist the equivalent structure; plain chat can only export a copyable handoff. `PROJECT.md` does not replace product decisions or verification evidence.
 
 Those English names and filenames stay inside the project. With a beginner, DZ says “who needs help with which trouble,” “what to do and leave out this time,” “what to make first and how to try it,” “make it do the real job once,” and “check it again before putting it online for other people.”
 
 ### Mid-task takeover
 
-You can invoke DZ halfway through the same conversation or development task. It does not automatically restart and does not delete existing code merely because workflow artifacts are missing.
+You can invoke DZ halfway through the same conversation or development task. When it can read the project, it reconciles the ledger with the real repository; otherwise it requests the smallest handoff record. It does not automatically restart or delete existing code merely because workflow artifacts are missing. A host that saved the project journal can restore the last completely saved state.
 
 DZ first inspects without changing anything, then uses four short lines:
 
@@ -434,7 +503,7 @@ When code exists without a clear explanation, DZ preserves it as potentially use
 
 When those decisions already exist and the task is a bounded defect, DZ resumes from implementation or testing without restarting product discovery. It reopens only the earliest decision affected by a change to experience, data, permissions, cost, architecture, or another material boundary.
 
-Take over in ChatGPT Desktop:
+Take over on a surface with the `@` plugin menu:
 
 ```text
 @dz Continue this work. Do not change anything yet. In four short lines, tell me what was made, what can stay, what is missing, and what one small thing to do now. Do not ask me to repeat known facts.
@@ -454,7 +523,7 @@ DZ incorporates the workflows from:
 - *AI Product Vibe Coding General Frontend Technology Stack Handbook*;
 - *AI Agent Product Launch and Deployment Handbook*.
 
-They inform backend-first versus vertical-slice delivery, mandatory/default/on-demand modules, async task states, mock plus real-model verification, browser quality, and production readiness.
+These handbooks are not optional reading. After the third confirmation, DZ expands every applicable route into required ledger work: the general build route for every project; representative-page, real-backend, browser, interruption, and recovery work for a UI; identity, isolation, secrets, storage, monitoring, cost, recovery, production checks, README, and handoff when other people will use it; and result, incident, cost, and feedback work after release. Every item needs real evidence. Frameworks and cloud providers remain replaceable recommendations rather than mandatory answers.
 
 DZ also corrects shortcuts that should not become universal defaults:
 
@@ -472,16 +541,19 @@ DZ uses Codex-native mechanisms rather than copying Claude-specific commands:
 - Plan mode for read-only discovery and planning when supported;
 - `AGENTS.md` for stable repository knowledge;
 - Skills for reusable cross-project methods;
+- `.dz/state.json`, an append-only journal, and the work ledger for cross-task progress;
+- the repository state tool for pause, recovery, risk decisions, and evidence checks;
+- the bundled Stop hook for a final ledger check: it requests one continuation for an active run, subject to host policy, then permits a warned second stop while preserving the unfinished state so the hook cannot loop by itself;
 - the current plan for execution under an accepted implementation plan;
 - subagents and worktrees only for genuinely independent work;
 - sandboxes, approvals, tests, evals, CI, and review as layered controls;
 - provider Skills or official documentation for deployment-specific steps.
 
-See [`references/codex-native.md`](references/codex-native.md) and the open-source [`openai/codex`](https://github.com/openai/codex) harness.
+The repository is both a validated Codex plugin bundle and a standalone Skill. The local Stop hook requests one bounded closeout continuation; Codex may still decline it because of trust, policy, or another Stop hook. This hook does not repeat its own request, is not an infinite runner, and is not a security boundary. Durable supervision still comes from project state, project rules, and verification evidence. See [`references/codex-native.md`](references/codex-native.md), [`references/codex-stop-hook.md`](references/codex-stop-hook.md), and the open-source [`openai/codex`](https://github.com/openai/codex) harness.
 
 ### Installation on Codex (example)
 
-Clone the repository as `dz`, then place or symlink it into the user Skills directory:
+Clone the repository as `dz`, then place or symlink it into the user Skills directory. `.codex-plugin/plugin.json` and `skills/dz/` also provide a plugin package structure; the following remains the most direct local Skill installation:
 
 ```bash
 git clone https://github.com/Irixil/irixi-project-forge.git dz
@@ -491,47 +563,74 @@ ln -s "/absolute/path/to/dz" "$HOME/.agents/skills/dz"
 
 If an update is not detected, restart Codex and open a fresh task.
 
+Choose either the local Skill or the plugin installation so two `dz` versions do not shadow each other. Do not copy `skills/dz/` by itself; that wrapper needs the canonical workflow and references at the same repository root.
+
+The plugin loads its Stop hook from the same version and asks you to inspect and trust it through Codex `/hooks`. With a standalone local Skill, the hook is optional: follow [`assets/codex-hooks/README.md`](assets/codex-hooks/README.md) to review and merge the inert template without overwriting an existing project `.codex/hooks.json`.
+
+The repository is a valid plugin bundle, but it has not yet been published as a marketplace source with a one-command marketplace install. This section therefore documents only the locally validated Skill installation.
+
 ### Usage
 
 Start from a rough idea:
 
 ```text
-@dz I want to make something that helps a small shop sort customer messages. I know nothing about product or software work. Use short sentences and concrete examples. Ask me one thing at a time, and make sure we understand the job before writing code.
+$dz I want to make something that helps a small shop sort customer messages. I know nothing about product or software work. Use short sentences and concrete examples. Ask me one thing at a time, and make sure we understand the job before writing code.
 ```
 
 Read an existing description:
 
 ```text
-@dz Read this description. Do not ask again about things it already explains. Tell me the one important thing that is still unclear, then ask one question.
+$dz Read this description. Do not ask again about things it already explains. Tell me the one important thing that is still unclear, then ask one question.
 ```
 
 Resume an existing project:
 
 ```text
-@dz Continue this work without starting over. In four short lines, tell me what was made, what can stay, what is missing, and what one small thing to do now.
+$dz Continue this work without starting over. In four short lines, tell me what was made, what can stay, what is missing, and what one small thing to do now.
 ```
 
 Audit release readiness:
 
 ```text
-@dz Do not put this online for other people yet. Make it do the real job once, then tell me what works now, what nobody has tried, and how to restore it if something goes wrong.
+$dz Do not put this online for other people yet. Make it do the real job once, then tell me what works now, what nobody has tried, and how to restore it if something goes wrong.
 ```
 
 Ask DZ to look for reusable parts:
 
 ```text
-@dz I want file uploads to retry after a failure. First clarify the exact behavior we need, then look for suitable GitHub parts. Do not import a whole project; tell me what is worth using, what is only worth learning from, and what should be rejected.
+$dz I want file uploads to retry after a failure. First clarify the exact behavior we need, then look for suitable GitHub parts. Do not import a whole project; tell me what is worth using, what is only worth learning from, and what should be rejected.
 ```
 
-In ChatGPT, type `@` and select `dz`: a standalone local Skill appears in ChatGPT Desktop, while a packaged Plugin also works on ChatGPT web and mobile. In Codex CLI or the IDE extension, run `/skills` or type `$dz`. These entry points follow the [official OpenAI Skills documentation](https://developers.openai.com/codex/skills).
+The examples above use Codex. On a plugin surface with an `@` menu, open the menu and select “DZ — Irixi Project Forge”; the selected mention may appear as `@dz`. Hosts may expose different entry points, but they load the same DZ rules. See the [official OpenAI Skills documentation](https://developers.openai.com/codex/skills) for the Codex Skill surface.
 
 ### Structure
 
 ```text
 dz/
+├── .codex-plugin/
+│   └── plugin.json
 ├── SKILL.md
 ├── LICENSE.md
 ├── dz-manifest.json
+├── skills/
+│   └── dz/
+│       ├── SKILL.md
+│       └── agents/openai.yaml
+├── scripts/
+│   ├── dz_state.py
+│   └── dz_codex_stop_hook.py
+├── hooks/
+│   └── hooks.json
+├── schemas/
+│   └── dz-project-state.schema.json
+├── tests/
+│   ├── test_dz_state.py
+│   └── test_dz_codex_stop_hook.py
+├── assets/
+│   ├── project/AGENTS.md
+│   └── codex-hooks/
+│       ├── README.md
+│       └── hooks.json.example
 ├── agents/
 │   └── openai.yaml
 ├── adapters/
@@ -544,6 +643,7 @@ dz/
     ├── guided-dialogue.md
     ├── takeover-resume.md
     ├── artifact-chain.md
+    ├── project-state.md
     ├── artifacts/
     │   ├── intent.md
     │   ├── spec.md
@@ -557,12 +657,13 @@ dz/
     ├── agent-harness.md
     ├── platform-adapters.md
     ├── codex-native.md
+    ├── codex-stop-hook.md
     └── forward-tests.md
 ```
 
 ### Validation
 
-The package is checked with the Codex Skill validator and JSON validation, and defines fifteen fresh-context behavioral test families:
+The Skill and plugin each pass their structural validator; the project ledger has thirty-five runnable tests and the Codex closeout check has ten, for forty-five total; DZ also defines eighteen fresh-context behavioral test families:
 
 1. a vague “product for everyone” idea;
 2. fashionable blockchain, RAG, and multi-agent over-scoping;
@@ -578,7 +679,10 @@ The package is checked with the Codex Skill validator and JSON validation, and d
 12. concise, concrete guidance for a complete beginner, with one question and a same-project example after confusion;
 13. automatic capability-aware behavior across chat-only, build-capable, and release-capable hosts, with identical behavior for identical capabilities regardless of brand;
 14. a mid-task beginner takeover that names what was made, what can stay, what has not been personally tried, and the one next action in four short lines;
-15. anchor the exact needed behavior before safely finding and screening existing parts, without treating visibility, stars, or demos as permission or quality proof, and without downloading or running unknown code before the build approach is confirmed.
+15. anchor the exact needed behavior before safely finding and screening existing parts, without treating visibility, stars, or demos as permission or quality proof, and without downloading or running unknown code before the build approach is confirmed;
+16. continue an exact action after an authorized owner accepts clearly disclosed risk, while preserving that risk and unverified checks;
+17. stop on pause, recover from the ledger in a fresh task, and preserve files without claiming completion after cancellation;
+18. allow the user to close at any time without treating a build, reachable URL, or risk acceptance as verified evidence.
 
 See [`references/forward-tests.md`](references/forward-tests.md) for the behavioral oracles.
 

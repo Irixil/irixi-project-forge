@@ -50,6 +50,8 @@ These concern safety, recoverability, or honest verification and survive technol
 - protected data has identity isolation, retention, deletion, and recovery boundaries;
 - deployment has observable health, monitoring, cost controls, and a verified rollback path proportional to risk.
 
+These baselines define the recommended safe path and the evidence needed to call it verified. They do not trap the user in the workflow. For a residual risk the decision owner is authorized to accept, explain the concrete consequence, safer option, recovery, and missing evidence; severity alone does not block continuation. Keep the result unverified or partially verified when the evidence is still absent. Missing authority, access, platform permission, or lawful third-party rights remains a real blocker.
+
 ### B. Default choices
 
 Use these for a new Web-based AI MVP without existing constraints, then record actual versions in `plan.md`:
@@ -193,7 +195,7 @@ The source deployment handbook offers Volcengine veFaaS, a Serverless API gatewa
 
 Apply these corrections and stronger boundaries:
 
-1. **Least privilege over blanket FullAccess.** Prefer a dedicated temporary identity, scoped service roles, short-lived credentials, and removal or rotation after use. If a provider forces broad access, disclose the risk and duration before the user grants it.
+1. **Least privilege over blanket FullAccess.** Prefer a dedicated temporary identity, scoped service roles, short-lived credentials, and removal or rotation after use. If a provider forces broad access, disclose the risk and duration before the user grants it. If the authorized user accepts that exact risk, continue with the narrowest available scope and record how to revoke it.
 2. **Never request secrets in chat.** Guide the user to a secure local entry or provider secret manager. Avoid printing secret-bearing commands or environment contents.
 3. **Ephemeral disk is not durable storage.** A minimum instance plus periodic backup may be acceptable only for an explicitly low-value, low-concurrency beta with a stated recovery-point window and a tested restore. Important or multi-user data needs genuinely durable storage and migrations.
 4. **A reachable URL is only a routing check.** Production success also requires health, real core flow, identity isolation, persistence/recovery, file access, monitoring, cost, and rollback evidence.
@@ -218,6 +220,42 @@ Before asking for release approval, explain:
 The nontechnical user should not have to understand cloud terms. When a console action is unavoidable, give a click-by-click instruction for only the current screen and invite a screenshot when the UI differs.
 
 ## Evidence matrix by stage
+
+The three handbooks are delivery routes, not optional reading. Immediately after the exact Plan is accepted, expand every applicable row below into required DZ work items. Keep a row out only when the accepted Plan explains why it does not apply. Every item moves through `pending → in_progress → implemented_unverified → verified`; do not mark a route complete from a narrative summary alone.
+
+### General product build route
+
+1. Inspect the repository, runtime, current changes, data, ports, secrets *presence* without values, and existing evidence; record the project-specific technical fit.
+2. Choose backend-first or one end-to-end vertical slice and create the current slice sheet: included behavior, explicit exclusions, files/interfaces, failure states, recovery, acceptance examples, and handoff.
+3. Implement only that slice, preserving recoverable important data, tasks, and human decisions.
+4. Run deterministic mock regression for business rules, states, permissions, failure, and recovery.
+5. Run every applicable real model, tool, provider, and core user path; absence of access leaves that work explicitly unverified.
+6. Give the product owner a plain-language walkthrough, fix observed failures, repeat affected checks, and update the project README and handoff.
+
+### Frontend route when a user interface is in scope
+
+1. Record the frontend-specific fit: existing UI, target devices, browser constraints, real backend, design references, and accessibility needs.
+2. Confirm the visual direction on one representative page during the approved build slice before spreading it across the product.
+3. Record the real user flow, page/component/interface list, task-state matrix, empty/failure/waiting/recovery behavior, and explicit exclusions for the current slice.
+4. Connect the real backend during the slice. Run lint, type, unit/component, production-build, and core end-to-end checks.
+5. Inspect the real browser, console, network, target widths/devices, keyboard/accessibility, interruption, refresh, duplicate actions, and the complete user path.
+6. Record changed files, known issues, unverified states, product-owner walkthrough, and release notes before the next frontend slice.
+
+### Release route when another person or production environment will use it
+
+1. Record the exact release target, revision, owner, audience, region, identity, data/files, expected cost, provider facts, known risks, and rollback choice.
+2. Check secrets, permissions, package contents, runtime compatibility, migrations, durable storage, user isolation, backup/restore, monitoring redaction, budget controls, and current official provider instructions.
+3. Obtain an informed action-specific release decision. An authorized owner may accept residual gaps they are entitled to decide; preserve them and their recovery path instead of converting them into passed checks.
+4. Deploy the named revision only to the named environment, then separately check the public entry, identity/isolation, core path, real model/tool, persistence, files, monitoring, cost signal, and rollback or restore path.
+5. Update README, access instructions, environment-variable names without values, known gaps, rollback, ownership, and the plain-language user acceptance checklist.
+
+### Maintain route after release
+
+1. Record product outcome, quality, reliability, cost, incidents, and user feedback against the accepted success signals.
+2. Human-triage each signal into no action, an in-scope defect, or a changed product decision. Monitoring never grants itself permission to edit, push, spend, send, or release.
+3. Add the chosen work to the ledger, route it through the earliest affected decision, and preserve new regression evidence for the next release.
+
+These route items are the operational form of the handbooks. The templates and technology defaults support them; they never replace the work ledger or evidence.
 
 | Stage | Minimum evidence |
 |---|---|

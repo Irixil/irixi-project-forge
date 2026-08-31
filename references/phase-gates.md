@@ -132,7 +132,7 @@ Show the exact Draft artifact or a complete decision-relevant diff. The user cor
 - any user-visible account, cost, information-sharing, attribution, or failure consequence introduced by an existing part;
 - unresolved assumptions they are consciously carrying.
 
-Only after acceptance mark that artifact version Accepted and enter technical planning. Blocking concerns must be resolved. Important unresolved concerns need a decision from the named owner authorized for that risk. Deferrable concerns belong in Later, Won't, or the risk register with a revisit trigger.
+Only after acceptance mark that artifact version Accepted and enter technical planning. A material concern must be mitigated or knowingly decided by the named owner authorized for that exact risk. An accepted residual risk stays visible and does not automatically stop the work. Missing authority, missing technical capability, platform prohibition, and unavailable third-party rights remain blockers. Deferrable concerns belong in Later, Won't, or the risk register with a revisit trigger.
 
 ## Stage 3 — BUILD: technical planning and thin-slice implementation
 
@@ -164,7 +164,7 @@ The paper review is read-only. Before Plan acceptance, do not save a candidate r
 
 ### Gate: Plan approved
 
-Show the exact Draft artifact or a complete decision-relevant diff. The user explicitly confirms that version's product impact, material cost, new platforms or accounts, deferred capabilities, and phase order. The named authorized owner confirms any triggered organizational policy, legal or open-source compliance, security, privacy, financial, regulated, or production risk boundary for the exact version and intended use. Unresolved reuse rights cannot be accepted as ordinary risk. An execution-capable delivery AI owns technical quality and must not transfer technical sign-off to the user. A chat-only AI must label technical quality as unverified. Only then may an execution-capable host begin implementation.
+Show the exact Draft artifact or a complete decision-relevant diff. The user explicitly confirms that version's product impact, material cost, new platforms or accounts, deferred capabilities, and phase order. The named authorized owner confirms any triggered organizational policy, legal or open-source compliance, security, privacy, financial, regulated, or production risk boundary for the exact version and intended use. Record the consequence, safer option, recovery, decision scope, and evidence. An informed owner may accept any residual risk they are entitled to decide, including a high or critical one, and continue; severity alone is not a blocker. Unresolved reuse rights cannot be created by risk acceptance. An execution-capable delivery AI owns technical quality and must not transfer technical sign-off to the user. A chat-only AI must label technical quality as unverified. Only then may an execution-capable host begin implementation.
 
 ### Implementation loop
 
@@ -178,7 +178,7 @@ For each approved thin slice:
 6. Update `plan.md` only when implementation materially departs from it.
 7. Record evidence in `verification.md`.
 
-The next reversible slice may proceed under the approved plan. Stop for scope changes, new credentials, material cost, sensitive data, external writes, destructive or irreversible actions, incompatible migrations, or release.
+The next reversible slice may proceed under the approved plan. Pause at scope changes, new credentials, material cost, sensitive data, external writes, destructive or irreversible actions, incompatible migrations, or release to explain the exact action and obtain current authorization. Once the authorized user accepts the disclosed residual risk, continue inside that exact scope; do not convert the risk into an automatic refusal or repeatedly request the same decision.
 
 ## Stage 4 — TEST: continuous feedback and independent verification
 
@@ -219,11 +219,13 @@ Determine whether the real product fulfills the accepted promises. The implement
 - Unverified paths and known limitations are explicit.
 - The implementation matches accepted intent, spec, and plan, or accepted revisions exist.
 
+If the user chooses to stop before this gate passes, close or pause with an honest `implemented_unverified` or `partially_verified` verdict and preserve the smallest future check. Do not trap the user and do not label the artifact Passed. If the authorized release owner later chooses to release with a known failed or unverified item, keep this gate unpassed, bind the risk acceptance to the exact revision and environment, and follow the controlled-release rules below.
+
 ## Stage 5 — DEPLOY: controlled release
 
 ### Prerequisite
 
-Read accepted artifacts, passed verification, review results, and the current deployment provider's authoritative documentation.
+Read accepted artifacts, all available verification, review results, risk decisions, and the current deployment provider's authoritative documentation. Passed verification is the recommended release baseline. A named authorized owner may instead choose a release with explicit known risks; that decision does not rewrite verification as Passed.
 
 ### Purpose
 
@@ -246,9 +248,22 @@ Prepare all release work while preserving a human production boundary.
 
 ### Gate: Production release approved
 
-A named release owner with authority for that environment explicitly approves it after seeing passed evidence, unresolved risks, cost, and rollback. Any triggered legal or open-source compliance boundary also requires the named authorized owner to approve the exact shipped parts, versions, use, and distribution mode; missing reuse rights block release and cannot be recorded as accepted risk. For a personal project the user may be release owner, but do not assume they have organizational or legal authority they have not established. Record each approver's role, scope, and evidence; stop if authority is unclear. Earlier requests such as “just deploy it” do not count as informed final approval if readiness information was unavailable at the time.
+A named release owner with authority for that environment explicitly approves it after seeing passed, failed, and unverified evidence; the concrete consequences; safer option; cost; and recovery or rollback. An informed owner may approve a residual risk they are entitled to decide, including a high or critical one; severity alone is not a blocker. DZ then proceeds without repeated persuasion while keeping every accepted risk visible. Any triggered legal or open-source compliance boundary also requires the named authorized owner to approve the exact shipped parts, versions, use, and distribution mode; missing reuse rights block release and cannot be recorded as accepted risk. For a personal project the user may be release owner, but do not assume they have organizational or legal authority they have not established. Record each approver's role, exact action, revision, environment, amount/time limit, and evidence; wait if authority is unclear. Earlier requests such as “just deploy it” do not count as informed final approval if readiness information was unavailable at the time.
 
 After release, a successful command or reachable URL proves only part of the path. Run the real production core flow, access-isolation check, persistence/recovery check where relevant, and monitoring check before marking Released.
+
+## Risk decision rule
+
+Risk is not the same as impossibility. For any risk level, including critical:
+
+1. name the exact action and concrete worst consequence;
+2. state the level, affected people or information, safer option, recovery, and unverified parts;
+3. let the authorized user choose safer handling, informed continuation, pause, or cancellation;
+4. bind acceptance to the action, target, revision, environment, amount, and time;
+5. after acceptance, add practical protection and continue without repeatedly reopening the same decision;
+6. keep failures and unverified evidence unchanged.
+
+Use `blocked` only when execution is impossible, required authority or access is absent, the host or platform forbids the action, or lawful third-party rights cannot be obtained. Every blocker names what must change before work can resume.
 
 ## Stage 6 — MAINTAIN: observe, learn, and restart the loop
 
@@ -291,6 +306,6 @@ If the utility mutates local user files or data, the accepted specification and 
 - A request changes experience, scope, data, permissions, or acceptance: reopen Specification.
 - A new architecture, provider, cost, migration, third-party part, material dependency or license change appears: reopen Plan. Also reopen Specification when users would see a different behavior, account, cost, information flow, attribution duty, or acceptance promise.
 - Verification fails: return to the responsible Build slice and preserve evidence.
-- Review finds a critical issue: fix and re-verify before Deploy.
-- Release fails: follow rollback and return to Test.
+- Review finds a critical issue: keep the review failure visible and open a scoped risk decision. Fixing and re-verifying is the recommended path, but a named authorized owner may knowingly accept that exact residual risk and continue without relabeling the review or verification as passed. Stop only for a true blocker such as missing authority, capability, required external condition, host permission, or third-party right.
+- Release fails: use only the recovery or rollback action actually available and authorized for that environment, record what really happened, keep an unrehearsed path labeled unverified, and return to Test.
 - Production feedback changes the goal: human triage creates new Intent.

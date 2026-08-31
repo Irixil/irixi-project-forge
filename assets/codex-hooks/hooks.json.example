@@ -1,0 +1,18 @@
+{
+  "description": "Optional project-local DZ Stop hook. Replace the example path before enabling it.",
+  "hooks": {
+    "Stop": [
+      {
+        "hooks": [
+          {
+            "type": "command",
+            "command": "python3 \"/absolute/path/to/dz/scripts/dz_codex_stop_hook.py\"",
+            "commandWindows": "py -3 \"C:\\absolute\\path\\to\\dz\\scripts\\dz_codex_stop_hook.py\"",
+            "timeout": 30,
+            "statusMessage": "Checking whether DZ may stop"
+          }
+        ]
+      }
+    ]
+  }
+}

@@ -1,0 +1,495 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://github.com/Irixil/irixi-project-forge/blob/main/schemas/dz-project-state.schema.json",
+  "title": "DZ Project State",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["schema_version", "workflow_version", "project", "run", "decisions", "target", "work_items", "evidence", "risks"],
+  "properties": {
+    "schema_version": {"const": "1.1"},
+    "workflow_version": {"type": "string", "minLength": 1},
+    "project": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["name", "language"],
+      "properties": {
+        "name": {"type": "string", "minLength": 1},
+        "language": {"enum": ["zh", "en"]}
+      }
+    },
+    "run": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["status", "product_verdict", "stage", "next_action", "waiting_for", "pending_risk_id", "authorized_risk_id", "blocker", "blocker_kind", "resume_when", "finish_reason", "updated_at"],
+      "properties": {
+        "status": {"enum": ["active", "waiting_user", "waiting_authorization", "blocked", "paused", "finished"]},
+        "product_verdict": {"enum": ["not_assessed", "implemented_unverified", "partially_verified", "verified", "cancelled"]},
+        "stage": {"enum": ["discovery", "intent_draft", "intent_accepted", "spec_draft", "spec_accepted", "plan_draft", "plan_accepted", "design", "build", "test", "deploy", "maintain"]},
+        "next_action": {"type": ["string", "null"]},
+        "waiting_for": {"type": ["string", "null"]},
+        "pending_risk_id": {"anyOf": [{"type": "string", "pattern": "^[^\\s]+$"}, {"type": "null"}]},
+        "authorized_risk_id": {"anyOf": [{"type": "string", "pattern": "^[^\\s]+$"}, {"type": "null"}]},
+        "blocker": {"type": ["string", "null"]},
+        "blocker_kind": {"enum": [null, "missing_capability", "missing_authority", "missing_external_condition", "host_denial", "rights_missing"]},
+        "resume_when": {"type": ["string", "null"]},
+        "finish_reason": {"type": ["string", "null"]},
+        "updated_at": {"type": "string", "format": "date-time"}
+      }
+    },
+    "decisions": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["intent", "spec", "plan"],
+      "properties": {
+        "intent": {"$ref": "#/$defs/decision"},
+        "spec": {"$ref": "#/$defs/decision"},
+        "plan": {"$ref": "#/$defs/decision"}
+      }
+    },
+    "target": {"$ref": "#/$defs/target"},
+    "work_items": {
+      "type": "array",
+      "items": {"$ref": "#/$defs/workItem"}
+    },
+    "evidence": {
+      "type": "array",
+      "items": {"$ref": "#/$defs/evidence"}
+    },
+    "risks": {
+      "type": "array",
+      "items": {"$ref": "#/$defs/risk"}
+    }
+  },
+  "allOf": [
+    {
+      "if": {
+        "properties": {
+          "run": {
+            "properties": {
+              "status": {"const": "finished"},
+              "product_verdict": {"const": "verified"}
+            }
+          }
+        }
+      },
+      "then": {
+        "properties": {
+          "decisions": {
+            "properties": {
+              "intent": {"properties": {"status": {"const": "accepted"}}},
+              "spec": {"properties": {"status": {"const": "accepted"}}},
+              "plan": {"properties": {"status": {"const": "accepted"}}}
+            }
+          },
+          "work_items": {
+            "minItems": 1,
+            "contains": {
+              "type": "object",
+              "required": ["required", "status"],
+              "properties": {
+                "required": {"const": true},
+                "status": {"const": "verified"}
+              }
+            }
+          },
+          "risks": {
+            "not": {
+              "contains": {
+                "type": "object",
+                "anyOf": [
+                  {
+                    "required": ["authorization_pending"],
+                    "properties": {"authorization_pending": {"const": true}}
+                  },
+                  {
+                    "required": ["action_status"],
+                    "properties": {"action_status": {"const": "authorized"}}
+                  }
+                ]
+              }
+            }
+          }
+        }
+      }
+    },
+    {
+      "if": {"properties": {"run": {"properties": {"status": {"const": "active"}}}}},
+      "then": {"properties": {"run": {"properties": {
+        "next_action": {"type": "string", "minLength": 1},
+        "waiting_for": {"const": null},
+        "pending_risk_id": {"const": null},
+        "blocker": {"const": null},
+        "blocker_kind": {"const": null},
+        "resume_when": {"const": null},
+        "finish_reason": {"const": null}
+      }}}}
+    },
+    {
+      "if": {"properties": {"run": {"properties": {"status": {"enum": ["waiting_user", "waiting_authorization"]}}}}},
+      "then": {"properties": {"run": {"properties": {"waiting_for": {"type": "string", "minLength": 1}}}}}
+    },
+    {
+      "if": {"properties": {"run": {"properties": {"status": {"const": "waiting_user"}}}}},
+      "then": {"properties": {"run": {"properties": {
+        "pending_risk_id": {"const": null},
+        "blocker": {"const": null},
+        "blocker_kind": {"const": null},
+        "resume_when": {"const": null},
+        "finish_reason": {"const": null}
+      }}}}
+    },
+    {
+      "if": {"properties": {"run": {"properties": {"status": {"const": "waiting_authorization"}}}}},
+      "then": {"properties": {"run": {"properties": {
+        "next_action": {"const": null},
+        "pending_risk_id": {"type": "string", "minLength": 1},
+        "authorized_risk_id": {"const": null},
+        "blocker": {"const": null},
+        "blocker_kind": {"const": null},
+        "resume_when": {"const": null},
+        "finish_reason": {"const": null}
+      }}}},
+      "else": {"properties": {"run": {"properties": {"pending_risk_id": {"const": null}}}}}
+    },
+    {
+      "if": {"properties": {"run": {"properties": {"status": {"const": "blocked"}}}}},
+      "then": {
+        "properties": {
+          "run": {
+            "properties": {
+              "blocker": {"type": "string", "minLength": 1},
+              "blocker_kind": {"enum": ["missing_capability", "missing_authority", "missing_external_condition", "host_denial", "rights_missing"]},
+              "resume_when": {"type": "string", "minLength": 1},
+              "waiting_for": {"const": null},
+              "pending_risk_id": {"const": null},
+              "finish_reason": {"const": null}
+            }
+          }
+        }
+      },
+      "else": {"properties": {"run": {"properties": {"blocker_kind": {"const": null}}}}}
+    },
+    {
+      "if": {"properties": {"run": {"properties": {"status": {"const": "paused"}}}}},
+      "then": {"properties": {"run": {"properties": {
+        "waiting_for": {"const": null},
+        "pending_risk_id": {"const": null},
+        "blocker": {"const": null},
+        "blocker_kind": {"const": null},
+        "resume_when": {"type": "string", "minLength": 1},
+        "finish_reason": {"const": null}
+      }}}}
+    },
+    {
+      "if": {"properties": {"run": {"properties": {"status": {"const": "finished"}}}}},
+      "then": {
+        "properties": {
+          "run": {
+            "properties": {
+              "product_verdict": {"enum": ["implemented_unverified", "partially_verified", "verified", "cancelled"]},
+              "waiting_for": {"const": null},
+              "pending_risk_id": {"const": null},
+              "blocker": {"const": null},
+              "blocker_kind": {"const": null},
+              "finish_reason": {"type": "string", "minLength": 1}
+            }
+          }
+        }
+      }
+    },
+    {
+      "if": {"properties": {"decisions": {"properties": {"spec": {"properties": {"status": {"enum": ["draft", "accepted"]}}}}}}},
+      "then": {"properties": {"decisions": {"properties": {"intent": {"properties": {"status": {"const": "accepted"}}}}}}}
+    },
+    {
+      "if": {"properties": {"decisions": {"properties": {"plan": {"properties": {"status": {"enum": ["draft", "accepted"]}}}}}}},
+      "then": {
+        "properties": {
+          "decisions": {
+            "properties": {
+              "intent": {"properties": {"status": {"const": "accepted"}}},
+              "spec": {"properties": {"status": {"const": "accepted"}}}
+            }
+          }
+        }
+      }
+    }
+  ],
+  "$defs": {
+    "target": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["id", "contract_sha256", "revision", "environment", "source", "artifact_path", "artifact_sha256", "set_at"],
+      "properties": {
+        "id": {"anyOf": [{"type": "string", "pattern": "^[^\\s]+$"}, {"type": "null"}]},
+        "contract_sha256": {"anyOf": [{"type": "string", "pattern": "^[0-9a-f]{64}$"}, {"type": "null"}]},
+        "revision": {"type": ["string", "null"]},
+        "environment": {"type": ["string", "null"]},
+        "source": {"type": ["string", "null"]},
+        "artifact_path": {"type": ["string", "null"]},
+        "artifact_sha256": {"anyOf": [{"type": "string", "pattern": "^[0-9a-f]{64}$"}, {"type": "null"}]},
+        "set_at": {"type": ["string", "null"], "format": "date-time"}
+      },
+      "oneOf": [
+        {
+          "properties": {
+            "id": {"const": null},
+            "contract_sha256": {"const": null},
+            "revision": {"const": null},
+            "environment": {"const": null},
+            "source": {"const": null},
+            "artifact_path": {"const": null},
+            "artifact_sha256": {"const": null},
+            "set_at": {"const": null}
+          }
+        },
+        {
+          "properties": {
+            "id": {"type": "string", "pattern": "^[^\\s]+$"},
+            "contract_sha256": {"type": "string", "pattern": "^[0-9a-f]{64}$"},
+            "revision": {"type": "string", "minLength": 1},
+            "environment": {"type": "string", "minLength": 1},
+            "source": {"type": "string", "minLength": 1},
+            "artifact_path": {"type": "string", "minLength": 1},
+            "artifact_sha256": {"type": "string", "pattern": "^[0-9a-f]{64}$"},
+            "set_at": {"type": "string", "format": "date-time"}
+          }
+        }
+      ]
+    },
+    "decision": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["status", "path", "artifact_sha256", "accepted_by", "acceptance_reference", "accepted_at"],
+      "properties": {
+        "status": {"enum": ["not_created", "draft", "accepted", "superseded"]},
+        "path": {"type": "string", "minLength": 1},
+        "artifact_sha256": {"anyOf": [{"type": "string", "pattern": "^[0-9a-f]{64}$"}, {"type": "null"}]},
+        "accepted_by": {"type": ["string", "null"]},
+        "acceptance_reference": {"type": ["string", "null"]},
+        "accepted_at": {"type": ["string", "null"], "format": "date-time"}
+      },
+      "allOf": [
+        {
+          "if": {"properties": {"status": {"const": "not_created"}}},
+          "then": {"properties": {
+            "artifact_sha256": {"const": null},
+            "accepted_by": {"const": null},
+            "acceptance_reference": {"const": null},
+            "accepted_at": {"const": null}
+          }}
+        },
+        {
+          "if": {"properties": {"status": {"const": "draft"}}},
+          "then": {"properties": {
+            "artifact_sha256": {"type": "string", "pattern": "^[0-9a-f]{64}$"},
+            "accepted_by": {"const": null},
+            "acceptance_reference": {"const": null},
+            "accepted_at": {"const": null}
+          }}
+        },
+        {
+          "if": {"properties": {"status": {"const": "accepted"}}},
+          "then": {"properties": {
+            "artifact_sha256": {"type": "string", "pattern": "^[0-9a-f]{64}$"},
+            "accepted_by": {"type": "string", "minLength": 1},
+            "acceptance_reference": {"type": "string", "minLength": 1},
+            "accepted_at": {"type": "string", "format": "date-time"}
+          }}
+        },
+        {
+          "if": {"properties": {"status": {"const": "superseded"}}},
+          "then": {"properties": {"artifact_sha256": {"type": "string", "pattern": "^[0-9a-f]{64}$"}}}
+        }
+      ]
+    },
+    "workItem": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["id", "title", "required", "contract_sha256", "phase", "status", "acceptance", "evidence_ids", "note", "blocker", "updated_at"],
+      "properties": {
+        "id": {"type": "string", "pattern": "^[^\\s]+$"},
+        "title": {"type": "string", "minLength": 1},
+        "required": {"type": "boolean"},
+        "contract_sha256": {"type": "string", "pattern": "^[0-9a-f]{64}$"},
+        "phase": {"enum": ["design", "build", "test", "deploy", "maintain"]},
+        "status": {"enum": ["pending", "in_progress", "implemented_unverified", "verified", "waiting_user", "blocked", "deferred", "cancelled"]},
+        "acceptance": {"type": "array", "minItems": 1, "items": {"type": "string", "minLength": 1}, "uniqueItems": true},
+        "evidence_ids": {"type": "array", "items": {"type": "string", "pattern": "^[^\\s]+$"}, "uniqueItems": true},
+        "note": {"type": ["string", "null"]},
+        "blocker": {"type": ["string", "null"]},
+        "updated_at": {"type": "string", "format": "date-time"}
+      },
+      "allOf": [
+        {
+          "if": {"properties": {"status": {"const": "verified"}}},
+          "then": {"properties": {"evidence_ids": {"minItems": 1}}}
+        },
+        {
+          "if": {"properties": {"status": {"const": "blocked"}}},
+          "then": {"properties": {"blocker": {"type": "string", "minLength": 1}}}
+        }
+      ]
+    },
+    "evidence": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["id", "work_item_id", "contract_sha256", "target_id", "acceptance", "kind", "claim", "source", "artifact_path", "artifact_sha256", "revision", "environment", "result", "resolves", "recorded_at"],
+      "properties": {
+        "id": {"type": "string", "pattern": "^[^\\s]+$"},
+        "work_item_id": {"type": "string", "pattern": "^[^\\s]+$"},
+        "contract_sha256": {"type": "string", "pattern": "^[0-9a-f]{64}$"},
+        "target_id": {"type": "string", "pattern": "^[^\\s]+$"},
+        "acceptance": {"type": "string", "minLength": 1},
+        "kind": {"type": "string", "minLength": 1},
+        "claim": {"type": "string", "minLength": 1},
+        "source": {"type": "string", "minLength": 1},
+        "artifact_path": {"type": "string", "minLength": 1},
+        "artifact_sha256": {"type": "string", "pattern": "^[0-9a-f]{64}$"},
+        "revision": {"type": "string", "minLength": 1},
+        "environment": {"type": "string", "minLength": 1},
+        "result": {"enum": ["passed", "failed", "unverified"]},
+        "resolves": {"type": "array", "items": {"type": "string", "pattern": "^[^\\s]+$"}, "uniqueItems": true},
+        "recorded_at": {"type": "string", "format": "date-time"}
+      }
+    },
+    "risk": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["id", "title", "level", "action_kind", "consequence", "safer_option", "recovery", "scope", "lease_contract_sha256", "lease_target_id", "lease_revision", "lease_environment", "amount_limit", "expires_at", "authorization_pending", "decision", "action_status", "action_reference", "action_at", "decision_by", "decision_reference", "decided_at"],
+      "properties": {
+        "id": {"type": "string", "pattern": "^[^\\s]+$"},
+        "title": {"type": "string", "minLength": 1},
+        "level": {"enum": ["low", "medium", "high", "critical"]},
+        "action_kind": {"enum": ["informational", "spend", "external_write", "delete", "migration", "public_release", "production_access", "sensitive_data", "other_action"]},
+        "consequence": {"type": "string", "minLength": 1},
+        "safer_option": {"type": "string", "minLength": 1},
+        "recovery": {"type": "string", "minLength": 1},
+        "scope": {"type": "string", "minLength": 1},
+        "lease_contract_sha256": {"anyOf": [{"type": "string", "pattern": "^[0-9a-f]{64}$"}, {"type": "null"}]},
+        "lease_target_id": {"anyOf": [{"type": "string", "pattern": "^[^\\s]+$"}, {"type": "null"}]},
+        "lease_revision": {"type": ["string", "null"]},
+        "lease_environment": {"type": ["string", "null"]},
+        "amount_limit": {"type": ["string", "null"]},
+        "expires_at": {"type": ["string", "null"], "format": "date-time"},
+        "authorization_pending": {"type": "boolean"},
+        "decision": {"enum": ["open", "accepted", "mitigated", "declined"]},
+        "action_status": {"enum": ["not_applicable", "pending_authorization", "authorized", "completed", "failed", "cancelled", "declined"]},
+        "action_reference": {"type": ["string", "null"]},
+        "action_at": {"type": ["string", "null"], "format": "date-time"},
+        "decision_by": {"type": ["string", "null"]},
+        "decision_reference": {"type": ["string", "null"]},
+        "decided_at": {"type": ["string", "null"], "format": "date-time"}
+      },
+      "allOf": [
+        {
+          "if": {"properties": {"decision": {"const": "open"}}},
+          "then": {"properties": {
+            "decision_by": {"const": null},
+            "decision_reference": {"const": null},
+            "decided_at": {"const": null}
+          }},
+          "else": {"properties": {
+            "authorization_pending": {"const": false},
+            "decision_by": {"type": "string", "minLength": 1},
+            "decision_reference": {"type": "string", "minLength": 1},
+            "decided_at": {"type": "string", "format": "date-time"}
+          }}
+        },
+        {
+          "if": {
+            "properties": {"action_kind": {"const": "informational"}},
+            "required": ["action_kind"]
+          },
+          "then": {
+            "properties": {
+              "authorization_pending": {"const": false},
+              "expires_at": {"const": null}
+            },
+            "allOf": [
+              {
+                "if": {
+                  "properties": {"decision": {"const": "declined"}},
+                  "required": ["decision"]
+                },
+                "then": {"properties": {"action_status": {"const": "declined"}}},
+                "else": {"properties": {"action_status": {"const": "not_applicable"}}}
+              }
+            ]
+          },
+          "else": {
+            "allOf": [
+              {
+                "if": {
+                  "properties": {"decision": {"const": "open"}},
+                  "required": ["decision"]
+                },
+                "then": {
+                  "properties": {
+                    "authorization_pending": {"const": true},
+                    "action_status": {"const": "pending_authorization"},
+                    "expires_at": {"type": "string", "format": "date-time"}
+                  }
+                }
+              },
+              {
+                "if": {
+                  "properties": {"decision": {"enum": ["accepted", "mitigated"]}},
+                  "required": ["decision"]
+                },
+                "then": {
+                  "properties": {
+                    "authorization_pending": {"const": false},
+                    "action_status": {"enum": ["authorized", "completed", "failed", "cancelled"]}
+                  }
+                }
+              },
+              {
+                "if": {
+                  "properties": {"decision": {"const": "declined"}},
+                  "required": ["decision"]
+                },
+                "then": {
+                  "properties": {
+                    "authorization_pending": {"const": false},
+                    "action_status": {"const": "declined"}
+                  }
+                }
+              }
+            ],
+            "properties": {
+              "expires_at": {"type": "string", "format": "date-time"}
+            }
+          }
+        },
+        {
+          "oneOf": [
+            {
+              "properties": {
+                "lease_target_id": {"const": null},
+                "lease_revision": {"const": null},
+                "lease_environment": {"const": null}
+              }
+            },
+            {
+              "properties": {
+                "lease_target_id": {"type": "string", "pattern": "^[^\\s]+$"},
+                "lease_revision": {"type": "string", "minLength": 1},
+                "lease_environment": {"type": "string", "minLength": 1}
+              }
+            }
+          ]
+        },
+        {
+          "if": {
+            "properties": {"action_kind": {"const": "spend"}},
+            "required": ["action_kind"]
+          },
+          "then": {
+            "properties": {"amount_limit": {"type": "string", "minLength": 1}}
+          }
+        }
+      ]
+    }
+  }
+}

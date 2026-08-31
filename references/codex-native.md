@@ -10,6 +10,8 @@ Personal skills used across projects live in `$HOME/.agents/skills`. Repository-
 
 Official source: [Build skills](https://developers.openai.com/codex/skills)
 
+The repository also contains `.codex-plugin/plugin.json`, so the same canonical Skill can be distributed as a Codex plugin. The plugin's `skills/dz/SKILL.md` is a thin entry point that loads the root workflow rather than maintaining a second copy. The plugin is an installation and discovery shell; it does not by itself create persistence or guarantee that every model turn obeys the workflow.
+
 ## Responsibilities of skills, AGENTS.md, project artifacts, and tests
 
 | Layer | Responsible for | Not responsible for |
@@ -46,6 +48,16 @@ Official source: [Custom instructions with AGENTS.md](https://developers.openai.
 | App Server | Integrate authentication, threads, approvals, and events when building a deeply integrated Codex client | Use the SDK for jobs and CI. A client should pin its Codex version and generate schemas from that version; experimental transports are not production guarantees. |
 
 Official sources: [openai/codex README](https://github.com/openai/codex#readme), [Codex CLI](https://developers.openai.com/codex/cli/features), [Long-running work](https://learn.chatgpt.com/docs/long-running-work), [Subagents](https://learn.chatgpt.com/docs/agent-configuration/subagents), [Worktrees](https://developers.openai.com/codex/app/worktrees), [Code review](https://learn.chatgpt.com/docs/code-review), [Hooks](https://learn.chatgpt.com/docs/hooks), [Agent approvals & security](https://learn.chatgpt.com/docs/agent-approvals-security)
+
+## Codex project continuity
+
+When a project location is known, initialize and use the dependency-free state tool described in [project-state.md](project-state.md). It keeps `.dz/state.json`, an append-only recovery journal, a generated `PROJECT.md`, and a generated work ledger. Add the supplied `assets/project/AGENTS.md` section to the project's existing `AGENTS.md` only when project-instruction edits are in scope; merge it rather than replacing existing instructions.
+
+This provides a deterministic consistency check for state, evidence links, recovery, and legal stop conditions. It is not trusted attestation when the model can write the same files and invoke the same CLI. The plugin also bundles a Codex Stop adapter in `hooks/hooks.json`; it delegates to the same-version state tool instead of implementing another validator. For a valid `active` run it requests one continuation attempt. Trust policy, other matching Stop hooks, or host behavior may still prevent continuation. If Stop is reached again while active, this hook does not repeat its own request; it emits a warning and allows the turn to end while preserving the unfinished state. Waiting, blocked, paused, and finished states pass normally. Standalone Skill users may explicitly opt into the inert project template without overwriting an existing hook file. Review and trust the command through `/hooks`, and recheck support in the installed Codex surface. See [codex-stop-hook.md](codex-stop-hook.md).
+
+The Stop hook improves closeout reliability but does not intercept every Codex event, guarantee unlimited execution, repair a project automatically, or form a security boundary. Hosted tools may bypass local hooks, and platform or rate-limit stops can occur outside its control. Project state, journal reconciliation, tests, sandboxing, approvals, and truthful handoff remain necessary.
+
+In ChatGPT plugin surfaces the selectable plugin may appear as `@dz`. In Codex CLI and IDE surfaces, use `/skills` or `$dz`; do not claim that `agents/openai.yaml` registers `@dz` as a universal Codex alias.
 
 For the existing-parts check, Codex should use whatever read-only public research surface is actually present and follow [reuse-scout.md](reuse-scout.md). Plan mode can help keep the scan non-mutating, and an independent subagent can compare candidates, but neither grants network access, private-repository access, or reuse rights. Record exact URLs and immutable revisions instead of relying on remembered package facts. If an Accepted Plan later permits a technical-fit experiment for a candidate that already passed rights, origin, and supply-chain hard gates, require a non-privileged sandbox or container with no user-home, working-project, credential, host-socket, cloud-metadata, secret, or sensitive-data access; network denied by default; controlled install scripts; bounded resources and time; an exact source or artifact digest; recorded attempted actions; and destroy evidence. A temporary directory or worktree separates files or Git changes but is not a security sandbox. If the current Codex surface cannot prove the required boundary, do not execute the candidate.
 
@@ -98,6 +110,8 @@ Source: [The AI-Native SDLC playbook](https://claude.com/blog/the-ai-native-sdlc
 - Subagents use independent contexts, while worktrees isolate only the working directories where changes are made.
 - Convert fixed orchestration into scripts only after repeated validation, and make the resulting workflow persistent and recoverable.
 - “The model wants to stop this turn” is not the same as “the objective is complete.” Completion criteria require verifiable evidence.
+- “The user wants to stop” is a valid pause, cancellation, or honest early closure. It is separate from verified completion.
+- A disclosed high risk is a scope-specific user decision, not a reason to refuse automatically. After informed authorization, continue and retain the risk record; never rewrite failed or missing evidence.
 
 This workflow does not carry over Claude-specific APIs, environment variables, Hook formats, MCP configuration, or tutorial runtime code. When Codex already provides an equivalent harness capability, prefer the native one.
 

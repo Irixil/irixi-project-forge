@@ -17,7 +17,7 @@ Adapt only how the work is carried out:
 | Public web or GitHub reading | Run the sanitized, read-only existing-parts scan after the exact first product decision is accepted. Without it, state that no live search occurred and export search phrases plus an evidence card. |
 | Independent agents or isolated sessions | Delegate fresh review when useful; otherwise perform a clearly separated second-pass review or request another capable reviewer. |
 | Deployment connector | Prepare release evidence, but deploy only under current environment- and revision-specific approval. |
-| Persistent project storage | Save versioned project records. Without it, keep exact visible decision cards and export a handoff before the session ends. |
+| Persistent project storage | Save versioned decisions plus the DZ execution snapshot, journal, work ledger, evidence, and risk decisions. Without it, keep exact visible records and export a handoff at every pause or ending. |
 
 The model brand does not decide the profile. Real host capabilities do.
 
@@ -56,8 +56,11 @@ After selecting a profile, adapt these mechanics without asking the beginner to 
 5. **Review:** independent agent or fresh environment when available; a labeled separate pass otherwise.
 6. **Release:** direct deployment only when the host has the capability and current approval. Otherwise produce a release checklist and handoff.
 7. **Recovery:** use version control, snapshots, or provider rollback only when actually present; otherwise explain the manual recovery method.
+8. **Stopping:** allow pause, cancellation, or honest early closure on every host. A host with durable state records it; a text-only host emits a copyable handoff. Neither path turns missing checks into success.
 
 Capability adaptation never removes the three product confirmations or weakens sensitive-data, external-write, cost, deletion, migration, and production boundaries.
+
+Those boundaries are informed decision points, not automatic refusals. After the authorized user sees the consequence, safer option, recovery, and missing evidence and chooses to continue, execute within the recorded scope. Only missing authority or capability, platform prohibition, or unavailable third-party rights is a true blocker.
 
 ## Loading forms
 

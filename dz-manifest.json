@@ -1,6 +1,6 @@
 {
   "protocol_version": "1.0",
-  "workflow_version": "2026-08-30",
+  "workflow_version": "2026-08-31",
   "id": "dz",
   "name": "Irixi Project Forge",
   "description": "A platform-neutral workflow that guides a nontechnical user from an idea or current project state to a verified product or an honest implementation handoff.",
@@ -24,7 +24,17 @@
     "adapter_rules": "references/platform-adapters.md",
     "capability_schema": "adapters/dz-capabilities.schema.json",
     "capability_example": "adapters/example-capabilities.json",
-    "openai_metadata": "agents/openai.yaml"
+    "openai_metadata": "agents/openai.yaml",
+    "project_state_guide": "references/project-state.md",
+    "project_state_schema": "schemas/dz-project-state.schema.json",
+    "project_state_tool": "scripts/dz_state.py",
+    "codex_stop_hook": "scripts/dz_codex_stop_hook.py",
+    "codex_hook_config": "hooks/hooks.json",
+    "codex_hook_guide": "references/codex-stop-hook.md",
+    "codex_project_hook_template": "assets/codex-hooks/hooks.json.example",
+    "codex_plugin_manifest": ".codex-plugin/plugin.json",
+    "codex_skill": "skills/dz/SKILL.md",
+    "codex_skill_metadata": "skills/dz/agents/openai.yaml"
   },
   "reference_sets": {
     "conversation": [
@@ -33,7 +43,8 @@
     ],
     "workflow": [
       "references/phase-gates.md",
-      "references/artifact-chain.md"
+      "references/artifact-chain.md",
+      "references/project-state.md"
     ],
     "delivery": [
       "references/handbook-routing.md",
@@ -46,7 +57,8 @@
       "references/platform-adapters.md"
     ],
     "codex_adapter": [
-      "references/codex-native.md"
+      "references/codex-native.md",
+      "references/codex-stop-hook.md"
     ],
     "artifact_templates": [
       "references/artifacts/intent.md",
@@ -62,6 +74,11 @@
     "$dz",
     "DZ启动"
   ],
+  "invocation_surfaces": {
+    "plugin_at_menu": "Open the @ menu and select DZ — Irixi Project Forge",
+    "codex_skill": "Select dz with /skills or invoke $dz",
+    "generic_prompt": "DZ启动："
+  },
   "generic_invocation": "DZ启动：",
   "capability_envelope": {
     "opening_tag": "<DZ_HOST_CAPABILITIES>",
@@ -130,6 +147,28 @@
     "third_party_experiment_requires_passed_hard_gates_and_security_isolation": true,
     "third_party_release_requires_exact_artifact_compliance_evidence": true,
     "external_action_requires_current_authority": true,
-    "preserve_valid_midtask_work": true
+    "preserve_valid_midtask_work": true,
+    "durable_state_after_meaningful_work": true,
+    "work_binds_complete_decision_contract": true,
+    "verified_requires_semantic_validation": true,
+    "passed_evidence_requires_hashed_artifact": true,
+    "evidence_binds_explicit_target_epoch": true,
+    "target_reset_requires_full_rerun": true,
+    "implementation_reopen_invalidates_target": true,
+    "evidence_history_is_append_only": true,
+    "risk_is_informed_decision_not_automatic_refusal": true,
+    "authorized_user_may_accept_residual_risk": true,
+    "actionable_risk_request_is_atomic": true,
+    "authorized_risk_scope_is_leased": true,
+    "risk_lease_binds_context_amount_and_expiry": true,
+    "pending_risk_authorization_survives_stop": true,
+    "local_ledger_is_not_trusted_attestation": true,
+    "migration_preserves_legacy_history": true,
+    "legacy_risk_never_authorizes_new_action": true,
+    "codex_stop_hook_is_bounded": true,
+    "user_may_pause_cancel_or_close": true,
+    "cancellation_does_not_prove_external_stop": true,
+    "finished_requires_explicit_resume": true,
+    "early_closure_never_implies_verified": true
   }
 }

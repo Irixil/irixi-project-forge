@@ -53,6 +53,7 @@ Prepare this before requesting production approval. Approval authorizes deployme
 - User-visible changes:
 - Verification and review links:
 - Known limitations and accepted risks:
+- Accepted-risk record: concrete consequence, safer option, recovery, decision owner, exact action/revision/environment/amount/time, and decision evidence:
 
 ## Production readiness
 - Identity and access isolation:
@@ -95,4 +96,4 @@ Prepare this before requesting production approval. Approval authorizes deployme
 - Final result and follow-up:
 ```
 
-After informed approval, set Deploying and perform the deployment. Set Released only after applicable post-release checks pass. A reachable URL proves routing only. If release fails, use the verified rollback, record evidence, set Rolled back, and return to Test. Missing or conflicting reuse rights, source provenance, or required legal/open-source compliance authority are blockers, never entries under “accepted risks.”
+After informed approval, set Deploying and perform the deployment, even when the named owner knowingly accepted a high or critical residual risk they are entitled to decide; severity alone is not a blocker, and do not repeatedly reopen the same decision unless its scope changes. Set Released only after recording the applicable post-release checks. A reachable URL proves routing only, so failed or skipped checks stay visible and the release must not be described as fully verified. If release fails, use the available rollback or recovery path, record evidence, set Rolled back when rollback actually succeeds, and return to Test. Missing or conflicting reuse rights, source provenance, or required legal/open-source compliance authority are blockers, never entries under “accepted risks.”

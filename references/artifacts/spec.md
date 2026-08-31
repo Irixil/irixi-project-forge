@@ -57,8 +57,8 @@ Read accepted `intent.md` before drafting.
 |---|---|---|---|---|
 
 ## Concern register
-| Concern | Severity | Consequence | DZ recommendation | Required decision owner | Decision and evidence | Status |
-|---|---|---|---|---|---|---|
+| Concern | Severity | Consequence | Safer option and recovery | Required decision owner | Mitigate / accept and continue / pause / cancel | Decision scope and evidence | Status |
+|---|---|---|---|---|---|---|---|
 
 ## Assumptions and unresolved questions
 - Assumption — confidence — validation method — owner:
@@ -69,4 +69,4 @@ Read accepted `intent.md` before drafting.
 - Technical assumptions requiring an approved spike:
 ```
 
-Acceptance means the user has inspected and accepted this exact Draft's experience, Must/Later/Won't boundary, acceptance criteria, and ordinary product tradeoffs. Any triggered organizational policy, legal or open-source compliance, security, privacy, financial, or production boundary requires acceptance by its named authorized owner. Neither person certifies frameworks or code quality.
+Acceptance means the user has inspected and accepted this exact Draft's experience, Must/Later/Won't boundary, acceptance criteria, and ordinary product tradeoffs. Any triggered organizational policy, legal or open-source compliance, security, privacy, financial, or production boundary requires a decision by its named authorized owner. A residual risk may be accepted and carried forward when that owner is entitled to decide it, regardless of severity; this does not certify frameworks, code quality, or missing evidence. Missing authority or reuse rights remains a blocker.

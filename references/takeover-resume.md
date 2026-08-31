@@ -21,6 +21,7 @@ Inspect only what is available and relevant:
 
 1. The current user's latest request and the visible conversation: original goal, corrections, explicit decisions, rejected options, promised next action, approvals, tool results, failures, and unfinished questions.
 2. Repository guidance and state the host can access: `AGENTS.md`, `CLAUDE.md`, `GEMINI.md`, or another active instruction file; `PROJECT.md`; `docs/sdlc`; README; version-control status and diff; branch or isolated workspace; relevant source and tests; run instructions; and current plan.
+   When `.dz/state.json` exists, validate it with the DZ state tool, inspect its last journal entry, and reconcile it with current files. If the snapshot is damaged, recover from `.dz/journal.jsonl` and report the recovery. The ledger is current execution evidence, not proof that a decision was accepted or a test passed.
 3. Evidence: exact commands and outputs, test or eval results, screenshots or browser evidence, review findings, release records, and known failures.
 4. Operational state when relevant: running task or terminal state, migrations, external side effects, deployment environment, and rollback readiness.
 
@@ -36,6 +37,7 @@ Apply these rules together:
 4. Current code, UI, schemas, prompts, and infrastructure reveal candidate behavior and constraints. They may be retained, but they do not prove that users wanted them.
 5. Conversation facts may be carried forward without making the user repeat them. If an exact artifact was never shown and accepted, reconstruct it as Draft rather than silently marking it Accepted.
 6. Existing authorization remains valid only for its named action, target, environment, cost, and time. Invoking DZ neither revokes a current scope-specific authorization nor expands it.
+7. A recorded accepted risk remains valid only for the same action and scope. Do not ask for the same decision again merely because the session changed; reopen it when the action, target, revision, environment, amount, time, consequence, or decision owner changes.
 
 Classify every important item as `supported`, `inferred`, `contradicted`, or `missing`.
 
@@ -104,6 +106,7 @@ Do not list every file, replay the entire conversation, or print labels such as 
 - The continuity summary is not another formal confirmation point. Once routing is supported, proceed with the selected stage and ask only for decisions that actually block it.
 - Keep just-in-time boundaries for credentials, sensitive data, paid calls, external writes, destructive actions, migrations, and release.
 - At handoff or pause, update `PROJECT.md` and the current evidence artifact only when writing is authorized, so a later task can resume without reconstructing everything again.
+- When persistent state is available, update `.dz/state.json` after every meaningful change and regenerate `PROJECT.md` and `work-items.md`. A user pause, cancellation, or early closure is a legal stopping state and never becomes verified completion.
 
 ## Takeover completion standard
 

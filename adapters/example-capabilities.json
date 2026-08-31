@@ -17,6 +17,8 @@
     "external_write": "no",
     "deployment": "no",
     "approval_flow": "no",
+    "project_state": "no",
+    "lifecycle_hooks": "no",
     "network": "restricted"
   },
   "notes": [

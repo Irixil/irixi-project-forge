@@ -1,5 +1,5 @@
 interface:
-  display_name: "Irixi Project Forge"
+  display_name: "DZ — Irixi Project Forge"
   short_description: "Turn ideas into products in everyday language"
   default_prompt: "Use $dz to speak in short, concrete words a complete beginner can understand, ask one question, and guide my idea or current work to the next small step."
 

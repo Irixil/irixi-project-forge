@@ -110,8 +110,9 @@ Use the full canvas if any of the following applies:
 - Centralize model-service integration, and make prompt, model, configuration, and tool versions traceable.
 - Validate structured outputs, bound retries, and define an explicit exit condition.
 - Give long-running work a stable task ID, explicit states, and recoverable storage; persist context while waiting for human input.
-- Put external writes, spending, message sending, deletion, permission changes, and infrastructure changes behind deterministic policy and human gates.
+- Put external writes, spending, message sending, deletion, permission changes, and infrastructure changes behind deterministic policy and human gates. A gate explains the concrete risk and obtains a scoped decision; it is not an automatic refusal. After an authorized user accepts the disclosed residual risk, continue within that exact scope and retain the decision record.
 - Treat authorization as scoped to an action, target, environment, amount, and time. Do not convert a broad statement made during design into standing production authority.
+- Keep permission, risk, and evidence separate: permission says whether an action may run; risk records what may go wrong and the user's informed choice; evidence says what actually happened. Accepting risk cannot turn failure into success.
 - A worktree isolates only code changes; the sandbox and approvals still govern network access, credentials, and system access.
 - Store in memory only verified information that is stable across sessions and genuinely reusable; the current user request always takes precedence.
 - Convert fixed orchestration into scripts only after it has proven stable through repeated use. Keep exploratory brainstorming model-driven instead of prematurely encoding it as a large node graph.
