@@ -63,6 +63,20 @@ class DzStateTests(unittest.TestCase):
         path.write_text(content, encoding="utf-8")
         return relative_path
 
+    def test_init_installs_refreshable_project_guidance_without_overwriting_other_rules(self):
+        agents = self.project / "AGENTS.md"
+        initial = agents.read_text(encoding="utf-8")
+        self.assertIn("DZ-PROJECT-CONTINUITY:START", initial)
+        self.assertIn("$HOME/.agents/skills/dz/SKILL.md", initial)
+
+        agents.write_text("# Team rule\n\nKeep this.\n\n" + initial, encoding="utf-8")
+        self.cli("install-guidance", str(self.project))
+        self.cli("install-guidance", str(self.project))
+        refreshed = agents.read_text(encoding="utf-8")
+        self.assertIn("# Team rule\n\nKeep this.", refreshed)
+        self.assertEqual(refreshed.count("DZ-PROJECT-CONTINUITY:START"), 1)
+        self.assertEqual(refreshed.count("DZ-PROJECT-CONTINUITY:END"), 1)
+
     def evidence_proof(self, evidence_id, revision="rev-1", environment="test"):
         self.ensure_target(revision, environment)
         artifact = self.write_project_file(

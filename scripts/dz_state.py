@@ -21,7 +21,7 @@ from typing import Any, Callable
 
 
 SCHEMA_VERSION = "1.1"
-WORKFLOW_VERSION = "2026-08-31"
+WORKFLOW_VERSION = "2026-09-02"
 
 RUN_STATUSES = {
     "active",
@@ -136,6 +136,11 @@ BLOCKER_KINDS = {
     "rights_missing",
 }
 DIGEST_LENGTH = 64
+GUIDANCE_START = "<!-- DZ-PROJECT-CONTINUITY:START -->"
+GUIDANCE_END = "<!-- DZ-PROJECT-CONTINUITY:END -->"
+PROJECT_GUIDANCE_TEMPLATE = (
+    Path(__file__).resolve().parents[1] / "assets" / "project" / "AGENTS.md"
+)
 
 
 def now() -> str:
@@ -1634,6 +1639,46 @@ def atomic_write(path: Path, content: str) -> None:
             os.unlink(temp_name)
 
 
+def project_guidance_block() -> str:
+    if not PROJECT_GUIDANCE_TEMPLATE.is_file():
+        raise ValueError(
+            f"DZ project guidance template not found: {PROJECT_GUIDANCE_TEMPLATE}"
+        )
+    template = PROJECT_GUIDANCE_TEMPLATE.read_text(encoding="utf-8").strip()
+    return f"{GUIDANCE_START}\n{template}\n{GUIDANCE_END}\n"
+
+
+def install_project_guidance(project: Path) -> Path:
+    target = project / "AGENTS.md"
+    existing = target.read_text(encoding="utf-8") if target.is_file() else ""
+    start_count = existing.count(GUIDANCE_START)
+    end_count = existing.count(GUIDANCE_END)
+    if start_count != end_count or start_count > 1:
+        raise ValueError(
+            "AGENTS.md has a damaged DZ continuity section; repair its markers first"
+        )
+
+    block = project_guidance_block()
+    if start_count == 1:
+        before, remainder = existing.split(GUIDANCE_START, 1)
+        _, after = remainder.split(GUIDANCE_END, 1)
+        content = before.rstrip()
+        if content:
+            content += "\n\n"
+        content += block.rstrip()
+        if after.strip():
+            content += "\n\n" + after.strip()
+        content += "\n"
+    else:
+        content = existing.rstrip()
+        if content:
+            content += "\n\n"
+        content += block
+
+    atomic_write(target, content)
+    return target
+
+
 def write_journal(path: Path, event: str, state: dict[str, Any]) -> None:
     path.parent.mkdir(parents=True, exist_ok=True)
     record = {"at": now(), "event": event, "state": state}
@@ -1867,7 +1912,14 @@ def init_command(args: argparse.Namespace) -> None:
         )
     project.mkdir(parents=True, exist_ok=True)
     persist(project, initial_state(args.name or project.name, args.language), "init")
+    install_project_guidance(project)
     print(paths["state"])
+
+
+def install_guidance_command(args: argparse.Namespace) -> None:
+    project = args.project.resolve()
+    project.mkdir(parents=True, exist_ok=True)
+    print(install_project_guidance(project))
 
 
 def check_command(args: argparse.Namespace) -> None:
@@ -2541,7 +2593,14 @@ def build_parser() -> argparse.ArgumentParser:
     command.add_argument("--language", choices=("zh", "en"), default="zh")
     command.set_defaults(handler=init_command)
 
-    for name, handler in (("check", check_command), ("show", show_command), ("recover", recover_command), ("migrate", migrate_command), ("can-stop", can_stop_command)):
+    for name, handler in (
+        ("check", check_command),
+        ("show", show_command),
+        ("recover", recover_command),
+        ("migrate", migrate_command),
+        ("can-stop", can_stop_command),
+        ("install-guidance", install_guidance_command),
+    ):
         command = subparsers.add_parser(name)
         project_arg(command)
         command.set_defaults(handler=handler)

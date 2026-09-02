@@ -1,6 +1,10 @@
 # DZ Project Continuity
 
-When `.dz/state.json` exists, read it before starting project work. Treat accepted files under `docs/sdlc/` as the product decisions and `.dz/state.json` as the current execution snapshot.
+This repository is a DZ project. Before product, application, or agent work, load the installed `dz` Skill. In Codex, if the selector did not attach it, read `$HOME/.agents/skills/dz/SKILL.md` directly. On another host, use its installed DZ entry or persistent project instruction. If DZ cannot be loaded, say so instead of silently using an ordinary workflow.
+
+At the start of every new task or session, read `PROJECT.md` and `.dz/state.json`, validate the ledger, inspect the latest valid `.dz/journal.jsonl` record, and reconcile them with the current files before changing anything. Begin with a short plain-language summary of what was last completed, what is waiting, and the next safe action. Do not restart discovery or rely on chat memory when the saved record already answers the question.
+
+Treat accepted files under `docs/sdlc/` as the product decisions and `.dz/state.json` as the current execution snapshot.
 
 - Run the DZ state check before acting and recover from `.dz/journal.jsonl` if the snapshot is damaged.
 - Keep one work item in progress at a time. Record meaningful changes, checks, user decisions, failures, risks, pauses, and cancellations in the same turn.

@@ -29,7 +29,11 @@ git clone https://github.com/Irixil/irixi-project-forge.git dz
 
 加载以后，使用该平台实际支持的 Skill 选择器或明确调用语法。它可能显示成 `DZ — Irixi Project Forge`、`dz`、`@dz` 或 `$dz`。如果平台使用 `@` 菜单，就从菜单里选中；只有平台明确把 `$dz` 或其他文字定义为调用语法时，直接输入才会生效。随手打出 `@dz` 不一定会加载 Skill。
 
+DZ 允许 Codex 根据“开始或继续做应用、Agent、产品”的请求自动选择它，但第一次使用或排查问题时，仍建议从菜单明确选中一次。修改 Skill 后没有出现在菜单里，就重启 Codex。
+
 不要同时安装同一版本的“本地 Skill”和“插件版”，否则菜单中可能出现两个 DZ。两个入口最终使用同一套流程，但保留一个更清楚。
+
+想让第二天的新任务自动接着昨天做，请从具体项目文件夹打开 Agent，而不是只打开它的上一级大文件夹。DZ 建立项目账本时会把一段接续说明合并进项目的 `AGENTS.md`；旧项目可以按 [`references/project-state.md`](references/project-state.md) 运行一次 `install-guidance` 补上。其他平台只有在支持长期项目指令并持续开放同一批项目文件时，才能做到同样的自动接续。
 
 #### B. Agent 能读取本地文件或项目文件夹，但没有 Skill 安装功能
 
@@ -119,7 +123,11 @@ Import the complete `dz` folder through the host's Skill manager, or point its S
 
 Invoke it through the host's actual Skill selector or documented invocation syntax. It may appear as `DZ — Irixi Project Forge`, `dz`, `@dz`, or `$dz`. If the host uses an `@` menu, select it there. Direct typing works only when the host explicitly defines that text as invocation syntax; merely typing `@dz` may not attach the Skill.
 
+DZ allows Codex to select it automatically when a request clearly starts or resumes an application, agent, or product. Explicit selection is still the clearest first-use and troubleshooting path. Restart Codex if an updated Skill does not appear in the selector.
+
 Do not install the same version as both a local Skill and a plugin. That can show two DZ entries. They lead to the same workflow, so keep one installation.
+
+To resume automatically in a new task tomorrow, open the agent from the exact project folder rather than only its parent container. When DZ initializes its ledger, it merges a continuity section into the project's `AGENTS.md`; an older project can run `install-guidance` once as described in [`references/project-state.md`](references/project-state.md). Another host can provide the same behavior only when it supports persistent project instructions and keeps the same project files available.
 
 #### B. The agent can read local or project files but cannot install Skills
 

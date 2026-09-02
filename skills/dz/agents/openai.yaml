@@ -4,4 +4,4 @@ interface:
   default_prompt: "Use $dz to explain the next product step in plain language, ask one question, and keep the project state current."
 
 policy:
-  allow_implicit_invocation: false
+  allow_implicit_invocation: true

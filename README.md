@@ -151,13 +151,15 @@ intent.md → spec.md → plan.md + code → verification.md → review/release.
 
 在能够读写项目并运行状态工具的环境里，DZ 用 `.dz/state.json` 保存当前快照，用 `.dz/journal.jsonl` 追加每次重要变化，并由状态工具生成 `PROJECT.md` 和 `docs/sdlc/work-items.md`。用户确认过的“为什么做、做成什么、怎么做”三份原文会合成一枚内容指纹，每项施工都绑在这枚指纹上；只要其中一份改变，旧施工和旧证明就不能悄悄沿用。每次检查前还要保存当前代码、构建或线上版本的真实观察证明，并生成一个新的检查批次；哪怕版本名字没变，重新设置检查对象也要重新跑完本批次的每条约定。旧结果只保留为历史。
 
+在 Codex 中，建账命令还会把一段带标记的接续说明合并进项目 `AGENTS.md`，不会覆盖项目原有规则。以后从这个具体项目文件夹新建任务时，Codex 会先被提醒加载 DZ、检查账本，并用大白话说明上次做到哪、现在等什么和下一步是什么。旧 DZ 项目运行一次 `install-guidance` 即可补上。
+
 账本格式已升级到 `1.1`。旧的 `1.0` 项目必须先运行迁移；工具会备份旧快照和日志、保留历史，并把无法确定属于哪份决定或哪次检查的内容降为“还没证明”，不会替用户猜。这个本地工具能检查前后记录是否一致、证明文件是否被改动，却不能证明 AI 写下的“用户已同意”或“测试真的执行过”一定真实，因为能改项目的 AI 也可能改账本并调用工具。需要防篡改的批准或验证，必须由 AI 无法控制的平台审批入口和测试执行器签发。其他接入程序要保存同样结构；普通聊天只能导出可复制的交接记录。`PROJECT.md` 不代替完整决定或验证证据。
 
 这些英文名称和文件名只在项目内部使用。和小白沟通时，DZ 默认只说“想帮谁解决哪件麻烦”“这次做什么、不做什么”“先做哪一步、做完怎样试”“让它真的做一遍”和“放到网上给别人用前再检查一次”。
 
 ### 中途调用与任务接管
 
-你可以在同一个对话或开发任务进行到一半时调用 DZ。能读取项目时，它先把项目账本和真实代码现状对一遍；不能读取时，只向你要最小交接记录。它不会自动从头开始，也不会因为缺少流程文档就删除已有代码。保存过项目日志的环境还能恢复到最后一次完整状态。
+你可以在同一个对话或开发任务进行到一半时调用 DZ。能读取项目时，它先把项目账本和真实代码现状对一遍；不能读取时，只向你要最小交接记录。它不会自动从头开始，也不会因为缺少流程文档就删除已有代码。保存过项目日志的环境还能恢复到最后一次完整状态。想让新任务自动接续，要从具体项目文件夹打开 Agent；只打开装着多个项目的上一级文件夹时，Agent 可能不知道该接哪一个。
 
 DZ 会先只看不改，用四句短话说明：
 
@@ -331,7 +333,7 @@ dz/
 
 ### 验证
 
-Skill 与插件分别通过结构校验；项目账本有三十五组可运行测试，Codex 收尾检查有十组，合计四十五组；另定义十八组新上下文行为测试：
+Skill 与插件分别通过结构校验；项目账本有三十六组可运行测试，Codex 收尾检查有十组，合计四十六组；另定义十八组新上下文行为测试：
 
 1. 模糊的“服务所有人”想法；
 2. 区块链、RAG 和多 Agent 技术堆砌；
@@ -511,13 +513,15 @@ intent.md → spec.md → plan.md + code → verification.md → review/release.
 
 Where the host can read and write the project and run the state tool, DZ stores the current snapshot in `.dz/state.json`, appends important changes to `.dz/journal.jsonl`, and uses the tool to generate `PROJECT.md` plus `docs/sdlc/work-items.md`. The exact accepted Intent, Specification, and Plan form one combined contract digest to which delivery work is bound; changing any one prevents silent reuse. Before evidence is recorded, DZ saves inspectable proof of the observed code, build, or deployment and creates a fresh target epoch. Resetting the target requires every criterion to run again even when the visible revision and environment text are unchanged. Old results remain history.
 
+On Codex, ledger initialization also merges a marked continuity section into the project's `AGENTS.md` without replacing existing rules. A later task opened from that exact project folder is told to load DZ, check the ledger, and explain in plain language what was last completed, what is waiting, and what comes next. Run `install-guidance` once for an older DZ project.
+
 State schema `1.1` requires an explicit migration from `1.0`. The tool first backs up the legacy snapshot and journal, preserves history, and downgrades records that cannot honestly be tied to the current contract and target instead of guessing. The local ledger checks consistency and artifact integrity; it is not trusted proof of human approval or test execution when the same AI can write its files and invoke its CLI. Tamper-resistant approvals and Passed claims require a host-controlled approval surface and runner outside the model's write authority. Other integrations must persist the equivalent structure; plain chat can only export a copyable handoff. `PROJECT.md` does not replace product decisions or verification evidence.
 
 Those English names and filenames stay inside the project. With a beginner, DZ says “who needs help with which trouble,” “what to do and leave out this time,” “what to make first and how to try it,” “make it do the real job once,” and “check it again before putting it online for other people.”
 
 ### Mid-task takeover
 
-You can invoke DZ halfway through the same conversation or development task. When it can read the project, it reconciles the ledger with the real repository; otherwise it requests the smallest handoff record. It does not automatically restart or delete existing code merely because workflow artifacts are missing. A host that saved the project journal can restore the last completely saved state.
+You can invoke DZ halfway through the same conversation or development task. When it can read the project, it reconciles the ledger with the real repository; otherwise it requests the smallest handoff record. It does not automatically restart or delete existing code merely because workflow artifacts are missing. A host that saved the project journal can restore the last completely saved state. For automatic pickup in a new task, open the agent from the exact project folder; a parent folder containing several projects may be ambiguous.
 
 DZ first inspects without changing anything, then uses four short lines:
 
@@ -691,7 +695,7 @@ dz/
 
 ### Validation
 
-The Skill and plugin each pass their structural validator; the project ledger has thirty-five runnable tests and the Codex closeout check has ten, for forty-five total; DZ also defines eighteen fresh-context behavioral test families:
+The Skill and plugin each pass their structural validator; the project ledger has thirty-six runnable tests and the Codex closeout check has ten, for forty-six total; DZ also defines eighteen fresh-context behavioral test families:
 
 1. a vague “product for everyone” idea;
 2. fashionable blockchain, RAG, and multi-agent over-scoping;

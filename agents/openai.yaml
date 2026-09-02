@@ -4,4 +4,4 @@ interface:
   default_prompt: "Use $dz to speak in short, concrete words a complete beginner can understand, ask one question, and guide my idea or current work to the next small step."
 
 policy:
-  allow_implicit_invocation: false
+  allow_implicit_invocation: true

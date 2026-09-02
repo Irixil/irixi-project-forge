@@ -27,6 +27,12 @@ python3 <dz-skill>/scripts/dz_state.py init <project> --name "<project name>" --
 python3 <dz-skill>/scripts/dz_state.py check <project>
 ```
 
+`init` also merges a marked DZ continuity section into the project's `AGENTS.md` without replacing other repository instructions. For an existing DZ project created before this behavior, install or refresh that section once:
+
+```bash
+python3 <dz-skill>/scripts/dz_state.py install-guidance <project>
+```
+
 Use `--language en` for English. Never reinitialize an existing ledger. A project created with state schema 1.0 must be upgraded once with `migrate`; DZ backs up the old state and journal, retains old work and evidence as history, and deliberately removes any old verified claim because 1.0 did not bind it to a complete decision contract or explicit target. A 1.0 risk decision remains history only: migration never turns an old broad approval into a 1.1 action lease, and any material next action needs a fresh exact authorization.
 
 ```bash
