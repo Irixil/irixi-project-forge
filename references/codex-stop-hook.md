@@ -9,7 +9,7 @@ DZ 的项目账本是持久记录，Codex Stop hook 只是一道本机收尾检�
 - 从 Codex Stop 事件的 `cwd` 开始向上查找最近的 `.dz/`。
 - 没有 `.dz/` 时直接放行，不影响普通项目。有 `.dz/` 但缺少 `state.json` 按损坏账本处理。
 - 通过同版本 `scripts/dz_state.py can-stop` 完成结构、证据文件、决策摘要和跨记录规则的语义检查，不维护第二套校验逻辑。
-- 有效账本为 `active` 时第一次输出顶层 `decision: "block"` 和 `reason`，向 Codex 请求再做一个安全动作。是否真的继续仍受 hook 信任、平台策略、其他 Stop hook 和宿主行为影响，DZ 不能保证。若同一 Stop 已经请求过一次仍是 `active`，第二次带警告放行，保留未完状态，避免工具故障把用户困在死循环里。
+- 有效账本为 `active` 时第一次输出顶层 `decision: "block"` 和 `reason`，提醒 Codex 不能照着旧 `next_action` 直接做。它必须先运行只读 `resume-report`，把全部有效记录与项目现在的内容对齐；用户还没确认时先汇报并记录为等待，已经确认时只做双方刚说定的一步。是否真的继续仍受 hook 信任、平台策略、其他 Stop hook 和宿主行为影响，DZ 不能保证。若同一 Stop 已经请求过一次仍是 `active`，第二次带警告放行，保留未完状态，避免工具故障把用户困在死循环里。
 - `waiting_user`、`waiting_authorization`、`blocked`、`paused` 和 `finished` 时输出空 JSON 对象并放行。
 - 账本损坏时第一次请求恢复、暂停、取消或诚实收尾。若同一轮已经请求续跑但仍无法恢复，第二次放行并警告不得宣称已验证。
 

@@ -15,9 +15,9 @@ Use everyday language with users. Internal state and gate names exist to prevent
 ### Mid-task invocation
 
 - State: `TAKEOVER_AUDIT`.
-- Read the visible conversation and current project state before asking discovery questions or changing files.
-- Follow [takeover-resume.md](takeover-resume.md) to separate observed work from gate-supported state, preserve valid work, and identify the earliest missing or contradicted gate.
-- Resume that stage. Do not restart from Discovery when accepted evidence supports a later stage, and do not treat existing code as proof that earlier gates passed.
+- Read the full visible conversation, saved records, and current project state before asking discovery questions or changing files. Look specifically for work performed after the latest saved record.
+- Follow [takeover-resume.md](takeover-resume.md) to run the read-only `resume-report` when available, read every valid saved event, compare the saved workspace checkpoint with the current project, separate observed work from gate-supported state, preserve valid work, treat the saved next action as advisory until reconciled, and identify the earliest missing or contradicted gate.
+- Show the reconciled present plus the recommended execution order and reasons. Let the user correct it and discuss how to proceed before making new changes. Then resume from that agreed present position. Do not restart from Discovery when accepted evidence supports a later stage, and do not treat existing code as proof that earlier gates passed.
 
 ### New idea
 

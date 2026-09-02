@@ -1,7 +1,7 @@
 interface:
   display_name: "DZ — Irixi Project Forge"
   short_description: "Build or resume products in plain language"
-  default_prompt: "Use $dz to explain the next product step in plain language, ask one question, and keep the project state current."
+  default_prompt: "Use $dz to guide my new idea, or reconcile my current project's prior records and latest state, explain what you recommend next in plain language, and discuss execution with me before acting."
 
 policy:
   allow_implicit_invocation: true

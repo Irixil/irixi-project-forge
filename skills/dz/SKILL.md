@@ -1,6 +1,6 @@
 ---
 name: dz
-description: "Guide nontechnical users from a rough idea or mid-task project through accepted decisions, staged implementation, evidence, risk choices, release, and resumable handoff. Not for unrelated isolated fixes or conceptual Q&A."
+description: "Start, build, take over, or resume an app, agent, or product with a nontechnical user through accepted decisions, implementation, evidence, release, and durable handoff. Use for end-to-end product work and any project containing .dz/state.json; not for unrelated isolated fixes or conceptual Q&A."
 ---
 
 # Irixi Project Forge

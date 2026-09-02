@@ -1,17 +1,17 @@
 # Mid-Task Takeover and Resume
 
-Use this reference when DZ is explicitly invoked after meaningful discussion, planning, tool calls, implementation, testing, or release work has already happened. The objective is continuity: understand the actual task, preserve valid work, repair only missing workflow contracts, and continue from the smallest justified next step.
+Use this reference when DZ is explicitly invoked after meaningful discussion, planning, tool calls, implementation, testing, or release work has already happened, including a second invocation in the same task. The objective is continuity: understand the complete current position, preserve valid work done before or after the latest saved record, repair only missing workflow contracts, agree how to proceed, and continue from the smallest justified next step.
 
 ## Core rule
 
-Do not restart merely because DZ was invoked late. Do not continue blindly merely because code exists.
+Do not restart merely because DZ was invoked late. Do not return mechanically to the last saved stopping point, because the user or another agent may have changed the project since then. Do not continue blindly merely because code exists.
 
 Enter `TAKEOVER_AUDIT` and maintain two separate assessments:
 
 - **Observed work state:** what discussion, files, code, tests, commands, or deployment evidence show has happened.
 - **Gate-supported workflow state:** the latest SDLC state supported by an exact accepted artifact or valid decision record.
 
-These may differ. For example, a repository may contain substantial code while the gate-supported state is still missing Intent. Report both without pretending the code is worthless or accepted.
+These may differ. For example, a repository may contain substantial code while the gate-supported state is still missing Intent, or the ledger may propose an old next action while newer files show that action was already attempted. Report both without pretending the code is worthless or accepted. Treat the ledger's `next_action` as a saved proposal until current evidence confirms it is still next.
 
 ## Begin read-only
 
@@ -19,9 +19,9 @@ Pause new implementation mutations until the takeover route is clear. Do not und
 
 Inspect only what is available and relevant:
 
-1. The current user's latest request and the visible conversation: original goal, corrections, explicit decisions, rejected options, promised next action, approvals, tool results, failures, and unfinished questions.
+1. The current user's latest request and the full visible conversation: original goal, corrections, explicit decisions, rejected options, promised next action, approvals, tool results, failures, unfinished questions, and work performed since DZ last wrote project state.
 2. Repository guidance and state the host can access: `AGENTS.md`, `CLAUDE.md`, `GEMINI.md`, or another active instruction file; `PROJECT.md`; `docs/sdlc`; README; version-control status and diff; branch or isolated workspace; relevant source and tests; run instructions; and current plan.
-   When `.dz/state.json` exists, validate it with the DZ state tool, inspect its last journal entry, and reconcile it with current files. If the snapshot is damaged, recover from `.dz/journal.jsonl` and report the recovery. The ledger is current execution evidence, not proof that a decision was accepted or a test passed.
+   When `.dz/state.json` exists, run the current DZ state tool's read-only `resume-report`. It must validate the snapshot, read every valid journal record, show the saved run history, and compare the latest saved workspace checkpoint with the current Git worktree when available. Reconcile that report with current files, test artifacts, and relevant running state. If no saved comparison exists, state that the timing of later changes is uncertain instead of guessing. If the snapshot is damaged, recover from `.dz/journal.jsonl` and report the recovery. If project guidance is stale, propose `install-guidance` and wait for the takeover confirmation before running it. The ledger is a saved account of execution, not permission to ignore later work and not proof that a decision was accepted or a test passed.
 3. Evidence: exact commands and outputs, test or eval results, screenshots or browser evidence, review findings, release records, and known failures.
 4. Operational state when relevant: running task or terminal state, migrations, external side effects, deployment environment, and rollback readiness.
 
@@ -45,16 +45,16 @@ Infer only the highest **contiguous** supported gate chain. A later artifact tha
 
 ## Produce a plain-language continuity summary
 
-The first substantive takeover response should be a compact, user-readable summary, not the new-idea interview scaffold. Keep the precise internal assessment, but explain it so a complete beginner can repeat it back. Use concrete work and results, not category words:
+The first substantive takeover response should be a compact, user-readable summary, not the new-idea interview scaffold. It must describe the present after reconciling the whole available history with changes made since the latest saved record. Keep the precise internal assessment, but explain it so a complete beginner can repeat it back. Use concrete work and results, not category words:
 
 ```text
-别人已经做到：[name the visible result, not “progress”].
-这些可以留下：[name the useful part, not “work” or “assets”].
-还不能确定：[name the exact thing not agreed or not personally tried]. If skipped, [one concrete consequence].
-先做：[one small action]. [one question the user can answer]
+以前已经做到：[name the visible result, not “progress”].
+后来又发生了：[name work or changes after the latest saved record, or say that none were found]. These can stay: [name the useful part].
+现在还不能确定：[name the exact conflict, missing agreement, or untried result]. If skipped, [one concrete consequence].
+我建议接下来：[name the small actions, order, and reason, plus one meaningful option when it changes the outcome]. Ask whether this account is correct and how the user wants to proceed.
 ```
 
-Do not list every file, replay the entire conversation, or print labels such as `TAKEOVER_AUDIT`, “gate-supported state,” `Intent`, or `Specification` unless the user asks for technical detail. Avoid “现有进度,” “成果,” “验证,” “真实环境,” and “真人试用.” Say exactly what was made, what was tried, by whom, and what happened. For example, replace “两项检查通过” with the two observed results, and replace “还缺真人试用” with “还没请以后要用它的人亲手从头做到尾.” Keep the reply to four short lines or four bullets, normally under about 220 Chinese characters or 140 English words, and ask one question. Use up to three questions only during a genuine incident when delay increases harm and they cannot be decided separately.
+Do not list every file, replay the entire conversation, or print labels such as `TAKEOVER_AUDIT`, “gate-supported state,” `Intent`, or `Specification` unless the user asks for technical detail. Avoid “现有进度,” “成果,” “验证,” “真实环境,” and “真人试用.” Say exactly what was made, what changed later, what was tried, by whom, and what happened. For example, replace “两项检查通过” with the two observed results, and replace “还缺真人试用” with “还没请以后要用它的人亲手从头做到尾.” Keep the reply to four short lines or four bullets, normally under about 220 Chinese characters or 140 English words, and ask one question that both invites correction and opens discussion of the proposed execution. Use up to three questions only during a genuine incident when delay increases harm and they cannot be decided separately.
 
 ## Route by takeover shape
 
@@ -99,11 +99,11 @@ Do not list every file, replay the entire conversation, or print labels such as 
 
 ## Continuation rules
 
-- Continue from the earliest unsupported or contradicted gate, not automatically from Discovery and not automatically from the newest code.
+- Route from the reconciled present, not automatically from Discovery, the newest code, the last saved stopping point, or the ledger's old proposed next action. Use the earliest unsupported or contradicted gate only to decide which agreement governs the next change.
 - Preserve previously accepted exact artifacts unless current evidence reopens them.
 - Preserve valid implementation work whenever it can satisfy the accepted contract safely.
 - A missing artifact requires retrospective alignment, not retrospective fiction. Never invent past approval.
-- The continuity summary is not another formal confirmation point. Once routing is supported, proceed with the selected stage and ask only for decisions that actually block it.
+- The continuity summary is not formal acceptance of a product artifact, but it is a required resume checkpoint. Before new edits, commands, paid calls, external writes, or release actions, show the summary and proposed execution, let the user correct them, and wait for confirmation. After confirmation, carry out the agreed next step without repeatedly asking about unchanged details.
 - Keep just-in-time boundaries for credentials, sensitive data, paid calls, external writes, destructive actions, migrations, and release.
 - At handoff or pause, update `PROJECT.md` and the current evidence artifact only when writing is authorized, so a later task can resume without reconstructing everything again.
 - When persistent state is available, update `.dz/state.json` after every meaningful change and regenerate `PROJECT.md` and `work-items.md`. A user pause, cancellation, or early closure is a legal stopping state and never becomes verified completion.
@@ -117,5 +117,6 @@ Takeover is complete when:
 - existing changes have a keep/review decision rather than being ignored;
 - the earliest missing or reopened gate is named;
 - current evidence and authorization boundaries are explicit;
-- the user sees one recommended next action in plain language;
-- the workflow has resumed at that action without unnecessary repetition.
+- the user sees the recommended next actions, their order, why they are recommended, and any meaningful alternative in plain language;
+- the user has confirmed or corrected the current-position summary and discussed how to proceed;
+- the workflow has resumed from that agreed present position without discarding later work or repeating settled questions.

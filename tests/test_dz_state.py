@@ -76,6 +76,90 @@ class DzStateTests(unittest.TestCase):
         self.assertIn("# Team rule\n\nKeep this.", refreshed)
         self.assertEqual(refreshed.count("DZ-PROJECT-CONTINUITY:START"), 1)
         self.assertEqual(refreshed.count("DZ-PROJECT-CONTINUITY:END"), 1)
+        self.assertIn("saved `next_action` is an old proposal", refreshed)
+        self.assertIn(
+            "Do not make new project changes until the user confirms", refreshed
+        )
+        self.assertIn("resume-report", refreshed)
+        self.assertIn("2026-09-02.2", refreshed)
+
+    def test_resume_report_reads_all_journal_records_and_reports_uncertainty_without_git(self):
+        self.cli(
+            "set-run",
+            str(self.project),
+            "--status",
+            "waiting_user",
+            "--waiting-for",
+            "the user's correction",
+        )
+        report = json.loads(self.cli("resume-report", str(self.project)).stdout)
+
+        self.assertEqual(report["journal_records_reviewed"], len(report["journal_history"]))
+        self.assertGreaterEqual(report["journal_records_reviewed"], 3)
+        self.assertEqual(report["journal_history"][-1]["event"], "set_run:waiting_user")
+        self.assertIsNone(report["workspace"]["changed_since_saved_record"])
+        self.assertTrue(report["workspace"]["uncertainty"])
+        self.assertTrue(
+            report["takeover_rules"]["user_confirmation_required_before_new_mutation"]
+        )
+
+    def test_resume_report_detects_a_git_file_changed_after_the_saved_checkpoint(self):
+        subprocess.run(["git", "init"], cwd=self.project, capture_output=True, check=True)
+        subprocess.run(
+            ["git", "config", "user.email", "dz-tests@example.invalid"],
+            cwd=self.project,
+            capture_output=True,
+            check=True,
+        )
+        subprocess.run(
+            ["git", "config", "user.name", "DZ tests"],
+            cwd=self.project,
+            capture_output=True,
+            check=True,
+        )
+        self.write_project_file("app.txt", "saved version\n")
+        subprocess.run(["git", "add", "."], cwd=self.project, capture_output=True, check=True)
+        subprocess.run(
+            ["git", "commit", "-m", "saved checkpoint"],
+            cwd=self.project,
+            capture_output=True,
+            check=True,
+        )
+        self.cli(
+            "set-run",
+            str(self.project),
+            "--status",
+            "waiting_user",
+            "--waiting-for",
+            "the user's correction",
+        )
+
+        self.write_project_file("app.txt", "changed after save\n")
+        report = json.loads(self.cli("resume-report", str(self.project)).stdout)
+
+        self.assertTrue(report["workspace"]["changed_since_saved_record"])
+        self.assertIn("app.txt", report["workspace"]["changed_paths"])
+        self.assertIsNone(report["workspace"]["uncertainty"])
+
+    def test_install_guidance_refreshes_an_old_workflow_version(self):
+        state_path = self.project / ".dz" / "state.json"
+        journal_path = self.project / ".dz" / "journal.jsonl"
+        state = self.state()
+        state["workflow_version"] = "2026-09-02.1"
+        state_path.write_text(
+            json.dumps(state, ensure_ascii=False, indent=2) + "\n", encoding="utf-8"
+        )
+        records = journal_path.read_text(encoding="utf-8").splitlines()
+        latest = json.loads(records[-1])
+        latest["state"]["workflow_version"] = "2026-09-02.1"
+        records[-1] = json.dumps(latest, ensure_ascii=False, separators=(",", ":"))
+        journal_path.write_text("\n".join(records) + "\n", encoding="utf-8")
+
+        stale = self.cli("check", str(self.project), expected=1)
+        self.assertIn("install-guidance", stale.stderr)
+        self.cli("install-guidance", str(self.project))
+        self.assertEqual(self.state()["workflow_version"], "2026-09-02.2")
+        self.cli("check", str(self.project))
 
     def evidence_proof(self, evidence_id, revision="rev-1", environment="test"):
         self.ensure_target(revision, environment)

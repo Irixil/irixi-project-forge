@@ -15,7 +15,7 @@ Use this reference for every new, vague, solution-first, or nontechnical product
 | A request to deploy | Release-readiness audit | That “it runs” means it is safe or useful in production |
 | Production feedback or an incident | Evidence capture and human triage | That every request should become a feature or automatic fix |
 
-Do not use the new-idea first-response scaffold for a mid-task takeover. Preserve already established answers and begin with the compact plain-language continuity summary in [takeover-resume.md](takeover-resume.md).
+Do not use the new-idea first-response scaffold for a mid-task takeover. Preserve already established answers and any useful work performed after the latest saved record. Begin with the compact plain-language current-position summary and proposed execution in [takeover-resume.md](takeover-resume.md), then wait for the user to correct or confirm it and discuss how to proceed before changing the project.
 
 ## Speak so a complete beginner can repeat it back
 

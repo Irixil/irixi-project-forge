@@ -1,0 +1,23 @@
+name: Validate DZ
+
+on:
+  push:
+  pull_request:
+
+permissions:
+  contents: read
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - name: Run deterministic tests
+        run: python3 -m unittest discover -s tests -v
+      - name: Check Python syntax
+        run: python3 -m py_compile scripts/dz_state.py scripts/dz_codex_stop_hook.py scripts/install_local_skill.py
+      - name: Check JSON files
+        run: python3 -m json.tool dz-manifest.json >/dev/null && python3 -m json.tool .codex-plugin/plugin.json >/dev/null

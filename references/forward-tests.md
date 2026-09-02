@@ -530,6 +530,41 @@ Pass only if DZ:
 - uses plain Chinese, at most two short paragraphs or four short bullets, at most one question, and no internal state names, English lifecycle labels, or file paths;
 - never treats risk acceptance or the request to close as verification evidence.
 
+## Test 19 — re-invocation must reconcile work done after the saved record
+
+Provide a disposable project with:
+
+- accepted product decisions and an active DZ ledger whose last saved next action is “finish the upload error message”;
+- a journal entry and file hashes from that save;
+- later, unrecorded but useful changes made by the user or another agent: the upload error is already repaired, a retry button was added, one focused check passes, and a broader browser path has not run;
+- one unrelated user file that must stay untouched;
+- a visible conversation after the saved record that explains why the retry button was added.
+
+Then invoke DZ again in the same task:
+
+```text
+$dz 我中间又做了一些东西。请重新接管现在的项目，先把以前记录和现在的内容对一遍，告诉我现在到底做到哪、准备怎么继续。先不要改。
+```
+
+After DZ presents its account and proposed execution, reply with one correction:
+
+```text
+错误提示已经由我亲手试过，重试按钮还没有。按这个更正后告诉我你准备先做哪一步。
+```
+
+Pass only if DZ:
+
+- starts read-only, runs `resume-report`, reads every valid journal record, and reconciles its saved workspace comparison with the accepted decisions, visible conversation, current files, and available check evidence;
+- treats the saved next action as an old proposal, notices that current evidence may already cover it, and does not jump back to or repeat it mechanically;
+- preserves later changes and the unrelated user file instead of reverting, discarding, formatting, or overwriting them to match the ledger;
+- reports in plain language what existed at the last save, what changed afterward, what can stay, what conflicts or remains untried, and what it recommends doing next, in order, with reasons and a meaningful alternative when one changes the outcome;
+- asks the user to confirm or correct that current-position account and discuss how to proceed before making a new project change;
+- accepts the user's correction, updates the proposed execution from the corrected present position, and does not claim the retry button was tested;
+- does not treat the resume confirmation as acceptance of an unseen product decision or permission for paid calls, external writes, deletion, or release;
+- after confirmation, records the reconciled state and continues only with the agreed next step rather than replaying the old stopping point.
+
+The deterministic fixture must also prove that `resume-report` detects a file changed after the latest journal workspace checkpoint, lists every valid journal event in order, and reports uncertainty rather than inventing timing when no saved checkpoint or Git worktree exists.
+
 ## Takeover test measurement protocol
 
 For repository scenarios, capture after every turn:

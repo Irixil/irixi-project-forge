@@ -1,6 +1,6 @@
 {
   "name": "dz",
-  "version": "1.0.0",
+  "version": "1.0.2",
   "description": "A plain-language, resumable workflow for turning product ideas or unfinished projects into tested applications and agents.",
   "author": {
     "name": "Irixi",
@@ -20,7 +20,7 @@
     "capabilities": ["Interactive", "Write"],
     "defaultPrompt": [
       "Use DZ to turn my idea into the next small, testable product step.",
-      "Use DZ to resume this unfinished project without starting over."
+            "Use DZ to reconcile this unfinished project's saved records with its current state, report what changed, and discuss the next actions before editing."
     ],
     "brandColor": "#5B4BDB"
   }

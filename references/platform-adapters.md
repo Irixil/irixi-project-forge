@@ -101,7 +101,7 @@ Before a session ends or work moves to another platform, provide one compact han
 3. what everyone agreed to make first and how to try it, if reached;
 4. what was actually observed, changed, and tested;
 5. what remains unknown or unauthorized;
-6. the single recommended next action;
+6. the recommended next actions, order, reasons, and meaningful options; on resume, read every valid saved event, compare a saved workspace checkpoint with the current project when possible, show how later work changed the saved position, name any unavailable comparison, and wait for the user to confirm or correct the account before new mutations;
 7. links or locations of available project records.
 
 Clearly label inference. A handoff preserves context; it does not create approval or turn an unrun check into evidence.

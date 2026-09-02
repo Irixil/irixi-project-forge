@@ -52,7 +52,7 @@ DZ 不会把“帮我做一个应用”直接理解为立即写代码。它会�
 - 不让非技术用户选择框架或为技术正确性背书；
 - 在“想解决哪件麻烦”“这次做什么、不做什么”“准备先做哪一步、做完怎样试”分别被你看过并点头前，不开始正式制作；
 - 用真实路径和可复现证据判断完成，而不是只看 Mock、构建成功、部署命令或可访问网址；
-- 可以中途接管当前任务，保留有效工作，不强迫用户重新回答已经明确的问题；
+- 可以中途再次接管当前任务，把所有旧记录和后来新增的操作与项目现状重新对齐，先汇报并讨论接下来的做法，再从用户确认的当前位置继续；
 - 每次有效动作后记录做了什么、证据在哪里、还差什么和下一步是什么；在能再次读取同一项目的环境里可以换对话恢复，普通聊天则带上导出的交接记录；
 - 把“这次工作能不能停”“用户是否决定收尾”“产品是否真的试过”分开，不用验收把用户困住。
 
@@ -151,7 +151,7 @@ intent.md → spec.md → plan.md + code → verification.md → review/release.
 
 在能够读写项目并运行状态工具的环境里，DZ 用 `.dz/state.json` 保存当前快照，用 `.dz/journal.jsonl` 追加每次重要变化，并由状态工具生成 `PROJECT.md` 和 `docs/sdlc/work-items.md`。用户确认过的“为什么做、做成什么、怎么做”三份原文会合成一枚内容指纹，每项施工都绑在这枚指纹上；只要其中一份改变，旧施工和旧证明就不能悄悄沿用。每次检查前还要保存当前代码、构建或线上版本的真实观察证明，并生成一个新的检查批次；哪怕版本名字没变，重新设置检查对象也要重新跑完本批次的每条约定。旧结果只保留为历史。
 
-在 Codex 中，建账命令还会把一段带标记的接续说明合并进项目 `AGENTS.md`，不会覆盖项目原有规则。以后从这个具体项目文件夹新建任务时，Codex 会先被提醒加载 DZ、检查账本，并用大白话说明上次做到哪、现在等什么和下一步是什么。旧 DZ 项目运行一次 `install-guidance` 即可补上。
+在 Codex 中，建账命令还会把一段带标记的接续说明合并进项目 `AGENTS.md`，不会覆盖项目原有规则。以后从这个具体项目文件夹新建任务，或者在做到一半时再次调用 DZ，它会先运行只读的 `resume-report`：读完每条有效日志，并在 Git 可用时把上次保存的文件状态与现在比较。上次写下的“下一步”只是一条旧建议；如果中间已经有人继续修改，DZ 必须保留并说明这些变化，不能退回旧位置。无法可靠判断修改时间时，它会直说，不会猜。它先用大白话汇报现在做到哪、哪些能留下、哪里冲突、接下来建议怎样做，并和用户确认后再继续。旧 DZ 项目会先报告说明过期，把 `install-guidance` 列入建议；用户确认接管以后再刷新。
 
 账本格式已升级到 `1.1`。旧的 `1.0` 项目必须先运行迁移；工具会备份旧快照和日志、保留历史，并把无法确定属于哪份决定或哪次检查的内容降为“还没证明”，不会替用户猜。这个本地工具能检查前后记录是否一致、证明文件是否被改动，却不能证明 AI 写下的“用户已同意”或“测试真的执行过”一定真实，因为能改项目的 AI 也可能改账本并调用工具。需要防篡改的批准或验证，必须由 AI 无法控制的平台审批入口和测试执行器签发。其他接入程序要保存同样结构；普通聊天只能导出可复制的交接记录。`PROJECT.md` 不代替完整决定或验证证据。
 
@@ -159,14 +159,14 @@ intent.md → spec.md → plan.md + code → verification.md → review/release.
 
 ### 中途调用与任务接管
 
-你可以在同一个对话或开发任务进行到一半时调用 DZ。能读取项目时，它先把项目账本和真实代码现状对一遍；不能读取时，只向你要最小交接记录。它不会自动从头开始，也不会因为缺少流程文档就删除已有代码。保存过项目日志的环境还能恢复到最后一次完整状态。想让新任务自动接续，要从具体项目文件夹打开 Agent；只打开装着多个项目的上一级文件夹时，Agent 可能不知道该接哪一个。
+你可以在同一个对话或开发任务进行到一半时再次调用 DZ。能读取项目时，它会把所有可见讨论、以前的决定、项目账本、日志和项目现在的文件对一遍，也会查明上次记录以后又改了什么。它不会把项目退回上次停下的位置，也不会因为缺少流程文档就删除中间做出的东西。它先汇报完整现状和接下来的建议做法，让用户更正、补充并讨论；用户确认后才继续。不能读取以前聊天或项目时，它会直说并只索要最小交接记录。想让新任务自动接续，要从具体项目文件夹打开 Agent；只打开装着多个项目的上一级文件夹时，Agent 可能不知道该接哪一个。
 
 DZ 会先只看不改，用四句短话说明：
 
-1. 别人已经做出了什么；
-2. 哪些具体东西可以留下；
-3. 哪件事还没人点头，或还没人亲手试过；
-4. 现在先做哪一小步，并只问你一个问题。
+1. 上次记录以前已经做出了什么；
+2. 上次记录以后又发生了什么，哪些具体东西可以留下；
+3. 现在有什么冲突，或哪件事还没人点头、没人亲手试过；
+4. 接下来建议按什么顺序做、为什么，并请用户更正或确认后一起决定怎样执行。
 
 如果代码已经存在但缺少说明，DZ 不会删除代码。它会先把“想解决哪件麻烦、这次做什么和不做什么、准备怎样动手和试用”补清楚，再留下对得上的部分继续检查。
 
@@ -175,13 +175,13 @@ DZ 会先只看不改，用四句短话说明：
 在支持 `@` 插件菜单的界面里，中途接管示例：
 
 ```text
-@dz 接着做现在这个东西。先别改。用四句短话告诉我：别人做出了什么、哪些能留、还缺什么、现在先干什么。已经说过的别再问。
+@dz 重新接管现在这个东西。先别改。把以前的记录和现在的内容对一遍，用四句短话告诉我：以前做了什么、后来又改了什么、现在还缺什么、你准备怎样继续。先和我确认再行动。
 ```
 
 在使用 `$` 调用 Skill 的 Codex 界面中：
 
 ```text
-$dz 接着做现在这个东西。别从头问。用短句告诉我哪些已经做好、哪些还没亲手试过，以及现在只做哪一小步。
+$dz 重新接管现在这个东西。别从头问，也别退回旧位置。用短句告诉我以前做了什么、后来又改了什么、哪些还没亲手试过，以及你准备怎样继续。先和我确认再行动。
 ```
 
 ### 三份技术手册的接入
@@ -222,15 +222,21 @@ DZ 使用 Codex 自身的执行机制，而不是复制 Claude 专属命令：
 
 ### 在 Codex 中安装（示例）
 
-把仓库克隆为 `dz`，然后放入或软链接到用户级 Skills 目录。仓库中的 `.codex-plugin/plugin.json` 和 `skills/dz/` 同时提供插件结构；下面仍是最直接的本地 Skill 安装方式：
+把仓库克隆为 `dz`，然后运行自带安装脚本。脚本只把独立 Skill 需要的内容复制到用户级 Skills 目录，不复制插件内层入口，因此 Codex 菜单里只出现一个 DZ：
 
 ```bash
 git clone https://github.com/Irixil/irixi-project-forge.git dz
-mkdir -p "$HOME/.agents/skills"
-ln -s "/absolute/path/to/dz" "$HOME/.agents/skills/dz"
+cd dz
+python3 scripts/install_local_skill.py
 ```
 
-如果更新后没有立即生效，请重启 Codex 并新建一个任务。
+以前按照旧说明把整个仓库软链接到 `~/.agents/skills/dz`，导致出现两个入口时，在仓库目录运行：
+
+```bash
+python3 scripts/install_local_skill.py --replace
+```
+
+这个命令会把旧软链接移到 `~/.agents/skill-backups/`，不会删除它指向的仓库。以后仓库更新后，必须再次运行 `python3 scripts/install_local_skill.py --replace`，把新文件复制到安装位置；只重启 Codex 不会更新那份副本。重新安装后再重启 Codex，并新建一个任务。
 
 本地 Skill 和插件安装二选一，避免两个 `dz` 版本互相遮挡。不要只复制 `skills/dz/` 内层目录，它需要同一仓库根目录中的完整工作流和参考文件。
 
@@ -255,7 +261,7 @@ $dz 读一下这份说明。已经说清的别再问。直接告诉我哪件事�
 恢复已有项目：
 
 ```text
-$dz 接着做这个东西。不要从头问。用四句短话告诉我：别人做出了什么、哪些能留、还缺什么、现在先干什么。
+$dz 重新接管这个东西。先别改。读完以前的记录，再和现在的文件对一遍。用四句短话告诉我：以前做了什么、后来改了什么、哪里还说不准、你建议接下来怎样做。先和我讨论，等我确认后再动手。
 ```
 
 检查上线准备：
@@ -288,14 +294,16 @@ dz/
 │       └── agents/openai.yaml
 ├── scripts/
 │   ├── dz_state.py
-│   └── dz_codex_stop_hook.py
+│   ├── dz_codex_stop_hook.py
+│   └── install_local_skill.py
 ├── hooks/
 │   └── hooks.json
 ├── schemas/
 │   └── dz-project-state.schema.json
 ├── tests/
 │   ├── test_dz_state.py
-│   └── test_dz_codex_stop_hook.py
+│   ├── test_dz_codex_stop_hook.py
+│   └── test_install_local_skill.py
 ├── assets/
 │   ├── project/AGENTS.md
 │   └── codex-hooks/
@@ -333,7 +341,7 @@ dz/
 
 ### 验证
 
-Skill 与插件分别通过结构校验；项目账本有三十六组可运行测试，Codex 收尾检查有十组，合计四十六组；另定义十八组新上下文行为测试：
+Skill 与插件分别通过结构校验；项目账本有三十九组可运行测试，Codex 收尾检查有十组，单入口安装有三组，合计五十二组；另定义十九组新上下文行为测试：
 
 1. 模糊的“服务所有人”想法；
 2. 区块链、RAG 和多 Agent 技术堆砌；
@@ -348,11 +356,12 @@ Skill 与插件分别通过结构校验；项目账本有三十六组可运行�
 11. 产物过期、代码版本变化和旧验证证据不能混用的接管；
 12. 面向小白时必须简短、具体，只问一个问题；听不懂时必须换成当前事情里的例子；
 13. 同一套 DZ 在聊天型、可开发型和可上线型平台上自动选择合适做法；相同能力不因平台品牌不同而改变；
-14. 中途接手时也必须用四句短话说清已经做了什么、什么能留、什么没试、下一步做什么；
+14. 中途接手时也必须用四句短话说清以前有什么、后来改了什么、哪里还说不准、准备怎样继续，并等用户确认；
 15. 先说清真正需要的小动作，再安全寻找和筛选现成零件；不能把公开、Star 或 Demo 当成使用许可和质量证明，也不能在确认动手办法前下载运行陌生代码；
 16. 具体风险讲清并由有权决定的人接受后，继续执行该次动作，同时保留风险和未验证项；
 17. 暂停后停止动作，换对话从账本恢复，取消后保留文件且不谎称完成；
-18. 用户可以随时收尾，但构建成功、网址可访问或接受风险都不能冒充验证通过。
+18. 用户可以随时收尾，但构建成功、网址可访问或接受风险都不能冒充验证通过；
+19. 中途再次调用时，必须把旧记录和后来新增的操作重新对齐，先汇报完整现状和准备怎样执行，用户确认后再继续，不能退回旧位置。
 
 行为测试定义见 [`references/forward-tests.md`](references/forward-tests.md)。
 
@@ -416,7 +425,7 @@ In simple terms: DZ guides the work and the current execution-capable AI does th
 - Does not ask a beginner to choose frameworks or certify technical correctness.
 - Does not begin formal implementation until the user has separately confirmed which trouble to solve, what to do and leave out this time, and what to make first and how to try it.
 - Judges completion by reproducible real-path evidence, not a mock, green build, deploy command, or reachable URL alone.
-- Can take over midway, preserve valid work, and avoid repeating decisions already supported by the current task.
+- Can re-enter midway, reconcile all prior records and later work with the current project, report and discuss the proposed execution, then continue from the user-confirmed present without discarding valid work or repeating settled decisions.
 - Records each meaningful action, its evidence, remaining work, and next action. A fresh task can recover when it can reopen the same project; plain chat must carry the exported handoff.
 - Separates whether work may stop, whether the user chose to close, and whether the product is actually verified.
 
@@ -513,7 +522,7 @@ intent.md → spec.md → plan.md + code → verification.md → review/release.
 
 Where the host can read and write the project and run the state tool, DZ stores the current snapshot in `.dz/state.json`, appends important changes to `.dz/journal.jsonl`, and uses the tool to generate `PROJECT.md` plus `docs/sdlc/work-items.md`. The exact accepted Intent, Specification, and Plan form one combined contract digest to which delivery work is bound; changing any one prevents silent reuse. Before evidence is recorded, DZ saves inspectable proof of the observed code, build, or deployment and creates a fresh target epoch. Resetting the target requires every criterion to run again even when the visible revision and environment text are unchanged. Old results remain history.
 
-On Codex, ledger initialization also merges a marked continuity section into the project's `AGENTS.md` without replacing existing rules. A later task opened from that exact project folder is told to load DZ, check the ledger, and explain in plain language what was last completed, what is waiting, and what comes next. Run `install-guidance` once for an older DZ project.
+On Codex, ledger initialization also merges a marked continuity section into the project's `AGENTS.md` without replacing existing rules. A later task opened from that exact project folder, or a mid-task re-invocation, first runs the read-only `resume-report`. It reads every valid journal record and, when Git is available, compares the latest saved workspace checkpoint with the current worktree. The saved next action is only an old proposal. DZ preserves work done after the save, names any comparison it cannot make reliably, explains the reconciled present and proposed execution in plain language, and waits for the user to correct or confirm it before continuing. For an older DZ project, it proposes `install-guidance` and refreshes the managed guidance only after that takeover confirmation.
 
 State schema `1.1` requires an explicit migration from `1.0`. The tool first backs up the legacy snapshot and journal, preserves history, and downgrades records that cannot honestly be tied to the current contract and target instead of guessing. The local ledger checks consistency and artifact integrity; it is not trusted proof of human approval or test execution when the same AI can write its files and invoke its CLI. Tamper-resistant approvals and Passed claims require a host-controlled approval surface and runner outside the model's write authority. Other integrations must persist the equivalent structure; plain chat can only export a copyable handoff. `PROJECT.md` does not replace product decisions or verification evidence.
 
@@ -521,14 +530,14 @@ Those English names and filenames stay inside the project. With a beginner, DZ s
 
 ### Mid-task takeover
 
-You can invoke DZ halfway through the same conversation or development task. When it can read the project, it reconciles the ledger with the real repository; otherwise it requests the smallest handoff record. It does not automatically restart or delete existing code merely because workflow artifacts are missing. A host that saved the project journal can restore the last completely saved state. For automatic pickup in a new task, open the agent from the exact project folder; a parent folder containing several projects may be ambiguous.
+You can invoke DZ again halfway through the same conversation or development task. When it can read the project, it reconciles all visible discussion, accepted decisions, the ledger and journal, the current files, and work performed after the latest save. It does not roll the project back to that save or delete later work merely because workflow records are behind. It first reports the complete current position and proposed execution, lets the user correct and discuss it, and continues only after confirmation. If it cannot read prior conversation or project evidence, it says so and requests the smallest handoff record. For automatic pickup in a new task, open the agent from the exact project folder; a parent folder containing several projects may be ambiguous.
 
 DZ first inspects without changing anything, then uses four short lines:
 
-1. What the previous person actually made.
-2. Which specific parts can stay.
-3. What nobody has agreed or personally tried yet.
-4. The one small thing to do now, followed by one question.
+1. What existed before the latest saved record.
+2. What changed afterward and which specific parts can stay.
+3. What now conflicts, lacks agreement, or has not been personally tried.
+4. What DZ recommends doing next, in what order and why, followed by one question that invites correction and discussion before execution.
 
 When code exists without a clear explanation, DZ preserves it as potentially useful work that still needs checking. It writes down which trouble to solve, what to do and leave out this time, and what to make and try first. It asks the user whether those exact sentences are right, then keeps the parts that match.
 
@@ -537,13 +546,13 @@ When those decisions already exist and the task is a bounded defect, DZ resumes 
 Take over on a surface with the `@` plugin menu:
 
 ```text
-@dz Continue this work. Do not change anything yet. In four short lines, tell me what was made, what can stay, what is missing, and what one small thing to do now. Do not ask me to repeat known facts.
+@dz Take over the project as it exists now. Do not change anything yet. Reconcile prior records with later work, then tell me in four short lines what existed, what changed, what remains uncertain, and how you propose to continue. Confirm it with me before acting.
 ```
 
 Take over where Skills use `$` invocation:
 
 ```text
-$dz Continue this work without starting over. Use short sentences to tell me what is already done, what nobody has personally tried, and the one small thing to do now.
+$dz Take over the project as it exists now without restarting or returning to the old stopping point. Use short sentences to explain what existed, what changed later, what nobody has personally tried, and how you propose to continue. Confirm it with me before acting.
 ```
 
 ### Integration with the three handbooks
@@ -584,15 +593,21 @@ The repository is both a validated Codex plugin bundle and a standalone Skill. T
 
 ### Installation on Codex (example)
 
-Clone the repository as `dz`, then place or symlink it into the user Skills directory. `.codex-plugin/plugin.json` and `skills/dz/` also provide a plugin package structure; the following remains the most direct local Skill installation:
+Clone the repository as `dz`, then run the bundled installer. It copies only the standalone Skill contents into the user Skills directory and omits the nested plugin entry, so Codex shows one DZ entry:
 
 ```bash
 git clone https://github.com/Irixil/irixi-project-forge.git dz
-mkdir -p "$HOME/.agents/skills"
-ln -s "/absolute/path/to/dz" "$HOME/.agents/skills/dz"
+cd dz
+python3 scripts/install_local_skill.py
 ```
 
-If an update is not detected, restart Codex and open a fresh task.
+If the previous instructions symlinked the whole repository to `~/.agents/skills/dz` and produced two entries, run this from the repository:
+
+```bash
+python3 scripts/install_local_skill.py --replace
+```
+
+This moves the old symlink to `~/.agents/skill-backups/` and does not delete the repository it points to. After a later repository update, run `python3 scripts/install_local_skill.py --replace` again to copy the new files into the installed Skill; restarting Codex alone cannot update that copied package. Then restart Codex and open a fresh task.
 
 Choose either the local Skill or the plugin installation so two `dz` versions do not shadow each other. Do not copy `skills/dz/` by itself; that wrapper needs the canonical workflow and references at the same repository root.
 
@@ -617,7 +632,7 @@ $dz Read this description. Do not ask again about things it already explains. Te
 Resume an existing project:
 
 ```text
-$dz Continue this work without starting over. In four short lines, tell me what was made, what can stay, what is missing, and what one small thing to do now.
+$dz Take over this project again without editing yet. Read all saved records and compare them with the current files. In four short lines, tell me what existed, what changed later, what is still uncertain, and how you recommend proceeding. Discuss it with me and wait for my confirmation before acting.
 ```
 
 Audit release readiness:
@@ -650,14 +665,16 @@ dz/
 │       └── agents/openai.yaml
 ├── scripts/
 │   ├── dz_state.py
-│   └── dz_codex_stop_hook.py
+│   ├── dz_codex_stop_hook.py
+│   └── install_local_skill.py
 ├── hooks/
 │   └── hooks.json
 ├── schemas/
 │   └── dz-project-state.schema.json
 ├── tests/
 │   ├── test_dz_state.py
-│   └── test_dz_codex_stop_hook.py
+│   ├── test_dz_codex_stop_hook.py
+│   └── test_install_local_skill.py
 ├── assets/
 │   ├── project/AGENTS.md
 │   └── codex-hooks/
@@ -695,7 +712,7 @@ dz/
 
 ### Validation
 
-The Skill and plugin each pass their structural validator; the project ledger has thirty-six runnable tests and the Codex closeout check has ten, for forty-six total; DZ also defines eighteen fresh-context behavioral test families:
+The Skill and plugin each pass their structural validator; the project ledger has thirty-nine runnable tests, the Codex closeout check has ten, and the single-entry installer has three, for fifty-two total; DZ also defines nineteen fresh-context behavioral test families:
 
 1. a vague “product for everyone” idea;
 2. fashionable blockchain, RAG, and multi-agent over-scoping;
@@ -710,11 +727,12 @@ The Skill and plugin each pass their structural validator; the project ledger ha
 11. takeover involving stale artifacts, a changed revision, and revision-bound evidence;
 12. concise, concrete guidance for a complete beginner, with one question and a same-project example after confusion;
 13. automatic capability-aware behavior across chat-only, build-capable, and release-capable hosts, with identical behavior for identical capabilities regardless of brand;
-14. a mid-task beginner takeover that names what was made, what can stay, what has not been personally tried, and the one next action in four short lines;
+14. a mid-task beginner takeover that names what existed, what changed later, what remains uncertain, and the proposed execution before waiting for the user's confirmation;
 15. anchor the exact needed behavior before safely finding and screening existing parts, without treating visibility, stars, or demos as permission or quality proof, and without downloading or running unknown code before the build approach is confirmed;
 16. continue an exact action after an authorized owner accepts clearly disclosed risk, while preserving that risk and unverified checks;
 17. stop on pause, recover from the ledger in a fresh task, and preserve files without claiming completion after cancellation;
-18. allow the user to close at any time without treating a build, reachable URL, or risk acceptance as verified evidence.
+18. allow the user to close at any time without treating a build, reachable URL, or risk acceptance as verified evidence;
+19. on mid-task re-invocation, reconcile saved records with later work, report the full present and proposed execution, wait for the user's correction or confirmation, and never jump back to the old stopping point.
 
 See [`references/forward-tests.md`](references/forward-tests.md) for the behavioral oracles.
 

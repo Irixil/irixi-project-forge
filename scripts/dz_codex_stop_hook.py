@@ -83,8 +83,11 @@ def main() -> int:
         return emit({})
     if result.returncode == 2:
         reason = (
-            "DZ 账本还是 active。先做 `.dz/state.json` 里的下一个安全动作，"
-            "或按用户的真实选择记录为等待、阻塞、暂停、取消或收尾，再结束。"
+            "DZ 账本还是 active。不要照着 `.dz/state.json` 里保存的旧下一步直接做。"
+            "先只读运行 DZ 状态工具的 `resume-report`，把全部有效记录和项目现在的内容对一遍。"
+            "如果用户还没确认当前情况和接下来的做法，先用短句汇报并记录为等待用户；"
+            "如果用户已经确认，只做双方刚刚说定的那一步。也可以按用户的真实选择记录为"
+            "阻塞、暂停、取消或收尾，再结束。"
             "用户说暂停或取消时应立即记录并停止；不要为了放行就把未验证内容说成 verified。"
         )
         if event.get("stop_hook_active") is True:

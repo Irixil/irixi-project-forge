@@ -24,10 +24,11 @@ docs/sdlc/evidence/*           # durable test, browser, model, or user-check out
 
 ```bash
 python3 <dz-skill>/scripts/dz_state.py init <project> --name "<project name>" --language zh
+python3 <dz-skill>/scripts/dz_state.py resume-report <project>
 python3 <dz-skill>/scripts/dz_state.py check <project>
 ```
 
-`init` also merges a marked DZ continuity section into the project's `AGENTS.md` without replacing other repository instructions. For an existing DZ project created before this behavior, install or refresh that section once:
+`init` also merges a marked DZ continuity section into the project's `AGENTS.md` without replacing other repository instructions and stores a Git workspace checkpoint in the journal when Git is available. `resume-report` is read-only: it reads every valid journal record, returns the current ledger, compares the latest saved workspace checkpoint with the current Git worktree, and names any stale guidance or unavailable comparison. For an existing DZ project created before this behavior, first run `resume-report`, show the user the takeover account, then install or refresh the managed section after the user confirms:
 
 ```bash
 python3 <dz-skill>/scripts/dz_state.py install-guidance <project>
@@ -51,8 +52,8 @@ python3 <dz-skill>/scripts/dz_state.py migrate <project>
 
 On every meaningful stateful turn:
 
-1. Read the ledger, accepted files, project instructions, repository state, and current evidence.
-2. Run `check`. If the snapshot is damaged, run `recover` and say that recovery occurred.
+1. Run the read-only `resume-report`, then reconcile its full journal history and workspace comparison with the visible conversation, accepted files, current files, and current evidence.
+2. If the snapshot is damaged, run `recover` and say that recovery occurred. If the workflow guidance is stale, propose `install-guidance` and wait for the user's takeover confirmation before refreshing it.
 3. Compare the records with observable files and runtime facts; preserve discrepancies.
 4. Set one smallest safe next action before doing it.
 5. After each meaningful change, check, user decision, failure, risk decision, pause, or cancellation, update the ledger immediately.
@@ -132,6 +133,6 @@ python3 <dz-skill>/scripts/dz_state.py set-run <project> --status active --next-
 
 `finished` is closed to ordinary mutations. Record an outstanding external action outcome if necessary, without reopening or upgrading the finished verdict. To do new project work, explicitly resume the run as `active` first. A move to `waiting_user`, `waiting_authorization`, `blocked`, or `paused` records an honest non-working state and does not permit new product actions.
 
-On resume, trust neither chat nor ledger alone. Reconcile both with current files and observable state. Preserve valid history and continue from the first unfinished current-contract action.
+On resume or mid-task re-invocation, trust neither chat nor ledger alone and never treat the recorded next action as a command. Run `resume-report` so the tool reads every valid journal record and compares the latest saved workspace checkpoint with the current Git worktree. Reconcile that report with the full visible conversation, accepted records, current files, checks, and relevant running state. Preserve work performed after the latest saved record. When a reliable comparison is unavailable, say so and ask the user to correct the uncertain timing. Before new mutations, report the reconciled present and proposed execution in plain language, let the user correct it, and discuss how to proceed. Continue only after that checkpoint is confirmed; it does not retroactively accept product decisions or authorize an external action.
 
 The JSON Schema checks shape. `check` adds cross-record consistency for contract binding, target epoch, evidence, stage gates, journal continuity, and risk leases. Neither supplies trusted human or execution attestation by itself. A host lacking a trusted approval and execution channel must disclose that limitation instead of presenting the local ledger as tamper-proof proof.

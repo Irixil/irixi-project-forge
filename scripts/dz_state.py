@@ -13,6 +13,8 @@ import copy
 import hashlib
 import json
 import os
+import stat
+import subprocess
 import sys
 import tempfile
 from datetime import datetime, timezone
@@ -21,7 +23,7 @@ from typing import Any, Callable
 
 
 SCHEMA_VERSION = "1.1"
-WORKFLOW_VERSION = "2026-09-02"
+WORKFLOW_VERSION = "2026-09-02.2"
 
 RUN_STATUSES = {
     "active",
@@ -141,6 +143,7 @@ GUIDANCE_END = "<!-- DZ-PROJECT-CONTINUITY:END -->"
 PROJECT_GUIDANCE_TEMPLATE = (
     Path(__file__).resolve().parents[1] / "assets" / "project" / "AGENTS.md"
 )
+WORKSPACE_IGNORED_PATHS = {"PROJECT.md", "docs/sdlc/work-items.md"}
 
 
 def now() -> str:
@@ -191,6 +194,167 @@ def project_paths(project: Path) -> dict[str, Path]:
         "journal": dz_dir / "journal.jsonl",
         "dashboard": project / "PROJECT.md",
         "work_items": project / "docs" / "sdlc" / "work-items.md",
+    }
+
+
+def workspace_path_ignored(value: str) -> bool:
+    normalized = value.replace("\\", "/")
+    while normalized.startswith("./"):
+        normalized = normalized[2:]
+    return (
+        normalized == ".dz"
+        or normalized.startswith(".dz/")
+        or normalized in WORKSPACE_IGNORED_PATHS
+    )
+
+
+def workspace_file_fingerprint(project: Path, value: str) -> dict[str, Any]:
+    relative = Path(value)
+    if relative.is_absolute() or ".." in relative.parts:
+        return {"kind": "invalid_path"}
+    path = project / relative
+    try:
+        metadata = path.lstat()
+    except OSError:
+        return {"kind": "missing"}
+    if stat.S_ISLNK(metadata.st_mode):
+        try:
+            target = os.readlink(path)
+        except OSError:
+            target = "unreadable"
+        return {"kind": "symlink", "target": target}
+    if stat.S_ISREG(metadata.st_mode):
+        try:
+            digest = hashlib.sha256()
+            with path.open("rb") as handle:
+                for chunk in iter(lambda: handle.read(1024 * 1024), b""):
+                    digest.update(chunk)
+            return {
+                "kind": "file",
+                "size": metadata.st_size,
+                "sha256": digest.hexdigest(),
+            }
+        except OSError:
+            return {"kind": "unreadable", "size": metadata.st_size}
+    if stat.S_ISDIR(metadata.st_mode):
+        return {"kind": "directory"}
+    return {"kind": "other", "mode": stat.S_IFMT(metadata.st_mode)}
+
+
+def git_bytes(project: Path, *args: str) -> bytes | None:
+    try:
+        result = subprocess.run(
+            ["git", "-C", str(project), *args],
+            capture_output=True,
+            timeout=20,
+            check=False,
+        )
+    except (OSError, subprocess.TimeoutExpired):
+        return None
+    if result.returncode != 0:
+        return None
+    return result.stdout
+
+
+def workspace_snapshot(project: Path) -> dict[str, Any]:
+    inside = git_bytes(project, "rev-parse", "--is-inside-work-tree")
+    if inside is None or inside.strip() != b"true":
+        return {
+            "kind": "unavailable",
+            "reason": "Git working tree is unavailable; later file changes cannot be dated reliably",
+        }
+
+    status_output = git_bytes(
+        project,
+        "-c",
+        "core.quotepath=false",
+        "status",
+        "--porcelain=v1",
+        "-z",
+        "--untracked-files=all",
+        "--",
+        ".",
+    )
+    if status_output is None:
+        return {
+            "kind": "unavailable",
+            "reason": "Git status could not be read; later file changes cannot be dated reliably",
+        }
+
+    entries: list[dict[str, Any]] = []
+    tokens = status_output.split(b"\0")
+    index = 0
+    while index < len(tokens):
+        token = tokens[index]
+        index += 1
+        if not token:
+            continue
+        if len(token) < 4 or token[2:3] != b" ":
+            continue
+        status_code = os.fsdecode(token[:2])
+        path_value = os.fsdecode(token[3:])
+        source_value = None
+        if "R" in status_code or "C" in status_code:
+            if index < len(tokens) and tokens[index]:
+                source_value = os.fsdecode(tokens[index])
+                index += 1
+        if workspace_path_ignored(path_value):
+            continue
+        entry: dict[str, Any] = {
+            "status": status_code,
+            "path": path_value,
+            "content": workspace_file_fingerprint(project, path_value),
+        }
+        if source_value is not None:
+            entry["source"] = source_value
+        entries.append(entry)
+
+    entries.sort(key=lambda item: (item["path"], item["status"], item.get("source", "")))
+    head_output = git_bytes(project, "rev-parse", "--verify", "HEAD")
+    branch_output = git_bytes(project, "symbolic-ref", "--quiet", "--short", "HEAD")
+    payload = {
+        "head": os.fsdecode(head_output).strip() if head_output else None,
+        "branch": os.fsdecode(branch_output).strip() if branch_output else None,
+        "entries": entries,
+    }
+    digest = hashlib.sha256(
+        json.dumps(payload, ensure_ascii=False, sort_keys=True, separators=(",", ":")).encode(
+            "utf-8"
+        )
+    ).hexdigest()
+    return {"kind": "git", "digest": digest, **payload}
+
+
+def compare_workspace_snapshots(
+    saved: Any, current: dict[str, Any]
+) -> dict[str, Any]:
+    if not isinstance(saved, dict):
+        return {
+            "changed_since_saved_record": None,
+            "changed_paths": [],
+            "uncertainty": "The saved journal record has no workspace checkpoint",
+        }
+    if saved.get("kind") != "git" or current.get("kind") != "git":
+        reason = current.get("reason") or saved.get("reason") or "Workspace comparison is unavailable"
+        return {
+            "changed_since_saved_record": None,
+            "changed_paths": [],
+            "uncertainty": reason,
+        }
+
+    saved_entries = {entry.get("path"): entry for entry in saved.get("entries", [])}
+    current_entries = {entry.get("path"): entry for entry in current.get("entries", [])}
+    changed_paths = sorted(
+        path
+        for path in set(saved_entries) | set(current_entries)
+        if saved_entries.get(path) != current_entries.get(path)
+    )
+    if saved.get("head") != current.get("head"):
+        changed_paths.insert(0, "<committed revision changed>")
+    return {
+        "changed_since_saved_record": saved.get("digest") != current.get("digest"),
+        "changed_paths": changed_paths,
+        "uncertainty": None,
     }
 
 
@@ -1449,25 +1613,37 @@ def validate_state(state: dict[str, Any], project_path: Path | None = None) -> l
 
 
 def latest_valid_journal_state(project: Path) -> dict[str, Any] | None:
+    records, _ = valid_journal_records(project)
+    if not records:
+        return None
+    return copy.deepcopy(records[-1]["state"])
+
+
+def valid_journal_records(project: Path) -> tuple[list[dict[str, Any]], int]:
     journal = project_paths(project)["journal"]
     if not journal.is_file():
-        return None
-    latest = None
+        return [], 0
+    records: list[dict[str, Any]] = []
+    invalid = 0
     with journal.open("rb") as handle:
         for raw_line in handle:
             try:
                 record = json.loads(raw_line.decode("utf-8"))
             except (UnicodeDecodeError, json.JSONDecodeError):
+                invalid += 1
                 continue
             candidate = record.get("state") if isinstance(record, dict) else None
             if isinstance(candidate, dict):
                 try:
                     candidate_errors = validate_state(candidate)
                 except Exception:
+                    invalid += 1
                     continue
                 if not candidate_errors:
-                    latest = candidate
-    return copy.deepcopy(latest)
+                    records.append(record)
+                    continue
+            invalid += 1
+    return records, invalid
 
 
 def latest_legacy_v1_state(project: Path) -> dict[str, Any] | None:
@@ -1679,9 +1855,22 @@ def install_project_guidance(project: Path) -> Path:
     return target
 
 
-def write_journal(path: Path, event: str, state: dict[str, Any]) -> None:
+def project_guidance_is_current(project: Path) -> bool:
+    target = project / "AGENTS.md"
+    if not target.is_file():
+        return False
+    try:
+        content = target.read_text(encoding="utf-8")
+    except OSError:
+        return False
+    return project_guidance_block().strip() in content
+
+
+def write_journal(
+    path: Path, event: str, state: dict[str, Any], workspace: dict[str, Any]
+) -> None:
     path.parent.mkdir(parents=True, exist_ok=True)
-    record = {"at": now(), "event": event, "state": state}
+    record = {"at": now(), "event": event, "state": state, "workspace": workspace}
     encoded = (
         json.dumps(record, ensure_ascii=False, separators=(",", ":")) + "\n"
     ).encode("utf-8")
@@ -1874,7 +2063,8 @@ def persist(project: Path, state: dict[str, Any], event: str) -> None:
     if errors:
         raise ValueError("; ".join(errors))
     paths = project_paths(project)
-    write_journal(paths["journal"], event, state)
+    workspace = workspace_snapshot(project)
+    write_journal(paths["journal"], event, state, workspace)
     atomic_write(paths["state"], json.dumps(state, ensure_ascii=False, indent=2) + "\n")
     render(project, state)
 
@@ -1884,6 +2074,10 @@ def mutate(project: Path, event: str, change: Callable[[dict[str, Any]], None]) 
     consistency_errors = journal_consistency_errors(project, state)
     if consistency_errors:
         raise ValueError("; ".join(consistency_errors))
+    if state.get("workflow_version") != WORKFLOW_VERSION:
+        raise ValueError(
+            "DZ workflow guidance is outdated; run install-guidance with the current DZ Skill"
+        )
     if state.get("run", {}).get("status") == "finished" and not event.startswith(
         ("set_run:", "complete_risk_action:")
     ):
@@ -1913,13 +2107,28 @@ def init_command(args: argparse.Namespace) -> None:
     project.mkdir(parents=True, exist_ok=True)
     persist(project, initial_state(args.name or project.name, args.language), "init")
     install_project_guidance(project)
+    refreshed = load_state(project)
+    refreshed["workflow_version"] = WORKFLOW_VERSION
+    persist(project, refreshed, "install_guidance")
     print(paths["state"])
 
 
 def install_guidance_command(args: argparse.Namespace) -> None:
     project = args.project.resolve()
     project.mkdir(parents=True, exist_ok=True)
-    print(install_project_guidance(project))
+    paths = project_paths(project)
+    state = None
+    if paths["state"].is_file():
+        state = load_state(project)
+        errors = validate_state(state, project)
+        errors.extend(journal_consistency_errors(project, state))
+        if errors:
+            raise ValueError("; ".join(errors))
+    target = install_project_guidance(project)
+    if state is not None:
+        state["workflow_version"] = WORKFLOW_VERSION
+        persist(project, state, "install_guidance")
+    print(target)
 
 
 def check_command(args: argparse.Namespace) -> None:
@@ -1928,6 +2137,10 @@ def check_command(args: argparse.Namespace) -> None:
     errors = validate_state(state, project)
     errors.extend(active_authorized_lease_errors(state))
     errors.extend(journal_consistency_errors(project, state))
+    if state.get("workflow_version") != WORKFLOW_VERSION:
+        errors.append(
+            "DZ workflow guidance is outdated; run install-guidance with the current DZ Skill"
+        )
     if errors:
         for error in errors:
             print(f"ERROR: {error}", file=sys.stderr)
@@ -1938,6 +2151,103 @@ def check_command(args: argparse.Namespace) -> None:
 def show_command(args: argparse.Namespace) -> None:
     state = load_state(args.project.resolve())
     print(json.dumps(state, ensure_ascii=False, indent=2))
+
+
+def resume_report_command(args: argparse.Namespace) -> None:
+    project = args.project.resolve()
+    state = load_state(project)
+    errors = validate_state(state, project)
+    errors.extend(active_authorized_lease_errors(state))
+    errors.extend(journal_consistency_errors(project, state))
+    if errors:
+        raise ValueError("; ".join(errors))
+
+    records, invalid_records = valid_journal_records(project)
+    saved_workspace = records[-1].get("workspace") if records else None
+    current_workspace = workspace_snapshot(project)
+    workspace_comparison = compare_workspace_snapshots(saved_workspace, current_workspace)
+    history = []
+    previous_run: dict[str, Any] = {}
+    previous_decisions: dict[str, Any] = {}
+    for record in records:
+        record_state = record["state"]
+        run = record_state.get("run", {})
+        decisions = record_state.get("decisions", {})
+        run_summary = {
+            "status": run.get("status"),
+            "stage": run.get("stage"),
+            "product_verdict": run.get("product_verdict"),
+            "next_action": run.get("next_action"),
+            "waiting_for": run.get("waiting_for"),
+        }
+        decision_summary = {
+            name: {
+                "status": decision.get("status"),
+                "path": decision.get("path"),
+                "artifact_sha256": decision.get("artifact_sha256"),
+            }
+            for name, decision in decisions.items()
+            if isinstance(decision, dict)
+        }
+        entry: dict[str, Any] = {
+            "at": record.get("at"),
+            "event": record.get("event"),
+        }
+        run_changes = {
+            key: value
+            for key, value in run_summary.items()
+            if previous_run.get(key) != value
+        }
+        decision_changes = {
+            key: value
+            for key, value in decision_summary.items()
+            if previous_decisions.get(key) != value
+        }
+        if run_changes:
+            entry["run_changes"] = run_changes
+        if decision_changes:
+            entry["decision_changes"] = decision_changes
+        history.append(entry)
+        previous_run = run_summary
+        previous_decisions = decision_summary
+
+    warnings = []
+    if invalid_records:
+        warnings.append(
+            f"{invalid_records} malformed or invalid journal record(s) were skipped"
+        )
+    if state.get("workflow_version") != WORKFLOW_VERSION:
+        warnings.append(
+            "Project workflow guidance is older than the installed DZ Skill; propose install-guidance after the user confirms the takeover"
+        )
+    if not project_guidance_is_current(project):
+        warnings.append(
+            "The managed DZ section in AGENTS.md is missing or stale; propose install-guidance after the user confirms the takeover"
+        )
+    if workspace_comparison["uncertainty"]:
+        warnings.append(workspace_comparison["uncertainty"])
+
+    report = {
+        "installed_workflow_version": WORKFLOW_VERSION,
+        "project_workflow_version": state.get("workflow_version"),
+        "journal_records_reviewed": len(records),
+        "journal_history": history,
+        "current_state": state,
+        "workspace": {
+            "saved": saved_workspace,
+            "current": current_workspace,
+            **workspace_comparison,
+        },
+        "warnings": warnings,
+        "takeover_rules": {
+            "saved_next_action_is_advisory": True,
+            "reconcile_visible_conversation_and_current_files": True,
+            "report_present_and_proposed_execution_first": True,
+            "user_confirmation_required_before_new_mutation": True,
+            "confirmation_is_not_external_action_authorization": True,
+        },
+    }
+    print(json.dumps(report, ensure_ascii=False, indent=2))
 
 
 def recover_command(args: argparse.Namespace) -> None:
@@ -2596,6 +2906,7 @@ def build_parser() -> argparse.ArgumentParser:
     for name, handler in (
         ("check", check_command),
         ("show", show_command),
+        ("resume-report", resume_report_command),
         ("recover", recover_command),
         ("migrate", migrate_command),
         ("can-stop", can_stop_command),

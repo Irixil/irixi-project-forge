@@ -25,15 +25,15 @@ git clone https://github.com/Irixil/irixi-project-forge.git dz
 
 #### A. 平台支持 Agent Skills 或 Skill 文件夹
 
-在平台的 Skill 管理页面中，导入整个 `dz` 文件夹，或把平台的 Skill 目录指向这个文件夹。平台识别的入口文件是仓库根目录的 `SKILL.md`。
+在普通 Agent 平台的 Skill 管理页面中，导入整个 `dz` 文件夹；平台识别的入口文件是仓库根目录的 `SKILL.md`。Codex 本地安装请在下载目录运行 `python3 scripts/install_local_skill.py`，它会生成只有一个入口的独立 Skill，避免仓库里的插件入口被重复发现。
 
 加载以后，使用该平台实际支持的 Skill 选择器或明确调用语法。它可能显示成 `DZ — Irixi Project Forge`、`dz`、`@dz` 或 `$dz`。如果平台使用 `@` 菜单，就从菜单里选中；只有平台明确把 `$dz` 或其他文字定义为调用语法时，直接输入才会生效。随手打出 `@dz` 不一定会加载 Skill。
 
-DZ 允许 Codex 根据“开始或继续做应用、Agent、产品”的请求自动选择它，但第一次使用或排查问题时，仍建议从菜单明确选中一次。修改 Skill 后没有出现在菜单里，就重启 Codex。
+DZ 允许 Codex 根据“开始或继续做应用、Agent、产品”的请求自动选择它，但第一次使用或排查问题时，仍建议从菜单明确选中一次。仓库更新后，要先在仓库目录运行 `python3 scripts/install_local_skill.py --replace` 更新安装副本，再重启 Codex；只重启不会复制新文件。
 
-不要同时安装同一版本的“本地 Skill”和“插件版”，否则菜单中可能出现两个 DZ。两个入口最终使用同一套流程，但保留一个更清楚。
+不要同时安装同一版本的“本地 Skill”和“插件版”，否则菜单中仍可能出现两个 DZ。旧说明曾让用户把整个仓库软链接到 Codex 的 Skill 目录，这也会同时暴露根入口和插件内层入口；在仓库目录运行 `python3 scripts/install_local_skill.py --replace` 可以改成单入口安装。旧链接会移到 `~/.agents/skill-backups/`，原仓库不会被删除。
 
-想让第二天的新任务自动接着昨天做，请从具体项目文件夹打开 Agent，而不是只打开它的上一级大文件夹。DZ 建立项目账本时会把一段接续说明合并进项目的 `AGENTS.md`；旧项目可以按 [`references/project-state.md`](references/project-state.md) 运行一次 `install-guidance` 补上。其他平台只有在支持长期项目指令并持续开放同一批项目文件时，才能做到同样的自动接续。
+想让第二天的新任务接管昨天的项目，请从具体项目文件夹打开 Agent，而不是只打开它的上一级大文件夹。DZ 建立项目账本时会把一段接续说明合并进项目的 `AGENTS.md`。每次重新接管时，它会先运行只读 `resume-report`，读完每条有效日志，并在 Git 可用时比较上次保存的文件状态和现在的内容。旧项目说明过期时，它会先把刷新 `install-guidance` 列入建议，等用户确认接管后再执行。其他平台只有在支持长期项目指令并持续开放同一批项目文件时，才能做到同样的接续。
 
 #### B. Agent 能读取本地文件或项目文件夹，但没有 Skill 安装功能
 
@@ -44,7 +44,7 @@ DZ 允许 Codex 根据“开始或继续做应用、Agent、产品”的请求�
 
 先完整读取“<DZ 文件夹的绝对路径>/SKILL.md”。把它当作本次工作的工作方式，并按照其中“Load references progressively”的规则，只读取当前步骤需要的参考文件，不要一次加载整个 references 文件夹。
 
-开始前先根据你现在真实拥有的工具，说明你能否读取和修改我的项目、运行命令、打开网页和发布；不能确认的能力按没有处理。如果“<我的项目文件夹>”里已经有 .dz/state.json，先检查并从真实进度继续，不要重新开始。
+开始前先根据你现在真实拥有的工具，说明你能否读取和修改我的项目、运行命令、打开网页和发布；不能确认的能力按没有处理。如果“<我的项目文件夹>”里已经有 .dz/state.json，先把以前的记录、后来新增的操作和项目现在的内容对一遍。汇报现在做到哪、准备怎样继续，等我确认或更正后再行动；不要重新开始，也不要退回旧位置。
 
 我的事情是：<写下你的想法，或者说“整理这个做到一半的项目并继续”>。
 ```
@@ -88,7 +88,7 @@ DZ启动：<写下你的想法或当前做到哪里>。
 
 1. 它知道自己是在使用 DZ，而不是只回答一个普通问题；
 2. 它会按当前 Agent 的真实工具说明能做到哪一步，不会假装运行过测试；
-3. 新想法会先问一个最重要的问题，做到一半的项目会先整理现状，不会立刻乱写代码或重新从头问。
+3. 新想法会先问一个最重要的问题；做到一半的项目会先把旧记录和后来新增的操作与当前内容对齐，汇报准备怎样继续，等用户确认后再行动。
 
 如果它说“DZ 不在可用 Skill 清单”，但它确实可以读取文件，就使用上面的 B 方式给出完整路径。这样是手动加载，仍然可以运行 DZ；原生 Skill 菜单只是更方便的入口。
 
@@ -119,15 +119,15 @@ Do not download only `SKILL.md`. The full workflow progressively loads relevant 
 
 #### A. The host supports Agent Skills or Skill folders
 
-Import the complete `dz` folder through the host's Skill manager, or point its Skill directory at this folder. The Agent Skills entry point is the root `SKILL.md`.
+For an ordinary Agent host, import the complete `dz` folder through its Skill manager; the Agent Skills entry point is the root `SKILL.md`. For a local Codex installation, run `python3 scripts/install_local_skill.py` from the downloaded repository. It creates a standalone package with one entry and prevents the nested plugin entry from being discovered a second time.
 
 Invoke it through the host's actual Skill selector or documented invocation syntax. It may appear as `DZ — Irixi Project Forge`, `dz`, `@dz`, or `$dz`. If the host uses an `@` menu, select it there. Direct typing works only when the host explicitly defines that text as invocation syntax; merely typing `@dz` may not attach the Skill.
 
-DZ allows Codex to select it automatically when a request clearly starts or resumes an application, agent, or product. Explicit selection is still the clearest first-use and troubleshooting path. Restart Codex if an updated Skill does not appear in the selector.
+DZ allows Codex to select it automatically when a request clearly starts or resumes an application, agent, or product. Explicit selection is still the clearest first-use and troubleshooting path. After updating the repository, first run `python3 scripts/install_local_skill.py --replace` from that repository to refresh the installed copy, then restart Codex; restarting alone does not copy new files.
 
-Do not install the same version as both a local Skill and a plugin. That can show two DZ entries. They lead to the same workflow, so keep one installation.
+Do not install the same version as both a local Skill and a plugin. That can still show two DZ entries. Older instructions also symlinked the whole repository into Codex's Skill directory, which exposed both the root entry and the nested plugin entry. Run `python3 scripts/install_local_skill.py --replace` from the repository to convert that old symlink into a single-entry installation. The old link moves to `~/.agents/skill-backups/`, and the source repository is not deleted.
 
-To resume automatically in a new task tomorrow, open the agent from the exact project folder rather than only its parent container. When DZ initializes its ledger, it merges a continuity section into the project's `AGENTS.md`; an older project can run `install-guidance` once as described in [`references/project-state.md`](references/project-state.md). Another host can provide the same behavior only when it supports persistent project instructions and keeps the same project files available.
+To take over the project in a new task tomorrow, open the agent from the exact project folder rather than only its parent container. When DZ initializes its ledger, it merges a continuity section into the project's `AGENTS.md`. On every takeover, it first runs the read-only `resume-report`, reads every valid journal record, and compares the saved workspace checkpoint with the current Git worktree when available. If an older project has stale guidance, DZ proposes `install-guidance` and runs it only after the user confirms the takeover. Another host can provide the same continuity only when it supports persistent project instructions and keeps the same project files available.
 
 #### B. The agent can read local or project files but cannot install Skills
 
@@ -138,7 +138,7 @@ Start DZ.
 
 First read “<absolute path to the DZ folder>/SKILL.md” completely. Use it as the working method for this task. Follow its “Load references progressively” rules and read only the references needed for the current step; do not load the whole references folder at once.
 
-Before starting, use only the tools you can truly access to say whether you can read and modify my project, run commands, browse the web, and publish. Treat anything uncertain as unavailable. If “<my project folder>” already contains .dz/state.json, check it and continue from the real state instead of restarting.
+Before starting, use only the tools you can truly access to say whether you can read and modify my project, run commands, browse the web, and publish. Treat anything uncertain as unavailable. If “<my project folder>” already contains .dz/state.json, reconcile prior records and later work with the current project. Report the present and how you propose to continue, then wait for my correction or confirmation before acting. Do not restart or return to the old stopping point.
 
 My request is: <describe the idea, or say “organize and continue this unfinished project”>.
 ```
@@ -182,7 +182,7 @@ The first project reply should then demonstrate three things:
 
 1. The agent knows it is running DZ instead of merely answering a generic question.
 2. It states what the current host can really do and does not claim tests it never ran.
-3. It asks one high-value question for a new idea, or audits the current state of an unfinished project instead of coding blindly or restarting discovery.
+3. It asks one high-value question for a new idea; for an unfinished project, it reconciles saved records and later work with the current contents, reports the proposed execution, and waits for the user's correction or confirmation before acting.
 
 If it says that DZ is absent from the available Skill list but can read files, use method B with the exact path. That is a valid manual load; a native Skill selector is simply the more convenient entry point.
 
