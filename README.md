@@ -149,9 +149,13 @@ intent.md → spec.md → plan.md + code → verification.md → review/release.
 5. **Deploy**：检查访问控制、密钥、持久化、备份、监控、成本和回滚，输出 `review.md` 与 `release.md`。上线批准不等于上线成功。
 6. **Maintain**：把生产反馈、事故和指标转成可追踪证据，经人工判断后进入修复或新的 Intent。
 
-在能够读写项目并运行状态工具的环境里，DZ 用 `.dz/state.json` 保存当前快照，用 `.dz/journal.jsonl` 追加每次重要变化，并由状态工具生成 `PROJECT.md` 和 `docs/sdlc/work-items.md`。用户确认过的“为什么做、做成什么、怎么做”三份原文会合成一枚内容指纹，每项施工都绑在这枚指纹上；只要其中一份改变，旧施工和旧证明就不能悄悄沿用。每次检查前还要保存当前代码、构建或线上版本的真实观察证明，并生成一个新的检查批次；哪怕版本名字没变，重新设置检查对象也要重新跑完本批次的每条约定。旧结果只保留为历史。
+在能够读写项目并运行状态工具的环境里，DZ 用 `.dz/state.json` 保存当前快照，用 `.dz/journal.jsonl` 追加每次重要变化，并由状态工具生成 `PROJECT.md`、`docs/sdlc/work-items.md` 和 `docs/sdlc/issues.md`。用户确认过的“为什么做、做成什么、怎么做”三份原文会合成一枚内容指纹，每项施工都绑在这枚指纹上；只要其中一份改变，旧施工和旧证明就不能悄悄沿用。每次检查前还要保存当前代码、构建或线上版本的真实观察证明，并生成一个新的检查批次；哪怕版本名字没变，重新设置检查对象也要重新跑完本批次的每条约定。旧结果只保留为历史。
 
-在 Codex 中，建账命令还会把一段带标记的接续说明合并进项目 `AGENTS.md`，不会覆盖项目原有规则。以后从这个具体项目文件夹新建任务，或者在做到一半时再次调用 DZ，它会先运行只读的 `resume-report`：读完每条有效日志，并在 Git 可用时把上次保存的文件状态与现在比较。上次写下的“下一步”只是一条旧建议；如果中间已经有人继续修改，DZ 必须保留并说明这些变化，不能退回旧位置。无法可靠判断修改时间时，它会直说，不会猜。它先用大白话汇报现在做到哪、哪些能留下、哪里冲突、接下来建议怎样做，并和用户确认后再继续。旧 DZ 项目会先报告说明过期，把 `install-guidance` 列入建议；用户确认接管以后再刷新。
+开发、试用或上线后发现的重要问题也会单独记下来。DZ 自己判断它应该回到当前修理任务、补充用户会遇到的情况、修改动手方法、放到以后、重新讨论为什么做，还是先作为上线反馈观察；不会让小白选择技术分类，也不会把所有问题都塞进 PRD。只是代码没有做到原先已经说定的事，DZ 可以直接做小修并留下记录；如果会改变用户怎么用、保存或传出什么、谁能看到、花多少钱或这次做多少，必须先把原话、建议改法和影响完整给用户看，等用户同意后再动。
+
+“已经改了”不等于“真的好了”。没有亲手跑过能重现原问题的检查时，DZ 必须写成“已经改了，但还没证明真的解决”；只有当前版本实际通过检查，并留下以后能重复运行的防复发检查，才能写成已经解决。
+
+在 Codex 中，建账命令还会把一段带标记的接续说明合并进项目 `AGENTS.md`，不会覆盖项目原有规则。以后从这个具体项目文件夹新建任务，或者在做到一半时再次调用 DZ，它会先运行只读的 `resume-report`：读完每条有效日志、没有解决的问题和后来对问题做过的处理，并在 Git 可用时把上次保存的文件状态与现在比较。上次写下的“下一步”只是一条旧建议；如果中间已经有人继续修改，DZ 必须保留并说明这些变化，不能退回旧位置。无法可靠判断修改时间时，它会直说，不会猜。它先用大白话汇报现在做到哪、哪些能留下、发现了什么问题、哪里冲突、接下来建议怎样做，并和用户确认后再继续。旧 DZ 项目会先报告说明过期，把 `install-guidance` 列入建议；用户确认接管以后再刷新。
 
 账本格式已升级到 `1.1`。旧的 `1.0` 项目必须先运行迁移；工具会备份旧快照和日志、保留历史，并把无法确定属于哪份决定或哪次检查的内容降为“还没证明”，不会替用户猜。这个本地工具能检查前后记录是否一致、证明文件是否被改动，却不能证明 AI 写下的“用户已同意”或“测试真的执行过”一定真实，因为能改项目的 AI 也可能改账本并调用工具。需要防篡改的批准或验证，必须由 AI 无法控制的平台审批入口和测试执行器签发。其他接入程序要保存同样结构；普通聊天只能导出可复制的交接记录。`PROJECT.md` 不代替完整决定或验证证据。
 
@@ -322,6 +326,7 @@ dz/
     ├── takeover-resume.md
     ├── artifact-chain.md
     ├── project-state.md
+    ├── issue-learning-loop.md
     ├── artifacts/
     │   ├── intent.md
     │   ├── spec.md
@@ -341,7 +346,7 @@ dz/
 
 ### 验证
 
-Skill 与插件分别通过结构校验；项目账本有三十九组可运行测试，Codex 收尾检查有十组，单入口安装有三组，合计五十二组；另定义十九组新上下文行为测试：
+Skill 与插件分别通过结构校验；项目账本有四十二组可运行测试，Codex 收尾检查有十组，单入口安装有三组，合计五十五组；另定义二十组新上下文行为测试：
 
 1. 模糊的“服务所有人”想法；
 2. 区块链、RAG 和多 Agent 技术堆砌；
@@ -362,6 +367,7 @@ Skill 与插件分别通过结构校验；项目账本有三十九组可运行�
 17. 暂停后停止动作，换对话从账本恢复，取消后保留文件且不谎称完成；
 18. 用户可以随时收尾，但构建成功、网址可访问或接受风险都不能冒充验证通过；
 19. 中途再次调用时，必须把旧记录和后来新增的操作重新对齐，先汇报完整现状和准备怎样执行，用户确认后再继续，不能退回旧位置。
+20. 开发中发现的重要问题必须留下记录并由 DZ 自动分流；小修不反复打扰用户，改变原先约定时先给用户看完整改法；只有实际检查通过并留下防复发办法才能说问题解决。
 
 行为测试定义见 [`references/forward-tests.md`](references/forward-tests.md)。
 
@@ -520,9 +526,13 @@ intent.md → spec.md → plan.md + code → verification.md → review/release.
 5. **Deploy:** Review access, secrets, persistence, backup, monitoring, cost, and rollback in `review.md` and `release.md`. Release approval is not release completion.
 6. **Maintain:** Turn production feedback, incidents, and metrics into evidence, then route human-triaged changes into a bounded fix or new Intent.
 
-Where the host can read and write the project and run the state tool, DZ stores the current snapshot in `.dz/state.json`, appends important changes to `.dz/journal.jsonl`, and uses the tool to generate `PROJECT.md` plus `docs/sdlc/work-items.md`. The exact accepted Intent, Specification, and Plan form one combined contract digest to which delivery work is bound; changing any one prevents silent reuse. Before evidence is recorded, DZ saves inspectable proof of the observed code, build, or deployment and creates a fresh target epoch. Resetting the target requires every criterion to run again even when the visible revision and environment text are unchanged. Old results remain history.
+Where the host can read and write the project and run the state tool, DZ stores the current snapshot in `.dz/state.json`, appends important changes to `.dz/journal.jsonl`, and uses the tool to generate `PROJECT.md`, `docs/sdlc/work-items.md`, and `docs/sdlc/issues.md`. The exact accepted Intent, Specification, and Plan form one combined contract digest to which delivery work is bound; changing any one prevents silent reuse. Before evidence is recorded, DZ saves inspectable proof of the observed code, build, or deployment and creates a fresh target epoch. Resetting the target requires every criterion to run again even when the visible revision and environment text are unchanged. Old results remain history.
 
-On Codex, ledger initialization also merges a marked continuity section into the project's `AGENTS.md` without replacing existing rules. A later task opened from that exact project folder, or a mid-task re-invocation, first runs the read-only `resume-report`. It reads every valid journal record and, when Git is available, compares the latest saved workspace checkpoint with the current worktree. The saved next action is only an old proposal. DZ preserves work done after the save, names any comparison it cannot make reliably, explains the reconciled present and proposed execution in plain language, and waits for the user to correct or confirm it before continuing. For an older DZ project, it proposes `install-guidance` and refreshes the managed guidance only after that takeover confirmation.
+Material problems found during implementation, testing, use, or production are recorded separately. DZ chooses whether each one belongs with current repair work, a user-visible product decision, the technical approach, later work, the reason for the product, or production feedback. It never asks a beginner to choose technical categories and never dumps every problem into the PRD. A bounded defect inside already accepted behavior may be repaired without duplicate product approval. If the change affects how people use it, what is kept or sent, who can access it, material cost, or current scope, DZ first shows the old wording, complete proposed wording, and concrete impact, then waits for acceptance.
+
+“Changed” is not “fixed.” Until a check actually exercises the former failure, DZ records the issue as implemented but unproven. It becomes verified only when the current target passes and a repeatable regression check or equivalent prevention is retained.
+
+On Codex, ledger initialization also merges a marked continuity section into the project's `AGENTS.md` without replacing existing rules. A later task opened from that exact project folder, or a mid-task re-invocation, first runs the read-only `resume-report`. It reads every valid journal record, unresolved issue, and later issue change and, when Git is available, compares the latest saved workspace checkpoint with the current worktree. The saved next action is only an old proposal. DZ preserves work done after the save, names any comparison it cannot make reliably, explains the reconciled present, important problems, and proposed execution in plain language, and waits for the user to correct or confirm it before continuing. For an older DZ project, it proposes `install-guidance` and refreshes the managed guidance only after that takeover confirmation.
 
 State schema `1.1` requires an explicit migration from `1.0`. The tool first backs up the legacy snapshot and journal, preserves history, and downgrades records that cannot honestly be tied to the current contract and target instead of guessing. The local ledger checks consistency and artifact integrity; it is not trusted proof of human approval or test execution when the same AI can write its files and invoke its CLI. Tamper-resistant approvals and Passed claims require a host-controlled approval surface and runner outside the model's write authority. Other integrations must persist the equivalent structure; plain chat can only export a copyable handoff. `PROJECT.md` does not replace product decisions or verification evidence.
 
@@ -693,6 +703,7 @@ dz/
     ├── takeover-resume.md
     ├── artifact-chain.md
     ├── project-state.md
+    ├── issue-learning-loop.md
     ├── artifacts/
     │   ├── intent.md
     │   ├── spec.md
@@ -712,7 +723,7 @@ dz/
 
 ### Validation
 
-The Skill and plugin each pass their structural validator; the project ledger has thirty-nine runnable tests, the Codex closeout check has ten, and the single-entry installer has three, for fifty-two total; DZ also defines nineteen fresh-context behavioral test families:
+The Skill and plugin each pass their structural validator; the project ledger has forty-two runnable tests, the Codex closeout check has ten, and the single-entry installer has three, for fifty-five total; DZ also defines twenty fresh-context behavioral test families:
 
 1. a vague “product for everyone” idea;
 2. fashionable blockchain, RAG, and multi-agent over-scoping;
@@ -733,6 +744,7 @@ The Skill and plugin each pass their structural validator; the project ledger ha
 17. stop on pause, recover from the ledger in a fresh task, and preserve files without claiming completion after cancellation;
 18. allow the user to close at any time without treating a build, reachable URL, or risk acceptance as verified evidence;
 19. on mid-task re-invocation, reconcile saved records with later work, report the full present and proposed execution, wait for the user's correction or confirmation, and never jump back to the old stopping point.
+20. persist and route material problems without making beginners classify them, repair bounded defects without repeated interruption, require acceptance before product promises change, and require current Passed evidence plus regression protection before calling an issue fixed.
 
 See [`references/forward-tests.md`](references/forward-tests.md) for the behavioral oracles.
 

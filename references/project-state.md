@@ -16,11 +16,12 @@ It is not a security boundary. The CLI, state file, journal, and Stop hook norma
 .dz/migrations/*               # backups made by schema migration
 PROJECT.md                     # generated plain-language dashboard
 docs/sdlc/work-items.md        # generated work view
+docs/sdlc/issues.md            # generated material-problem view
 docs/sdlc/*.md                 # accepted decisions and detailed records
 docs/sdlc/evidence/*           # durable test, browser, model, or user-check output
 ```
 
-`state.json` is the current execution source. `PROJECT.md` and `work-items.md` are generated views. Accepted Intent, Specification, and Plan files remain the source for product decisions; verification and release files remain the source for detailed evidence. Never store secrets or private customer content in any ledger field.
+`state.json` is the current execution source. `PROJECT.md`, `work-items.md`, and `issues.md` are generated views. Accepted Intent, Specification, and Plan files remain the source for product decisions; verification and release files remain the source for detailed evidence. Never store secrets or private customer content in any ledger field.
 
 ```bash
 python3 <dz-skill>/scripts/dz_state.py init <project> --name "<project name>" --language zh
@@ -52,7 +53,7 @@ python3 <dz-skill>/scripts/dz_state.py migrate <project>
 
 On every meaningful stateful turn:
 
-1. Run the read-only `resume-report`, then reconcile its full journal history and workspace comparison with the visible conversation, accepted files, current files, and current evidence.
+1. Run the read-only `resume-report`, then reconcile its full journal history and workspace comparison with the visible conversation, accepted files, current files, current evidence, unresolved issues, and later issue changes.
 2. If the snapshot is damaged, run `recover` and say that recovery occurred. If the workflow guidance is stale, propose `install-guidance` and wait for the user's takeover confirmation before refreshing it.
 3. Compare the records with observable files and runtime facts; preserve discrepancies.
 4. Set one smallest safe next action before doing it.
@@ -94,6 +95,22 @@ python3 <dz-skill>/scripts/dz_state.py update-work <project> W1 --status verifie
 
 Every criterion for one work item must have intact Passed evidence under the same current contract and target epoch. A Passed record may resolve a Failed or Unverified gap only for the same work item, exact statement, and target epoch. A new target reruns every statement. Old evidence remains history and cannot cover a new deployment or a return to an older revision. Evidence is append-only; never delete, change, or reorder it to obtain a pass.
 
+## Material problems and learning
+
+Record a material problem as soon as it is observed. DZ chooses the internal kind from the evidence; never ask a beginner to choose a technical category. The kind automatically selects one durable route: current delivery work, Specification, Plan, backlog, Intent, or production feedback.
+
+```bash
+python3 <dz-skill>/scripts/dz_state.py add-issue <project> --id I1 --title "Accepted action fails" --kind implementation_gap --source "manual reproduction" --expected "the accepted action succeeds" --actual "it returns an error" --impact "the user cannot finish" --work-item W1
+python3 <dz-skill>/scripts/dz_state.py update-issue <project> I1 --status triaged
+python3 <dz-skill>/scripts/dz_state.py update-issue <project> I1 --status in_progress
+python3 <dz-skill>/scripts/dz_state.py update-issue <project> I1 --status implemented_unverified --resolution "smallest repair made"
+python3 <dz-skill>/scripts/dz_state.py update-issue <project> I1 --status verified --evidence E1 --prevention "repeatable regression check"
+```
+
+An implementation issue may move into implementation only when it links to work under the accepted current decision contract. `implemented_unverified` requires a resolution note. `verified` additionally requires linked current Passed evidence and a concrete regression check or equivalent prevention. `deferred` and `dismissed` require a retained reason. A failed update is not persisted, so a premature attempt to call an issue verified cannot rewrite its prior honest state.
+
+The ledger records routing; it does not silently rewrite accepted decisions. When the route is Specification, Plan, or Intent, create a complete visible successor Draft or decision-relevant diff and use the normal acceptance lifecycle before implementation. New ideas remain later work until selected. Production feedback stays in its feedback record until human triage. Follow `issue-learning-loop.md` for the interruption boundary and beginner-facing wording.
+
 ## Risk decisions and exact action leases
 
 Risk severity never causes an automatic refusal. Explain the concrete consequence, safer option, recovery, missing proof, and exact scope. The owner may choose safer handling, informed continuation, pause, or cancellation when they have authority to decide.
@@ -133,6 +150,6 @@ python3 <dz-skill>/scripts/dz_state.py set-run <project> --status active --next-
 
 `finished` is closed to ordinary mutations. Record an outstanding external action outcome if necessary, without reopening or upgrading the finished verdict. To do new project work, explicitly resume the run as `active` first. A move to `waiting_user`, `waiting_authorization`, `blocked`, or `paused` records an honest non-working state and does not permit new product actions.
 
-On resume or mid-task re-invocation, trust neither chat nor ledger alone and never treat the recorded next action as a command. Run `resume-report` so the tool reads every valid journal record and compares the latest saved workspace checkpoint with the current Git worktree. Reconcile that report with the full visible conversation, accepted records, current files, checks, and relevant running state. Preserve work performed after the latest saved record. When a reliable comparison is unavailable, say so and ask the user to correct the uncertain timing. Before new mutations, report the reconciled present and proposed execution in plain language, let the user correct it, and discuss how to proceed. Continue only after that checkpoint is confirmed; it does not retroactively accept product decisions or authorize an external action.
+On resume or mid-task re-invocation, trust neither chat nor ledger alone and never treat the recorded next action as a command. Run `resume-report` so the tool reads every valid journal record, unresolved issue, and later issue change, then compares the latest saved workspace checkpoint with the current Git worktree. Reconcile that report with the full visible conversation, accepted records, current files, checks, and relevant running state. Preserve work performed after the latest saved record. When a reliable comparison is unavailable, say so and ask the user to correct the uncertain timing. Before new mutations, report the reconciled present, material unresolved problems, and proposed execution in plain language, let the user correct it, and discuss how to proceed. Continue only after that checkpoint is confirmed; it does not retroactively accept product decisions or authorize an external action.
 
-The JSON Schema checks shape. `check` adds cross-record consistency for contract binding, target epoch, evidence, stage gates, journal continuity, and risk leases. Neither supplies trusted human or execution attestation by itself. A host lacking a trusted approval and execution channel must disclose that limitation instead of presenting the local ledger as tamper-proof proof.
+The JSON Schema checks shape. `check` adds cross-record consistency for contract binding, target epoch, evidence, issue routing and proof, stage gates, journal continuity, and risk leases. Neither supplies trusted human or execution attestation by itself. A host lacking a trusted approval and execution channel must disclose that limitation instead of presenting the local ledger as tamper-proof proof.

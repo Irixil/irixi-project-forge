@@ -10,6 +10,7 @@ docs/sdlc/intent.md                # Product decision
 docs/sdlc/spec.md                  # Product decision
 docs/sdlc/plan.md                  # Product and delivery decision
 docs/sdlc/work-items.md            # Generated work/evidence ledger
+docs/sdlc/issues.md                # Generated material-problem ledger
 docs/sdlc/verification.md          # Reproducible evidence
 docs/sdlc/review.md                # Independent disposition
 docs/sdlc/release.md               # Release authority and production evidence
@@ -30,6 +31,7 @@ Do not force every artifact into one status vocabulary:
 | `review.md` | In review → Changes required / Passed → Superseded | Independent reviewer disposition |
 | `release.md` | Draft → Approved → Deploying → Released / Rolled back → Superseded | Authorized approval, deployment, and post-release evidence |
 | feedback record | New → Triaged → Converted / Closed | Human triage |
+| issue ledger record | Open → Triaged / Waiting / In progress → Implemented unverified → Verified; or Deferred / Dismissed | Observable problem, selected route, current Passed evidence, and retained regression protection |
 
 Every artifact records its source of truth, preceding artifact or evidence, relevant revision/environment, and decision or evidence record. For Intent, Specification, and Plan, hash the complete visible Draft and record the unchanged digest, deciding owner, visible acceptance reference, and time. A timestamp, Git author, chat summary, or model assertion is not approval or proof.
 
@@ -92,7 +94,7 @@ Create this when the project location is known, project-record writes are author
 - Blocker and recovery condition:
 ```
 
-Update the state after every meaningful change, check, user decision, failure, risk decision, pause, cancellation, or handoff. Regenerate the dashboard and work ledger from that state; do not edit them into a second source of truth or copy full artifacts into them.
+Update the state after every meaningful change, check, user decision, failure, issue route or status change, risk decision, pause, cancellation, or handoff. Regenerate the dashboard, work ledger, and issue ledger from that state; do not edit them into a second source of truth or copy full artifacts into them.
 
 During a mid-task takeover, the plain-language continuity summary comes first. Update `PROJECT.md` only when writing is authorized and routing is clear. If code exists without accepted artifacts, record the implementation as candidate or unverified work; do not falsify past acceptance or discard it automatically.
 
@@ -109,6 +111,8 @@ The user may stop at any time. Record one of these without altering evidence:
 Risk acceptance permits the named action to continue; it never changes a failed or unverified result into Passed.
 
 ## Change routing
+
+First record and classify a material problem through [issue-learning-loop.md](issue-learning-loop.md). Preserve its ID in any successor Draft so later sessions can see why the accepted wording changed.
 
 - Evidence challenges the problem or outcome: revise and re-accept intent.
 - Experience, MVP, data, permissions, or acceptance changes: revise and re-accept spec.

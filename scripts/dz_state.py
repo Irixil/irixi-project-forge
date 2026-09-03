@@ -23,7 +23,7 @@ from typing import Any, Callable
 
 
 SCHEMA_VERSION = "1.1"
-WORKFLOW_VERSION = "2026-09-02.2"
+WORKFLOW_VERSION = "2026-09-03.1"
 
 RUN_STATUSES = {
     "active",
@@ -130,6 +130,50 @@ RISK_ACTION_KINDS = {
 AUTHORIZATION_ACTION_KINDS = RISK_ACTION_KINDS - {"informational"}
 TARGET_BOUND_ACTION_KINDS = {"public_release", "production_access"}
 EVIDENCE_RESULTS = {"passed", "failed", "unverified"}
+ISSUE_KINDS = {
+    "implementation_gap",
+    "specification_gap",
+    "plan_gap",
+    "new_idea",
+    "intent_conflict",
+    "production_feedback",
+}
+ISSUE_ROUTES = {
+    "implementation_gap": "work_item",
+    "specification_gap": "spec",
+    "plan_gap": "plan",
+    "new_idea": "backlog",
+    "intent_conflict": "intent",
+    "production_feedback": "feedback",
+}
+ISSUE_STATUSES = {
+    "open",
+    "triaged",
+    "waiting_user",
+    "in_progress",
+    "implemented_unverified",
+    "verified",
+    "deferred",
+    "dismissed",
+}
+ISSUE_TRANSITIONS = {
+    "open": {"triaged", "waiting_user", "deferred", "dismissed"},
+    "triaged": {"waiting_user", "in_progress", "deferred", "dismissed"},
+    "waiting_user": {"triaged", "deferred", "dismissed"},
+    "in_progress": {"implemented_unverified", "waiting_user", "deferred"},
+    "implemented_unverified": {"in_progress", "verified", "deferred"},
+    "verified": {"in_progress"},
+    "deferred": {"triaged", "waiting_user"},
+    "dismissed": set(),
+}
+UNRESOLVED_ISSUE_STATUSES = ISSUE_STATUSES - {"verified", "dismissed"}
+PRODUCT_BLOCKING_ISSUE_STATUSES = {
+    "open",
+    "triaged",
+    "waiting_user",
+    "in_progress",
+    "implemented_unverified",
+}
 BLOCKER_KINDS = {
     "missing_capability",
     "missing_authority",
@@ -143,7 +187,11 @@ GUIDANCE_END = "<!-- DZ-PROJECT-CONTINUITY:END -->"
 PROJECT_GUIDANCE_TEMPLATE = (
     Path(__file__).resolve().parents[1] / "assets" / "project" / "AGENTS.md"
 )
-WORKSPACE_IGNORED_PATHS = {"PROJECT.md", "docs/sdlc/work-items.md"}
+WORKSPACE_IGNORED_PATHS = {
+    "PROJECT.md",
+    "docs/sdlc/work-items.md",
+    "docs/sdlc/issues.md",
+}
 
 
 def now() -> str:
@@ -194,6 +242,7 @@ def project_paths(project: Path) -> dict[str, Path]:
         "journal": dz_dir / "journal.jsonl",
         "dashboard": project / "PROJECT.md",
         "work_items": project / "docs" / "sdlc" / "work-items.md",
+        "issues": project / "docs" / "sdlc" / "issues.md",
     }
 
 
@@ -433,6 +482,7 @@ def initial_state(name: str, language: str) -> dict[str, Any]:
         "work_items": [],
         "evidence": [],
         "risks": [],
+        "issues": [],
     }
 
 
@@ -570,7 +620,9 @@ def active_authorized_lease_errors(state: Any) -> list[str]:
 
 
 def derive_product_verdict(
-    work_items: list[dict[str, Any]], decisions: dict[str, Any]
+    work_items: list[dict[str, Any]],
+    decisions: dict[str, Any],
+    issues: list[dict[str, Any]] | None = None,
 ) -> str:
     if not accepted_decision_chain(decisions):
         return "not_assessed"
@@ -586,7 +638,16 @@ def derive_product_verdict(
     statuses = [item.get("status") for item in relevant]
     verified_count = sum(status == "verified" for status in statuses)
     if verified_count == len(statuses) and accepted_decision_chain(decisions):
-        return "verified"
+        blocking_issue = any(
+            item.get("status") in PRODUCT_BLOCKING_ISSUE_STATUSES
+            or (
+                item.get("kind") == "implementation_gap"
+                and item.get("status") not in {"verified", "dismissed"}
+            )
+            for item in (issues or [])
+            if isinstance(item, dict)
+        )
+        return "partially_verified" if blocking_issue else "verified"
     if verified_count:
         return "partially_verified"
     if any(status in {"in_progress", "implemented_unverified"} for status in statuses):
@@ -777,7 +838,9 @@ def reconcile_stale_artifacts(project: Path, state: dict[str, Any]) -> None:
                 "finish_reason": None,
             }
         )
-    derived_verdict = derive_product_verdict(state["work_items"], decisions)
+    derived_verdict = derive_product_verdict(
+        state["work_items"], decisions, state.get("issues", [])
+    )
     if (
         run.get("status") == "finished"
         and run.get("product_verdict") in VERDICT_RANK
@@ -816,9 +879,11 @@ def _validate_state(state: dict[str, Any], project_path: Path | None = None) -> 
         "work_items",
         "evidence",
         "risks",
+        "issues",
     }
+    required_root_fields = root_fields - {"issues"}
     unknown_root = set(state) - root_fields
-    missing_root = root_fields - set(state)
+    missing_root = required_root_fields - set(state)
     if unknown_root:
         errors.append(f"unknown root fields: {', '.join(sorted(unknown_root))}")
     if missing_root:
@@ -1128,6 +1193,7 @@ def _validate_state(state: dict[str, Any], project_path: Path | None = None) -> 
     raw_work_items = state.get("work_items")
     raw_evidence = state.get("evidence")
     raw_risks = state.get("risks")
+    raw_issues = state.get("issues", [])
     if not isinstance(raw_work_items, list):
         errors.append("work_items must be an array")
         raw_work_items = []
@@ -1137,14 +1203,19 @@ def _validate_state(state: dict[str, Any], project_path: Path | None = None) -> 
     if not isinstance(raw_risks, list):
         errors.append("risks must be an array")
         raw_risks = []
+    if not isinstance(raw_issues, list):
+        errors.append("issues must be an array")
+        raw_issues = []
 
     work_items: list[dict[str, Any]] = []
     evidence: list[dict[str, Any]] = []
     risks: list[dict[str, Any]] = []
+    issues: list[dict[str, Any]] = []
     for label, raw_items, valid_items in (
         ("work item", raw_work_items, work_items),
         ("evidence", raw_evidence, evidence),
         ("risk", raw_risks, risks),
+        ("issue", raw_issues, issues),
     ):
         for index, item in enumerate(raw_items):
             if not isinstance(item, dict):
@@ -1372,6 +1443,128 @@ def _validate_state(state: dict[str, Any], project_path: Path | None = None) -> 
                     f"{item_id}: verified work has unresolved evidence: {', '.join(unresolved)}"
                 )
 
+    issue_fields = {
+        "id",
+        "title",
+        "kind",
+        "status",
+        "source",
+        "expected",
+        "actual",
+        "impact",
+        "route",
+        "work_item_id",
+        "evidence_ids",
+        "resolution",
+        "prevention",
+        "created_at",
+        "updated_at",
+    }
+    for issue in issues:
+        issue_id = issue.get("id") if is_canonical_id(issue.get("id")) else ""
+        unknown = set(issue) - issue_fields
+        missing = issue_fields - set(issue)
+        if unknown:
+            errors.append(
+                f"{issue_id or 'issue'}: unknown fields: {', '.join(sorted(unknown))}"
+            )
+        if missing:
+            errors.append(
+                f"{issue_id or 'issue'}: missing fields: {', '.join(sorted(missing))}"
+            )
+        if not issue_id:
+            errors.append("every issue ID must be non-empty and contain no whitespace")
+        for field in (
+            "title",
+            "source",
+            "expected",
+            "actual",
+            "impact",
+            "created_at",
+            "updated_at",
+        ):
+            if not isinstance(issue.get(field), str) or not issue.get(field, "").strip():
+                errors.append(f"{issue_id or 'issue'}: {field} is required")
+        kind = issue.get("kind")
+        if kind not in ISSUE_KINDS:
+            errors.append(f"{issue_id or 'issue'}: invalid kind")
+        elif issue.get("route") != ISSUE_ROUTES[kind]:
+            errors.append(
+                f"{issue_id or 'issue'}: route must be {ISSUE_ROUTES[kind]} for {kind}"
+            )
+        status_value = issue.get("status")
+        if status_value not in ISSUE_STATUSES:
+            errors.append(f"{issue_id or 'issue'}: invalid status")
+        linked_work = issue.get("work_item_id")
+        if linked_work is not None:
+            if not is_canonical_id(linked_work):
+                errors.append(f"{issue_id or 'issue'}: work_item_id must be canonical or null")
+            elif linked_work not in work_by_id:
+                errors.append(f"{issue_id or 'issue'}: unknown work_item_id: {linked_work}")
+        linked_evidence = issue.get("evidence_ids")
+        if not isinstance(linked_evidence, list) or any(
+            not is_canonical_id(entry) for entry in (linked_evidence or [])
+        ):
+            errors.append(
+                f"{issue_id or 'issue'}: evidence_ids must contain canonical IDs without whitespace"
+            )
+            linked_evidence = []
+        elif len(linked_evidence) != len(set(linked_evidence)):
+            errors.append(f"{issue_id or 'issue'}: duplicate evidence_ids")
+        for evidence_id in linked_evidence:
+            proof = evidence_by_id.get(evidence_id)
+            if proof is None:
+                errors.append(f"{issue_id or 'issue'}: unknown evidence_id: {evidence_id}")
+            elif linked_work is not None and proof.get("work_item_id") != linked_work:
+                errors.append(
+                    f"{issue_id or 'issue'}: evidence {evidence_id} belongs to another work item"
+                )
+        for field in ("resolution", "prevention"):
+            if issue.get(field) is not None and (
+                not isinstance(issue.get(field), str) or not issue.get(field, "").strip()
+            ):
+                errors.append(f"{issue_id or 'issue'}: {field} must be text or null")
+        if status_value == "implemented_unverified" and not str(
+            issue.get("resolution") or ""
+        ).strip():
+            errors.append(
+                f"{issue_id or 'issue'}: implemented_unverified requires a resolution note"
+            )
+        if status_value in {"deferred", "dismissed"} and not str(
+            issue.get("resolution") or ""
+        ).strip():
+            errors.append(f"{issue_id or 'issue'}: {status_value} requires a reason")
+        if status_value == "verified":
+            if not str(issue.get("resolution") or "").strip():
+                errors.append(f"{issue_id or 'issue'}: verified requires a resolution note")
+            if not str(issue.get("prevention") or "").strip():
+                errors.append(f"{issue_id or 'issue'}: verified requires regression protection")
+            if not linked_evidence:
+                errors.append(f"{issue_id or 'issue'}: verified requires passed evidence")
+            for evidence_id in linked_evidence:
+                proof = evidence_by_id.get(evidence_id)
+                if proof is None:
+                    continue
+                if proof.get("result") != "passed":
+                    errors.append(
+                        f"{issue_id or 'issue'}: verified evidence {evidence_id} did not pass"
+                    )
+                if project_path is not None and not stored_file_matches(
+                    project_path, proof.get("artifact_path"), proof.get("artifact_sha256")
+                ):
+                    errors.append(
+                        f"{issue_id or 'issue'}: verified evidence {evidence_id} is missing or changed"
+                    )
+                selected_target = current_target(state)
+                if selected_target is None or (
+                    proof.get("target_id"),
+                    proof.get("revision"),
+                    proof.get("environment"),
+                ) != selected_target:
+                    errors.append(
+                        f"{issue_id or 'issue'}: verified evidence {evidence_id} is not for the current target"
+                    )
+
     risk_fields = {
         "id",
         "title",
@@ -1563,7 +1756,7 @@ def _validate_state(state: dict[str, Any], project_path: Path | None = None) -> 
         elif status == "active" and not risk_context_matches(state, authorized_risk):
             errors.append("active authorized risk lease no longer matches the current contract and target")
 
-    derived_verdict = derive_product_verdict(work_items, decisions)
+    derived_verdict = derive_product_verdict(work_items, decisions, issues)
     if status != "finished" and verdict in PRODUCT_VERDICTS and verdict != derived_verdict:
         errors.append(
             f"active product_verdict must match current records: {derived_verdict}"
@@ -1600,6 +1793,20 @@ def _validate_state(state: dict[str, Any], project_path: Path | None = None) -> 
             errors.append(
                 "verified verdict requires every required work item to be verified: "
                 + ", ".join(str(item) for item in unfinished)
+            )
+        blocking_issues = [
+            item.get("id")
+            for item in issues
+            if item.get("status") in PRODUCT_BLOCKING_ISSUE_STATUSES
+            or (
+                item.get("kind") == "implementation_gap"
+                and item.get("status") not in {"verified", "dismissed"}
+            )
+        ]
+        if blocking_issues:
+            errors.append(
+                "verified verdict cannot hide unresolved material issues: "
+                + ", ".join(str(item) for item in blocking_issues)
             )
     return errors
 
@@ -1919,6 +2126,24 @@ def label(value: str, language: str) -> str:
             "failed": "动作失败",
             "not_applicable": "不需要执行动作",
             "declined": "用户没有同意",
+            "open": "已记下，待判断",
+            "triaged": "已经分好去处",
+            "waiting_user": "等用户决定",
+            "in_progress": "正在处理",
+            "deferred": "留到以后",
+            "dismissed": "确认不用处理",
+            "implementation_gap": "原来说好的没做到",
+            "specification_gap": "原先没说清会怎样",
+            "plan_gap": "动手办法需要调整",
+            "new_idea": "以后可能再加的想法",
+            "intent_conflict": "为什么做这件事需要重看",
+            "production_feedback": "上线后收到的情况",
+            "work_item": "当前修理任务",
+            "spec": "补充用户会遇到的情况",
+            "plan": "调整动手办法",
+            "backlog": "放到以后",
+            "intent": "重新讨论为什么做",
+            "feedback": "继续记录上线反馈",
         },
         "en": {},
     }
@@ -1936,6 +2161,10 @@ def render(project: Path, state: dict[str, Any]) -> None:
     work_items = state["work_items"]
     risks = state["risks"]
     evidence = state["evidence"]
+    issues = state.get("issues", [])
+    unresolved_issues = [
+        item for item in issues if item.get("status") in UNRESOLVED_ISSUE_STATUSES
+    ]
     target = state.get("target") or {}
     target_summary = (
         f"{target.get('revision')} / {target.get('environment')} / {str(target.get('id'))[:12]}"
@@ -1968,6 +2197,8 @@ def render(project: Path, state: dict[str, Any]) -> None:
             "## 工作概览",
             f"- 共 {len(work_items)} 项；已检查 {sum(i['status'] == 'verified' for i in work_items)} 项；待检查 {sum(i['status'] == 'implemented_unverified' for i in work_items)} 项。",
             "- 详细记录：[docs/sdlc/work-items.md](docs/sdlc/work-items.md)",
+            f"- 共记录 {len(issues)} 个重要问题；其中 {len(unresolved_issues)} 个还没有彻底解决。",
+            "- 问题记录：[docs/sdlc/issues.md](docs/sdlc/issues.md)",
             "",
             "## 已知风险",
         ]
@@ -2010,6 +2241,8 @@ def render(project: Path, state: dict[str, Any]) -> None:
             "## Work overview",
             f"- {len(work_items)} total; {sum(i['status'] == 'verified' for i in work_items)} verified; {sum(i['status'] == 'implemented_unverified' for i in work_items)} implemented but unverified.",
             "- Details: [docs/sdlc/work-items.md](docs/sdlc/work-items.md)",
+            f"- {len(issues)} material issues recorded; {len(unresolved_issues)} are not fully resolved.",
+            "- Issues: [docs/sdlc/issues.md](docs/sdlc/issues.md)",
             "",
             "## Known risks",
         ]
@@ -2048,14 +2281,40 @@ def render(project: Path, state: dict[str, Any]) -> None:
     if not work_items:
         work_doc.append("| — | — | — | — | — | — | — | — |")
 
+    issue_doc = [
+        "# 问题清单" if language == "zh" else "# Issue ledger",
+        "",
+        "> 由 `.dz/state.json` 生成。DZ 判断问题该放到哪里；改变产品约定前仍需用户确认。"
+        if language == "zh"
+        else "> Generated from `.dz/state.json`. DZ chooses the route; product decisions still require user confirmation before they change.",
+        "",
+        "| ID | 问题 | 分类 | 去向 | 当前情况 | 影响 | 关联工作 | 验证证据 | 防止再犯 |"
+        if language == "zh"
+        else "| ID | Issue | Kind | Route | Status | Impact | Work | Evidence | Prevention |",
+        "|---|---|---|---|---|---|---|---|---|",
+    ]
+    for item in issues:
+        evidence_text = ", ".join(
+            markdown_cell(value) for value in item.get("evidence_ids", [])
+        ) or "—"
+        issue_doc.append(
+            f"| {markdown_cell(item['id'])} | {markdown_cell(item['title'])} | {label(item['kind'], language)} | {label(item['route'], language)} | {label(item['status'], language)} | {markdown_cell(item['impact'])} | {markdown_cell(item.get('work_item_id') or '—')} | {evidence_text} | {markdown_cell(item.get('prevention') or '—')} |"
+        )
+    if not issues:
+        issue_doc.append("| — | — | — | — | — | — | — | — | — |")
+
     atomic_write(paths["dashboard"], "\n".join(dashboard) + "\n")
     atomic_write(paths["work_items"], "\n".join(work_doc) + "\n")
+    atomic_write(paths["issues"], "\n".join(issue_doc) + "\n")
 
 
 def persist(project: Path, state: dict[str, Any], event: str) -> None:
+    state.setdefault("issues", [])
     if state["run"].get("status") != "finished":
         state["run"]["product_verdict"] = derive_product_verdict(
-            state.get("work_items", []), state.get("decisions", {})
+            state.get("work_items", []),
+            state.get("decisions", {}),
+            state.get("issues", []),
         )
     state["run"]["updated_at"] = now()
     errors = validate_state(state, project)
@@ -2169,10 +2428,23 @@ def resume_report_command(args: argparse.Namespace) -> None:
     history = []
     previous_run: dict[str, Any] = {}
     previous_decisions: dict[str, Any] = {}
+    previous_issues: dict[str, Any] = {}
     for record in records:
         record_state = record["state"]
         run = record_state.get("run", {})
         decisions = record_state.get("decisions", {})
+        issue_summary = {
+            item.get("id"): {
+                "title": item.get("title"),
+                "kind": item.get("kind"),
+                "route": item.get("route"),
+                "status": item.get("status"),
+                "resolution": item.get("resolution"),
+                "prevention": item.get("prevention"),
+            }
+            for item in record_state.get("issues", [])
+            if isinstance(item, dict) and is_canonical_id(item.get("id"))
+        }
         run_summary = {
             "status": run.get("status"),
             "stage": run.get("stage"),
@@ -2207,9 +2479,17 @@ def resume_report_command(args: argparse.Namespace) -> None:
             entry["run_changes"] = run_changes
         if decision_changes:
             entry["decision_changes"] = decision_changes
+        issue_changes = {
+            key: value
+            for key, value in issue_summary.items()
+            if previous_issues.get(key) != value
+        }
+        if issue_changes:
+            entry["issue_changes"] = issue_changes
         history.append(entry)
         previous_run = run_summary
         previous_decisions = decision_summary
+        previous_issues = issue_summary
 
     warnings = []
     if invalid_records:
@@ -2233,6 +2513,11 @@ def resume_report_command(args: argparse.Namespace) -> None:
         "journal_records_reviewed": len(records),
         "journal_history": history,
         "current_state": state,
+        "unresolved_issues": [
+            item
+            for item in state.get("issues", [])
+            if item.get("status") in UNRESOLVED_ISSUE_STATUSES
+        ],
         "workspace": {
             "saved": saved_workspace,
             "current": current_workspace,
@@ -2242,6 +2527,7 @@ def resume_report_command(args: argparse.Namespace) -> None:
         "takeover_rules": {
             "saved_next_action_is_advisory": True,
             "reconcile_visible_conversation_and_current_files": True,
+            "review_unresolved_issues_and_later_issue_changes": True,
             "report_present_and_proposed_execution_first": True,
             "user_confirmation_required_before_new_mutation": True,
             "confirmation_is_not_external_action_authorization": True,
@@ -2579,6 +2865,82 @@ def update_work_command(args: argparse.Namespace) -> None:
         item["updated_at"] = now()
 
     mutate(args.project.resolve(), f"update_work:{args.id}", change)
+
+
+def add_issue_command(args: argparse.Namespace) -> None:
+    def change(state: dict[str, Any]) -> None:
+        if not is_canonical_id(args.id):
+            raise ValueError("Issue IDs cannot contain whitespace")
+        if any(item.get("id") == args.id for item in state["issues"]):
+            raise ValueError(f"Issue already exists: {args.id}")
+        linked_work = None
+        if args.work_item is not None:
+            linked_work = find_by_id(
+                state["work_items"], args.work_item, "work item"
+            )["id"]
+        timestamp = now()
+        state["issues"].append(
+            {
+                "id": args.id,
+                "title": args.title,
+                "kind": args.kind,
+                "status": "open",
+                "source": args.source,
+                "expected": args.expected,
+                "actual": args.actual,
+                "impact": args.impact,
+                "route": ISSUE_ROUTES[args.kind],
+                "work_item_id": linked_work,
+                "evidence_ids": [],
+                "resolution": None,
+                "prevention": None,
+                "created_at": timestamp,
+                "updated_at": timestamp,
+            }
+        )
+
+    mutate(args.project.resolve(), f"add_issue:{args.id}", change)
+
+
+def update_issue_command(args: argparse.Namespace) -> None:
+    def change(state: dict[str, Any]) -> None:
+        issue = find_by_id(state["issues"], args.id, "issue")
+        if args.work_item is not None:
+            issue["work_item_id"] = find_by_id(
+                state["work_items"], args.work_item, "work item"
+            )["id"]
+        if args.evidence:
+            for evidence_id in args.evidence:
+                find_by_id(state["evidence"], evidence_id, "evidence")
+                if evidence_id not in issue["evidence_ids"]:
+                    issue["evidence_ids"].append(evidence_id)
+        if args.resolution is not None:
+            issue["resolution"] = args.resolution
+        if args.prevention is not None:
+            issue["prevention"] = args.prevention
+        if args.status is not None:
+            current = issue["status"]
+            if args.status != current and args.status not in ISSUE_TRANSITIONS[current]:
+                raise ValueError(f"Invalid issue transition: {current} -> {args.status}")
+            if args.status in {"in_progress", "implemented_unverified", "verified"}:
+                linked_work = issue.get("work_item_id")
+                if linked_work is None:
+                    raise ValueError(
+                        "Implementation progress needs a linked work item"
+                    )
+                work_item = find_by_id(state["work_items"], linked_work, "work item")
+                if (
+                    not accepted_decision_chain(state["decisions"])
+                    or work_item.get("contract_sha256")
+                    != accepted_contract_sha256(state["decisions"])
+                ):
+                    raise ValueError(
+                        "Implementation progress requires work under the accepted current decisions"
+                    )
+            issue["status"] = args.status
+        issue["updated_at"] = now()
+
+    mutate(args.project.resolve(), f"update_issue:{args.id}", change)
 
 
 def add_evidence_command(args: argparse.Namespace) -> None:
@@ -2971,6 +3333,28 @@ def build_parser() -> argparse.ArgumentParser:
     command.add_argument("--note")
     command.add_argument("--blocker")
     command.set_defaults(handler=update_work_command)
+
+    command = subparsers.add_parser("add-issue")
+    project_arg(command)
+    command.add_argument("--id", required=True)
+    command.add_argument("--title", required=True)
+    command.add_argument("--kind", required=True, choices=sorted(ISSUE_KINDS))
+    command.add_argument("--source", required=True)
+    command.add_argument("--expected", required=True)
+    command.add_argument("--actual", required=True)
+    command.add_argument("--impact", required=True)
+    command.add_argument("--work-item")
+    command.set_defaults(handler=add_issue_command)
+
+    command = subparsers.add_parser("update-issue")
+    project_arg(command)
+    command.add_argument("id")
+    command.add_argument("--status", choices=sorted(ISSUE_STATUSES))
+    command.add_argument("--work-item")
+    command.add_argument("--evidence", action="append")
+    command.add_argument("--resolution")
+    command.add_argument("--prevention")
+    command.set_defaults(handler=update_issue_command)
 
     command = subparsers.add_parser("add-evidence")
     project_arg(command)

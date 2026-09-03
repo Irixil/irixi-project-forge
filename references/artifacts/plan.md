@@ -57,6 +57,10 @@ Read accepted intent and specification, repository rules, code, and environment.
 ## Alternatives not chosen
 - Alternative — why rejected now — revisit trigger:
 
+## Changes from recorded problems (successor Draft only)
+| Issue ID | Old accepted approach | Complete proposed approach | Concrete product, cost, migration, dependency, or operating effect |
+|---|---|---|---|
+
 ## Authorization points
 - Account, credential, cost, sensitive data, external write, data change, legal/open-source compliance decision, or release requiring fresh action:
 

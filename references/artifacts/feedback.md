@@ -24,6 +24,7 @@ Monitoring begins read-only. It may draft this record in chat or another non-per
 ## Human triage
 - Dismiss / monitor / bounded defect within current spec / create new intent:
 - Named decision owner and rationale:
+- Linked issue-ledger ID and selected route:
 
 ## Regression protection
 - Test, eval, monitor, runbook, or `AGENTS.md` lesson added:

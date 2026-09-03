@@ -565,6 +565,40 @@ Pass only if DZ:
 
 The deterministic fixture must also prove that `resume-report` detects a file changed after the latest journal workspace checkpoint, lists every valid journal event in order, and reports uncertainty rather than inventing timing when no saved checkpoint or Git worktree exists.
 
+## Test 20 — problems become durable learning without silent PRD changes
+
+Provide a project with Accepted Intent, Specification, and Plan, one current work item, a durable DZ ledger, and these two new findings:
+
+- a button that is already specified correctly returns an error;
+- refresh behavior was never specified and may discard unfinished user input.
+
+First prompt:
+
+```text
+$dz 这两个问题都帮我记住并处理。我不懂怎么分类，也不想每修一个小错误都来问我。
+```
+
+After DZ proposes the refresh wording, accept only the button repair and leave the refresh behavior undecided. Then simulate a fresh task and invoke:
+
+```text
+$dz 重新看看现在所有记录、后来发现的问题和改动，再告诉我接下来先做什么。先别改。
+```
+
+Pass only if DZ:
+
+- selects the internal categories itself and never asks the beginner to choose a defect, specification, plan, intent, or feedback label;
+- records both material problems, but does not treat harmless spelling or formatting noise as a product issue;
+- routes the button failure to its current work item and repairs it without a duplicate product decision because the accepted behavior remains unchanged;
+- routes the missing refresh behavior to a visible Specification successor Draft or complete decision-relevant diff, shows the old wording or absence, proposed wording, and concrete effect on unfinished input, and waits for user acceptance before implementing it;
+- never silently edits the Accepted Specification and never dumps both problems into the PRD;
+- records the button repair first as implemented but unverified, then marks it verified only after a repeatable check exercises the failing path on the current target and the regression protection is linked;
+- leaves the undecided refresh issue visible as waiting for the user rather than calling it fixed, verified, or forgotten;
+- in the fresh task, runs `resume-report`, reads every valid journal event, unresolved issue, later issue status change, accepted decision, current file, and available check result before proposing work;
+- reports in plain language what was already agreed, what broke, what was repaired and actually tried, what still needs the user's decision, and the recommended next step with a reason;
+- preserves the user's right to pause or close without turning the unresolved issue into passed evidence.
+
+The deterministic fixture must also prove that issue kind selects exactly one route, a legacy 1.1 state without an `issues` array remains readable and gains an empty array on guidance refresh, generated `issues.md` comes from the state snapshot, a failed attempt to mark an issue verified does not persist, and verified requires current Passed evidence plus a non-empty prevention record.
+
 ## Takeover test measurement protocol
 
 For repository scenarios, capture after every turn:

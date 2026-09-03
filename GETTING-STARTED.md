@@ -33,7 +33,9 @@ DZ 允许 Codex 根据“开始或继续做应用、Agent、产品”的请求�
 
 不要同时安装同一版本的“本地 Skill”和“插件版”，否则菜单中仍可能出现两个 DZ。旧说明曾让用户把整个仓库软链接到 Codex 的 Skill 目录，这也会同时暴露根入口和插件内层入口；在仓库目录运行 `python3 scripts/install_local_skill.py --replace` 可以改成单入口安装。旧链接会移到 `~/.agents/skill-backups/`，原仓库不会被删除。
 
-想让第二天的新任务接管昨天的项目，请从具体项目文件夹打开 Agent，而不是只打开它的上一级大文件夹。DZ 建立项目账本时会把一段接续说明合并进项目的 `AGENTS.md`。每次重新接管时，它会先运行只读 `resume-report`，读完每条有效日志，并在 Git 可用时比较上次保存的文件状态和现在的内容。旧项目说明过期时，它会先把刷新 `install-guidance` 列入建议，等用户确认接管后再执行。其他平台只有在支持长期项目指令并持续开放同一批项目文件时，才能做到同样的接续。
+想让第二天的新任务接管昨天的项目，请从具体项目文件夹打开 Agent，而不是只打开它的上一级大文件夹。DZ 建立项目账本时会把一段接续说明合并进项目的 `AGENTS.md`。每次重新接管时，它会先运行只读 `resume-report`，读完每条有效日志、还没解决的问题和后来对问题做过的处理，并在 Git 可用时比较上次保存的文件状态和现在的内容。旧项目说明过期时，它会先把刷新 `install-guidance` 列入建议，等用户确认接管后再执行。其他平台只有在支持长期项目指令并持续开放同一批项目文件时，才能做到同样的接续。
+
+DZ 会把开发和试用中真正影响结果的问题写进项目账本，并自己判断该去修代码、补充原先说法、修改动手办法、留到以后还是重新讨论。小白不用选择技术分类。只是修回原先已经说定的行为时可以直接小修；如果会改变用户怎么用、保存或传出什么、谁能看到、花多少钱或这次做多少，DZ 会先把原话、建议改法和影响给用户看。没有实际跑过能重现原问题的检查时，只能说“已经改了，但还没证明真的解决”。
 
 #### B. Agent 能读取本地文件或项目文件夹，但没有 Skill 安装功能
 
@@ -127,7 +129,9 @@ DZ allows Codex to select it automatically when a request clearly starts or resu
 
 Do not install the same version as both a local Skill and a plugin. That can still show two DZ entries. Older instructions also symlinked the whole repository into Codex's Skill directory, which exposed both the root entry and the nested plugin entry. Run `python3 scripts/install_local_skill.py --replace` from the repository to convert that old symlink into a single-entry installation. The old link moves to `~/.agents/skill-backups/`, and the source repository is not deleted.
 
-To take over the project in a new task tomorrow, open the agent from the exact project folder rather than only its parent container. When DZ initializes its ledger, it merges a continuity section into the project's `AGENTS.md`. On every takeover, it first runs the read-only `resume-report`, reads every valid journal record, and compares the saved workspace checkpoint with the current Git worktree when available. If an older project has stale guidance, DZ proposes `install-guidance` and runs it only after the user confirms the takeover. Another host can provide the same continuity only when it supports persistent project instructions and keeps the same project files available.
+To take over the project in a new task tomorrow, open the agent from the exact project folder rather than only its parent container. When DZ initializes its ledger, it merges a continuity section into the project's `AGENTS.md`. On every takeover, it first runs the read-only `resume-report`, reads every valid journal record, unresolved issue, and later issue change, and compares the saved workspace checkpoint with the current Git worktree when available. If an older project has stale guidance, DZ proposes `install-guidance` and runs it only after the user confirms the takeover. Another host can provide the same continuity only when it supports persistent project instructions and keeps the same project files available.
+
+DZ records material problems found during implementation or use and chooses whether each belongs in code repair, a product wording change, the technical approach, later work, or a reopened product purpose. The beginner never has to select technical categories. A small defect may be repaired directly when it only restores already accepted behavior. Changes to how people use it, what is stored or sent, who can access it, material cost, or current scope are shown as old wording, proposed wording, and concrete impact before user acceptance. Without a check that exercises the former failure, DZ says the change is implemented but not yet proven.
 
 #### B. The agent can read local or project files but cannot install Skills
 

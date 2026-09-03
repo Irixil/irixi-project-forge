@@ -58,6 +58,10 @@
     "risks": {
       "type": "array",
       "items": {"$ref": "#/$defs/risk"}
+    },
+    "issues": {
+      "type": "array",
+      "items": {"$ref": "#/$defs/issue"}
     }
   },
   "allOf": [
@@ -352,6 +356,70 @@
         "resolves": {"type": "array", "items": {"type": "string", "pattern": "^[^\\s]+$"}, "uniqueItems": true},
         "recorded_at": {"type": "string", "format": "date-time"}
       }
+    },
+    "issue": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["id", "title", "kind", "status", "source", "expected", "actual", "impact", "route", "work_item_id", "evidence_ids", "resolution", "prevention", "created_at", "updated_at"],
+      "properties": {
+        "id": {"type": "string", "pattern": "^[^\\s]+$"},
+        "title": {"type": "string", "minLength": 1},
+        "kind": {"enum": ["implementation_gap", "specification_gap", "plan_gap", "new_idea", "intent_conflict", "production_feedback"]},
+        "status": {"enum": ["open", "triaged", "waiting_user", "in_progress", "implemented_unverified", "verified", "deferred", "dismissed"]},
+        "source": {"type": "string", "minLength": 1},
+        "expected": {"type": "string", "minLength": 1},
+        "actual": {"type": "string", "minLength": 1},
+        "impact": {"type": "string", "minLength": 1},
+        "route": {"enum": ["work_item", "spec", "plan", "backlog", "intent", "feedback"]},
+        "work_item_id": {"anyOf": [{"type": "string", "pattern": "^[^\\s]+$"}, {"type": "null"}]},
+        "evidence_ids": {"type": "array", "items": {"type": "string", "pattern": "^[^\\s]+$"}, "uniqueItems": true},
+        "resolution": {"type": ["string", "null"]},
+        "prevention": {"type": ["string", "null"]},
+        "created_at": {"type": "string", "format": "date-time"},
+        "updated_at": {"type": "string", "format": "date-time"}
+      },
+      "allOf": [
+        {
+          "if": {"properties": {"kind": {"const": "implementation_gap"}}},
+          "then": {"properties": {"route": {"const": "work_item"}}}
+        },
+        {
+          "if": {"properties": {"kind": {"const": "specification_gap"}}},
+          "then": {"properties": {"route": {"const": "spec"}}}
+        },
+        {
+          "if": {"properties": {"kind": {"const": "plan_gap"}}},
+          "then": {"properties": {"route": {"const": "plan"}}}
+        },
+        {
+          "if": {"properties": {"kind": {"const": "new_idea"}}},
+          "then": {"properties": {"route": {"const": "backlog"}}}
+        },
+        {
+          "if": {"properties": {"kind": {"const": "intent_conflict"}}},
+          "then": {"properties": {"route": {"const": "intent"}}}
+        },
+        {
+          "if": {"properties": {"kind": {"const": "production_feedback"}}},
+          "then": {"properties": {"route": {"const": "feedback"}}}
+        },
+        {
+          "if": {"properties": {"status": {"const": "implemented_unverified"}}},
+          "then": {"properties": {"resolution": {"type": "string", "minLength": 1}}}
+        },
+        {
+          "if": {"properties": {"status": {"enum": ["deferred", "dismissed"]}}},
+          "then": {"properties": {"resolution": {"type": "string", "minLength": 1}}}
+        },
+        {
+          "if": {"properties": {"status": {"const": "verified"}}},
+          "then": {"properties": {
+            "resolution": {"type": "string", "minLength": 1},
+            "prevention": {"type": "string", "minLength": 1},
+            "evidence_ids": {"minItems": 1}
+          }}
+        }
+      ]
     },
     "risk": {
       "type": "object",

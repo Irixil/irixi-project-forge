@@ -21,7 +21,7 @@ Inspect only what is available and relevant:
 
 1. The current user's latest request and the full visible conversation: original goal, corrections, explicit decisions, rejected options, promised next action, approvals, tool results, failures, unfinished questions, and work performed since DZ last wrote project state.
 2. Repository guidance and state the host can access: `AGENTS.md`, `CLAUDE.md`, `GEMINI.md`, or another active instruction file; `PROJECT.md`; `docs/sdlc`; README; version-control status and diff; branch or isolated workspace; relevant source and tests; run instructions; and current plan.
-   When `.dz/state.json` exists, run the current DZ state tool's read-only `resume-report`. It must validate the snapshot, read every valid journal record, show the saved run history, and compare the latest saved workspace checkpoint with the current Git worktree when available. Reconcile that report with current files, test artifacts, and relevant running state. If no saved comparison exists, state that the timing of later changes is uncertain instead of guessing. If the snapshot is damaged, recover from `.dz/journal.jsonl` and report the recovery. If project guidance is stale, propose `install-guidance` and wait for the takeover confirmation before running it. The ledger is a saved account of execution, not permission to ignore later work and not proof that a decision was accepted or a test passed.
+   When `.dz/state.json` exists, run the current DZ state tool's read-only `resume-report`. It must validate the snapshot, read every valid journal record, show the saved run history, list unresolved issues and later issue changes, and compare the latest saved workspace checkpoint with the current Git worktree when available. Reconcile that report with current files, test artifacts, and relevant running state. If no saved comparison exists, state that the timing of later changes is uncertain instead of guessing. If the snapshot is damaged, recover from `.dz/journal.jsonl` and report the recovery. If project guidance is stale, propose `install-guidance` and wait for the takeover confirmation before running it. The ledger is a saved account of execution, not permission to ignore later work and not proof that a decision was accepted or a test passed.
 3. Evidence: exact commands and outputs, test or eval results, screenshots or browser evidence, review findings, release records, and known failures.
 4. Operational state when relevant: running task or terminal state, migrations, external side effects, deployment environment, and rollback readiness.
 
@@ -106,7 +106,7 @@ Do not list every file, replay the entire conversation, or print labels such as 
 - The continuity summary is not formal acceptance of a product artifact, but it is a required resume checkpoint. Before new edits, commands, paid calls, external writes, or release actions, show the summary and proposed execution, let the user correct them, and wait for confirmation. After confirmation, carry out the agreed next step without repeatedly asking about unchanged details.
 - Keep just-in-time boundaries for credentials, sensitive data, paid calls, external writes, destructive actions, migrations, and release.
 - At handoff or pause, update `PROJECT.md` and the current evidence artifact only when writing is authorized, so a later task can resume without reconstructing everything again.
-- When persistent state is available, update `.dz/state.json` after every meaningful change and regenerate `PROJECT.md` and `work-items.md`. A user pause, cancellation, or early closure is a legal stopping state and never becomes verified completion.
+- When persistent state is available, update `.dz/state.json` after every meaningful change and regenerate `PROJECT.md`, `work-items.md`, and `issues.md`. A user pause, cancellation, or early closure is a legal stopping state and never becomes verified completion.
 
 ## Takeover completion standard
 
@@ -117,6 +117,7 @@ Takeover is complete when:
 - existing changes have a keep/review decision rather than being ignored;
 - the earliest missing or reopened gate is named;
 - current evidence and authorization boundaries are explicit;
+- unresolved, deferred, and recently changed material problems are accounted for and routed;
 - the user sees the recommended next actions, their order, why they are recommended, and any meaningful alternative in plain language;
 - the user has confirmed or corrected the current-position summary and discussed how to proceed;
 - the workflow has resumed from that agreed present position without discarding later work or repeating settled questions.

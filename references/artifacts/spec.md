@@ -63,6 +63,10 @@ Read accepted `intent.md` before drafting.
 ## Assumptions and unresolved questions
 - Assumption — confidence — validation method — owner:
 
+## Changes from recorded problems (successor Draft only)
+| Issue ID | Old accepted wording or missing case | Complete proposed wording | Concrete user, information, access, cost, or scope effect |
+|---|---|---|---|
+
 ## Handbook applicability
 - Applicable technical, frontend, and deployment baselines:
 - Defaults intentionally not used and why:

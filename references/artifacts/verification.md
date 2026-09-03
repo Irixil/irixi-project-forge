@@ -30,6 +30,10 @@ Update throughout Build and finalize in Test. This is evidence, not a human-acce
 ## Findings and corrections
 - Finding — severity — fix — recheck evidence:
 
+## Recorded-issue regression evidence
+| Issue ID | Former failure reproduced | Repair | Current-target recheck | Repeatable prevention | Verdict |
+|---|---|---|---|---|---|
+
 ## Unverified and limitations
 - Item — reason — impact — next action:
 

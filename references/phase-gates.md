@@ -16,7 +16,7 @@ Use everyday language with users. Internal state and gate names exist to prevent
 
 - State: `TAKEOVER_AUDIT`.
 - Read the full visible conversation, saved records, and current project state before asking discovery questions or changing files. Look specifically for work performed after the latest saved record.
-- Follow [takeover-resume.md](takeover-resume.md) to run the read-only `resume-report` when available, read every valid saved event, compare the saved workspace checkpoint with the current project, separate observed work from gate-supported state, preserve valid work, treat the saved next action as advisory until reconciled, and identify the earliest missing or contradicted gate.
+- Follow [takeover-resume.md](takeover-resume.md) to run the read-only `resume-report` when available, read every valid saved event, unresolved issue, and later issue change, compare the saved workspace checkpoint with the current project, separate observed work from gate-supported state, preserve valid work, treat the saved next action as advisory until reconciled, and identify the earliest missing or contradicted gate.
 - Show the reconciled present plus the recommended execution order and reasons. Let the user correct it and discuss how to proceed before making new changes. Then resume from that agreed present position. Do not restart from Discovery when accepted evidence supports a later stage, and do not treat existing code as proof that earlier gates passed.
 
 ### New idea
@@ -301,6 +301,8 @@ It may shorten documents, but the three confirmations still happen separately: s
 If the utility mutates local user files or data, the accepted specification and plan must include a preview or dry run, collision and idempotency behavior, an inspectable change manifest, a tested undo or rollback path, and fresh authorization for the real apply step. Test on disposable copies before originals.
 
 ## Reopening rules
+
+First classify and record a material problem through [issue-learning-loop.md](issue-learning-loop.md). A bounded implementation defect returns only to its responsible work item. A missing or changed product promise, technical plan, product purpose, later idea, or production report goes to its matching durable home; do not copy every problem into the PRD.
 
 - Evidence contradicts the problem or value: reopen Intent.
 - A request changes experience, scope, data, permissions, or acceptance: reopen Specification.

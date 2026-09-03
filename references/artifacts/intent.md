@@ -35,6 +35,10 @@ Draft only after discovery is concrete enough for review.
 ## Assumptions and open questions
 - Assumption — confidence — validation method:
 
+## Changes from recorded problems (successor Draft only)
+| Issue ID | Evidence that challenges the old intent | Complete proposed intent change | Concrete effect on who is helped, which trouble matters, or how usefulness is judged |
+|---|---|---|---|
+
 ## Kill criteria
 - Evidence that would cause us to stop, narrow, or rethink:
 

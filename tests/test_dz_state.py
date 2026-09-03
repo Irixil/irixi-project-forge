@@ -81,7 +81,7 @@ class DzStateTests(unittest.TestCase):
             "Do not make new project changes until the user confirms", refreshed
         )
         self.assertIn("resume-report", refreshed)
-        self.assertIn("2026-09-02.2", refreshed)
+        self.assertIn("2026-09-03.1", refreshed)
 
     def test_resume_report_reads_all_journal_records_and_reports_uncertainty_without_git(self):
         self.cli(
@@ -146,19 +146,22 @@ class DzStateTests(unittest.TestCase):
         journal_path = self.project / ".dz" / "journal.jsonl"
         state = self.state()
         state["workflow_version"] = "2026-09-02.1"
+        state.pop("issues")
         state_path.write_text(
             json.dumps(state, ensure_ascii=False, indent=2) + "\n", encoding="utf-8"
         )
         records = journal_path.read_text(encoding="utf-8").splitlines()
         latest = json.loads(records[-1])
         latest["state"]["workflow_version"] = "2026-09-02.1"
+        latest["state"].pop("issues")
         records[-1] = json.dumps(latest, ensure_ascii=False, separators=(",", ":"))
         journal_path.write_text("\n".join(records) + "\n", encoding="utf-8")
 
         stale = self.cli("check", str(self.project), expected=1)
         self.assertIn("install-guidance", stale.stderr)
         self.cli("install-guidance", str(self.project))
-        self.assertEqual(self.state()["workflow_version"], "2026-09-02.2")
+        self.assertEqual(self.state()["workflow_version"], "2026-09-03.1")
+        self.assertEqual(self.state()["issues"], [])
         self.cli("check", str(self.project))
 
     def evidence_proof(self, evidence_id, revision="rev-1", environment="test"):
@@ -519,6 +522,177 @@ class DzStateTests(unittest.TestCase):
         self.assertEqual(self.state()["decisions"]["intent"]["status"], "accepted")
         self.assertIn("Visible task", (self.project / "docs" / "sdlc" / "work-items.md").read_text())
         self.assertTrue((self.project / "PROJECT.md").is_file())
+
+    def test_issue_is_routed_and_returned_by_resume_report(self):
+        routes = {
+            "implementation_gap": "work_item",
+            "specification_gap": "spec",
+            "plan_gap": "plan",
+            "new_idea": "backlog",
+            "intent_conflict": "intent",
+            "production_feedback": "feedback",
+        }
+        for index, (kind, route) in enumerate(routes.items(), start=1):
+            self.cli(
+                "add-issue",
+                str(self.project),
+                "--id",
+                f"I{index}",
+                "--title",
+                "Refresh behavior was never agreed"
+                if kind == "specification_gap"
+                else kind,
+                "--kind",
+                kind,
+                "--source",
+                "tester reproduced the missing state",
+                "--expected",
+                "the user knows what should happen",
+                "--actual",
+                "the current records or product disagree",
+                "--impact",
+                "users may not get the expected result",
+            )
+            issue = self.state()["issues"][-1]
+            self.assertEqual(issue["route"], route)
+            self.assertEqual(issue["status"], "open")
+        issue_view = (self.project / "docs" / "sdlc" / "issues.md").read_text()
+        self.assertIn("Refresh behavior was never agreed", issue_view)
+
+        report = json.loads(self.cli("resume-report", str(self.project)).stdout)
+        self.assertEqual(
+            {item["id"] for item in report["unresolved_issues"]},
+            {f"I{index}" for index in range(1, 7)},
+        )
+        self.assertTrue(
+            any("I1" in entry.get("issue_changes", {}) for entry in report["journal_history"])
+        )
+        self.assertTrue(
+            report["takeover_rules"]["review_unresolved_issues_and_later_issue_changes"]
+        )
+
+    def test_issue_cannot_be_called_verified_without_proof_and_prevention(self):
+        self.add_work()
+        self.cli(
+            "add-issue",
+            str(self.project),
+            "--id",
+            "I1",
+            "--title",
+            "Accepted button action fails",
+            "--kind",
+            "implementation_gap",
+            "--source",
+            "manual test",
+            "--expected",
+            "the accepted action succeeds",
+            "--actual",
+            "the action returns an error",
+            "--impact",
+            "the user cannot finish the flow",
+            "--work-item",
+            "W1",
+        )
+        self.cli("update-issue", str(self.project), "I1", "--status", "triaged")
+        self.cli("update-issue", str(self.project), "I1", "--status", "in_progress")
+        self.cli(
+            "update-issue",
+            str(self.project),
+            "I1",
+            "--status",
+            "implemented_unverified",
+            "--resolution",
+            "Handled the failing response",
+        )
+        failed = self.cli(
+            "update-issue",
+            str(self.project),
+            "I1",
+            "--status",
+            "verified",
+            expected=1,
+        )
+        self.assertIn("regression protection", failed.stderr)
+        self.assertEqual(self.state()["issues"][0]["status"], "implemented_unverified")
+
+        self.cli("update-work", str(self.project), "W1", "--status", "in_progress")
+        self.cli(
+            "add-evidence",
+            str(self.project),
+            "--id",
+            "E1",
+            "--work-item",
+            "W1",
+            "--acceptance",
+            self.DEFAULT_ACCEPTANCE,
+            "--kind",
+            "regression test",
+            "--claim",
+            "The failure stays fixed",
+            "--source",
+            "python -m unittest issue_regression",
+            *self.evidence_proof("E1"),
+            "--result",
+            "passed",
+        )
+        self.cli(
+            "update-issue",
+            str(self.project),
+            "I1",
+            "--status",
+            "verified",
+            "--evidence",
+            "E1",
+            "--prevention",
+            "A repeatable regression test now covers the failure",
+        )
+        issue = self.state()["issues"][0]
+        self.assertEqual(issue["status"], "verified")
+        self.assertEqual(issue["evidence_ids"], ["E1"])
+
+    def test_verified_close_cannot_hide_a_known_implementation_gap(self):
+        self.add_work()
+        self.verify_default_work()
+        self.cli(
+            "add-issue",
+            str(self.project),
+            "--id",
+            "I1",
+            "--title",
+            "Known accepted path is broken",
+            "--kind",
+            "implementation_gap",
+            "--source",
+            "user report with reproduction",
+            "--expected",
+            "the accepted path succeeds",
+            "--actual",
+            "the accepted path fails",
+            "--impact",
+            "the user cannot finish",
+            "--work-item",
+            "W1",
+        )
+        result = self.cli(
+            "close",
+            str(self.project),
+            "--verdict",
+            "verified",
+            "--reason",
+            "Attempted verified close",
+            expected=1,
+        )
+        self.assertIn("cannot hide unresolved material issues", result.stderr)
+        self.assertEqual(self.state()["run"]["product_verdict"], "partially_verified")
+        self.cli(
+            "close",
+            str(self.project),
+            "--verdict",
+            "partially_verified",
+            "--reason",
+            "User chose to stop with the issue still open",
+        )
+        self.assertEqual(self.state()["run"]["status"], "finished")
 
     def test_acceptance_is_required_and_optional_work_cannot_verify_product(self):
         self.cli(

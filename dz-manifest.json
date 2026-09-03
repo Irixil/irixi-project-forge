@@ -1,6 +1,6 @@
 {
   "protocol_version": "1.0",
-  "workflow_version": "2026-09-02.2",
+  "workflow_version": "2026-09-03.1",
   "id": "dz",
   "name": "Irixi Project Forge",
   "description": "A platform-neutral workflow that guides a nontechnical user from an idea or current project state to a verified product or an honest implementation handoff.",
@@ -36,6 +36,9 @@
     "project_state_schema": "schemas/dz-project-state.schema.json",
     "project_state_tool": "scripts/dz_state.py",
     "resume_report_command": "scripts/dz_state.py resume-report",
+    "issue_guide": "references/issue-learning-loop.md",
+    "issue_add_command": "scripts/dz_state.py add-issue",
+    "issue_update_command": "scripts/dz_state.py update-issue",
     "local_skill_installer": "scripts/install_local_skill.py",
     "codex_project_guidance": "assets/project/AGENTS.md",
     "codex_stop_hook": "scripts/dz_codex_stop_hook.py",
@@ -54,7 +57,8 @@
     "workflow": [
       "references/phase-gates.md",
       "references/artifact-chain.md",
-      "references/project-state.md"
+      "references/project-state.md",
+      "references/issue-learning-loop.md"
     ],
     "delivery": [
       "references/handbook-routing.md",
@@ -164,6 +168,12 @@
     "resume_reports_and_discusses_proposed_execution": true,
     "resume_reads_every_valid_journal_record": true,
     "resume_compares_saved_workspace_checkpoint": true,
+    "material_issues_are_durable": true,
+    "issue_routing_is_ai_owned": true,
+    "accepted_product_records_never_change_silently": true,
+    "bounded_defects_do_not_require_duplicate_product_approval": true,
+    "verified_issue_requires_passed_evidence_and_regression_protection": true,
+    "resume_reads_unresolved_and_later_issue_changes": true,
     "durable_state_after_meaningful_work": true,
     "codex_implicit_invocation_enabled": true,
     "codex_project_guidance_on_init": true,
