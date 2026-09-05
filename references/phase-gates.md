@@ -2,6 +2,8 @@
 
 The six stages are a loop, not a waterfall. A stage may return to an earlier artifact when evidence changes the product. What must remain linear is decision authority: an unaccepted artifact cannot trigger the next stage.
 
+At any stage, a user-proposed modification is evaluated before it changes the product. Follow [change-proposal-review.md](change-proposal-review.md): keep the intended benefit separate from the proposed mechanism, give one professional verdict, expose the main hole and opportunity cost, and route an accepted result to the earliest governing artifact it changes. A tiny reversible improvement inside accepted behavior may stay with its current work item; confidence or urgency does not bypass a material review.
+
 ```text
 PLAN → DESIGN → BUILD → TEST → DEPLOY → MAINTAIN
   ↑                                         │
@@ -287,6 +289,8 @@ Keep the product aligned with user outcomes and turn real failures into durable 
 
 Monitoring may diagnose read-only and present a feedback or proposed-intent Draft without persisting it. Writing that record, creating code, a branch, commit, PR, external write, or production change must re-enter the applicable gates and receive fresh authorization; monitoring cannot inherit that authority by triggering itself.
 
+A bounded repair may reuse still-current accepted product and implementation decisions, but never a former release decision. Before the repair reaches production, rerun the affected checks on the new revision, retain independent review where required, show what passed, failed, and remains untried, and obtain fresh release authorization for that exact revision and environment. Tell the user this path when presenting the repair or PR; do not let the workflow appear to end at “open a PR.”
+
 ## Fast Track boundary
 
 Fast Track is allowed only when all are true:
@@ -301,6 +305,8 @@ It may shorten documents, but the three confirmations still happen separately: s
 If the utility mutates local user files or data, the accepted specification and plan must include a preview or dry run, collision and idempotency behavior, an inspectable change manifest, a tested undo or rollback path, and fresh authorization for the real apply step. Test on disposable copies before originals.
 
 ## Reopening rules
+
+Before reopening, assess the proposal rather than assuming every new request deserves current investment. “Do not adopt now” goes to the backlog or decision history with the reason; “Test first” creates only the smallest permitted learning step; “Adopt with changes” presents the improved complete wording; “Adopt” still follows the normal acceptance and authorization rules.
 
 First classify and record a material problem through [issue-learning-loop.md](issue-learning-loop.md). A bounded implementation defect returns only to its responsible work item. A missing or changed product promise, technical plan, product purpose, later idea, or production report goes to its matching durable home; do not copy every problem into the PRD.
 

@@ -2,6 +2,8 @@
 
 Use this reference whenever development, testing, review, or real use reveals a material problem. The purpose is to stop the same mistake from being forgotten or rediscovered while keeping accepted product decisions under human control.
 
+A user's proposed modification may be a response to a real problem, but it is not automatically the right repair. First use [change-proposal-review.md](change-proposal-review.md) to assess its value, holes, side effects, and better form. Then route an observed problem here; route a new idea, accepted product change, or technical-route change to its existing governing home.
+
 ## What to record
 
 Record a problem when it changes a user outcome, blocks an accepted flow, reveals a missing state or edge case, contradicts an accepted assumption, creates meaningful cost or safety exposure, or is likely to recur. Do not fill the ledger with one-off spelling fixes or harmless noise unless repetition makes them material.

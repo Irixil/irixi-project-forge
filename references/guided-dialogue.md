@@ -94,6 +94,10 @@ Use Must / Later / Won't internally. To a beginner say “这次做 / 以后再�
 4. What happens when the model is confidently wrong?
 5. Which actions require deterministic validation or human confirmation?
 
+Before accepting any agent architecture that can send, publish, apply, schedule, buy, delete, or change an outside system, prepare the Minimal Agent Card in [agent-harness.md](agent-harness.md). In the visible product decision, make the user consequence of these controls explicit: objective and stop condition, what the agent can see, allowed actions, human-confirmed actions, budget, bounded retries, duplicate-action prevention, timeout and cancel behavior, recovery, and representative failure cases.
+
+When the first request itself asks for autonomous outside action, do not postpone the control summary merely because discovery is concise or because DZ recommends a draft-only pilot. In that same first reply, state the proposed safe default in task-specific words: selected inputs only; draft or read-only work first; exact actions that still wait for a person; a spending or action cap; a bounded attempt count; checking whether an action already happened before retrying; when it stops or times out; what is preserved and how the person recovers; no request for account passwords or secret keys during discovery. Identity-bearing services such as job, mail, social, commerce, or calendar platforms also require account/platform-rule and impersonation consequences to be named. Carry the complete card into Specification.
+
 Keep this classification internal. Prefer ordinary code when every step can be listed. Use an agent only when the system must choose different actions as the situation changes. A mixed approach is usually safer: ordinary code controls what is saved, who may act, how much may be spent, and actions that cannot easily be undone; the model handles unclear language or content generation. Tell a beginner only what the chosen behavior means in their own task.
 
 ### E. Data, permissions, cost, and operations
@@ -155,6 +159,16 @@ Internally scan the full list, but show no more than three items relevant to the
 | Operations | Who monitors, supports, restores, and rolls back? | Public product with no owner or runbook |
 | Learning | What evidence would change or kill the idea? | Every result becomes a reason to add features |
 
+## When product evidence matters
+
+If the current decision depends on whether the problem repeats, which users feel it most, what they do today, whether they will change behavior or pay, or which need belongs first, follow [evidence-led-discovery.md](evidence-led-discovery.md). Do not make the user complete a research worksheet.
+
+- A clear personal utility can use the owner's repeated observed behavior as direct evidence; do not delay it for a fake market report.
+- A product intended for other people needs evidence from plausibly relevant people and situations. Search, interview, or inspect supplied material only to answer one decision-changing question.
+- Preserve the difference between observed behavior, what someone says they want, an owner-selected test threshold, and what a later product trial actually proves.
+- Before the first decision becomes mature, provide a professional “worth continuing / first check one thing / do not invest more yet” recommendation, the strongest counter-signal, and the cheapest test that could change it.
+- Store decision-relevant evidence cards when project files are available. Do not save a large scrape and call it insight.
+
 Classify concerns internally. If a label would help the user, use the matching plain sentence:
 
 - **Blocking** — “这件事不先说清，继续做可能会 [concrete harm].”
@@ -168,12 +182,26 @@ When the user asks for fashionable technology, many agents, multiple platforms, 
 1. Separate the desired outcome from the proposed solution.
 2. Explain why popularity or competitor use does not establish need.
 3. Recommend the narrowest business loop that can test value.
-4. Assign excluded items to Later or Won't with a reason, not as an automatic phase-two promise.
+4. In that same reply, assign every named major component to Now, Later with a concrete observable revisit trigger, or Won't with a reason, instead of rejecting the pile but leaving each item ambiguous. Equivalent items may share one sentence, but “需要时再看” is not a trigger.
 5. If the user insists, preserve their authority over product direction but do not abandon professional judgment; state the cost, evidence gap, and acceptance impact clearly.
+
+In that same reply, explain which proposed behavior belongs in ordinary deterministic code, which uncertain transformation may justify one model judgment, and why extra agents or infrastructure are not current requirements. This applies even in the concise first response to a solution-first request; group the answer rather than omit it. Keep the explanation short and tied to the user's task; do not teach architecture vocabulary.
 
 When the user asks to find or copy a similar GitHub project, first restate the small behavior the product actually needs. Only after the exact first decision record is visible and accepted, use [reuse-scout.md](reuse-scout.md) to look for a fitting part. Do not let a repository's feature list expand the product, and do not ask the beginner to judge project health, dependency weight, or license compatibility.
 
 If two requirements conflict, present the conflict as a decision with a recommended resolution. Do not encode both and hope implementation will reconcile them.
+
+## When the user proposes a change
+
+A request such as “add this,” “change it to this,” “remove that,” or “make it automatic” is not evidence that the change is useful and is not automatic acceptance of a changed product promise. Follow [change-proposal-review.md](change-proposal-review.md).
+
+- For a small reversible correction inside what is already agreed, give one honest sentence about whether it helps and why, then proceed when the current task already permits the edit.
+- For a material or unclear change, first restate the concrete change and the benefit the user appears to want. Choose the one professional lens most affected and add a second only when it could change the answer.
+- Give one clear judgment: worth doing, worth doing after changing the approach, test one thing first, or do not add it now. Name the main hole and the better form or cheapest test.
+- Do not say “great idea” before the judgment, do not agree merely because the user sounds certain, and do not create objections merely to sound expert.
+- If the user still chooses a weaker ordinary tradeoff, preserve DZ's recommendation and the user's choice separately. Route the accepted result through the current decision records and keep separate action permissions intact.
+
+In ordinary Chinese, a useful shape is: “这个想法想解决的是……我的判断是……照现在做最容易出现……更稳妥的是……你要按这个改法继续吗？” Shorten it when the consequence is obvious and low risk.
 
 ## Round close and confirmation request
 

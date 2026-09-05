@@ -26,10 +26,10 @@ Read accepted intent and specification, repository rules, code, and environment.
 - Candidates: exact repository URL, immutable commit or published artifact, relevant files permitted for review, and evidence date:
 - Useful part only, plus what will not be imported:
 - Actual use and distribution mode: unmodified/modified; source/binary; static/dynamic linking or IPC; SaaS/API; internal/external distribution; outbound product license:
-- License, file-level notices, attribution/source/source-offer duties, service commercial/data/termination terms, shipped locations, and unresolved legal question:
+- License or separate rights-holder permission, permission evidence and scope when used, file-level notices, attribution/source/source-offer duties or explicit waiver, service commercial/data/termination terms, shipped locations, and unresolved legal question:
 - Named authorized legal/open-source compliance owner, exact review scope, evidence, and conclusion when triggered; unresolved rights mean reject/block, not accepted risk:
 - Maintenance, tests, documentation, advisories, direct/transitive dependencies, install behavior, services, accounts, network calls, information sent out, permissions, and cost:
-- Disposition for each: maintained package or stable API / adapt small licensed module / independently implement pattern / reject / bounded technical-fit experiment only after rights, origin, and supply-chain hard gates pass:
+- Disposition for each: maintained package or stable API / adapt small licensed or separately permitted module / independently implement pattern / reject / bounded technical-fit experiment only after rights, origin, and supply-chain hard gates pass:
 - Chosen integration boundary, immutable source, resolved lockfile, artifact integrity value or digest, internal owner, update rule, and removal or replacement path:
 - Experiment boundary when applicable: question; success threshold; time and cost ceiling; discard condition; passed hard gates; isolated non-privileged sandbox/container; mounts and host access; network allowlist; lifecycle-script controls; resource limits; action log; destroy evidence:
 - Planned SBOM tied to release digest, or minimum manual inventory and tooling limitation:
@@ -57,9 +57,9 @@ Read accepted intent and specification, repository rules, code, and environment.
 ## Alternatives not chosen
 - Alternative — why rejected now — revisit trigger:
 
-## Changes from recorded problems (successor Draft only)
-| Issue ID | Old accepted approach | Complete proposed approach | Concrete product, cost, migration, dependency, or operating effect |
-|---|---|---|---|
+## Changes from assessed proposals or recorded problems (successor Draft only)
+| Proposal conversation/journal reference or Issue ID | Intended benefit, professional verdict, and main hole | Old accepted approach | Complete proposed approach | Concrete product, cost, migration, dependency, or operating effect |
+|---|---|---|---|---|
 
 ## Authorization points
 - Account, credential, cost, sensitive data, external write, data change, legal/open-source compliance decision, or release requiring fresh action:

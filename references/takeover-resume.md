@@ -54,7 +54,16 @@ The first substantive takeover response should be a compact, user-readable summa
 我建议接下来：[name the small actions, order, and reason, plus one meaningful option when it changes the outcome]. Ask whether this account is correct and how the user wants to proceed.
 ```
 
-Do not list every file, replay the entire conversation, or print labels such as `TAKEOVER_AUDIT`, “gate-supported state,” `Intent`, or `Specification` unless the user asks for technical detail. Avoid “现有进度,” “成果,” “验证,” “真实环境,” and “真人试用.” Say exactly what was made, what changed later, what was tried, by whom, and what happened. For example, replace “两项检查通过” with the two observed results, and replace “还缺真人试用” with “还没请以后要用它的人亲手从头做到尾.” Keep the reply to four short lines or four bullets, normally under about 220 Chinese characters or 140 English words, and ask one question that both invites correction and opens discussion of the proposed execution. Use up to three questions only during a genuine incident when delay increases harm and they cannot be decided separately.
+Do not list every file, replay the entire conversation, or print labels such as `TAKEOVER_AUDIT`, “gate-supported state,” `Intent`, or `Specification` unless the user asks for technical detail. Avoid “现有进度,” “成果,” “验证,” “真实环境,” and “真人试用.” Say exactly what was made, what changed later, what was tried, by whom, and what happened. For example, replace “两项检查通过” with the two observed results, and replace “还缺真人试用” with “还没请以后要用它的人亲手从头做到尾.” Keep the entire beginner-facing takeover report to exactly one compact block: at most four one-sentence lines or bullets, normally under about 220 Chinese characters or 140 English words, with no second audit list or explanatory paragraph before or after it. Group internal detail instead of leaking it. The fourth line contains the recommended next step, reason, meaningful alternative when needed, and one question that invites correction and discussion. Use up to three questions only during a genuine incident when delay increases harm and they cannot be decided separately.
+
+Compact example:
+
+```text
+- 以前：页面能粘贴留言；空着会提醒，旧价格问题也能拆开。
+- 后来：没有发现别的已证明改动，这两项可以留着。
+- 还缺：店主没从头试完，所以不知道回复是否真能用。
+- 建议：先请一位店主试一条打码留言，免得继续改错方向。这样接着做对吗？
+```
 
 ## Route by takeover shape
 

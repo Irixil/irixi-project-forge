@@ -1,6 +1,6 @@
 # DZ Project Continuity
 
-DZ workflow guidance version: `2026-09-03.1`.
+DZ workflow guidance version: `2026-09-05.3`.
 
 This repository is a DZ project. Before product, application, or agent work, load the installed `dz` Skill. In Codex, if the selector did not attach it, read `$HOME/.agents/skills/dz/SKILL.md` directly. On another host, use its installed DZ entry or persistent project instruction. If DZ cannot be loaded, say so instead of silently using an ordinary workflow.
 

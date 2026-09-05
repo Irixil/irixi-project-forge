@@ -23,7 +23,7 @@ from typing import Any, Callable
 
 
 SCHEMA_VERSION = "1.1"
-WORKFLOW_VERSION = "2026-09-03.1"
+WORKFLOW_VERSION = "2026-09-05.3"
 
 RUN_STATUSES = {
     "active",

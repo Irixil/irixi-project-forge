@@ -17,11 +17,12 @@ It is not a security boundary. The CLI, state file, journal, and Stop hook norma
 PROJECT.md                     # generated plain-language dashboard
 docs/sdlc/work-items.md        # generated work view
 docs/sdlc/issues.md            # generated material-problem view
+docs/sdlc/discovery-evidence.md # optional decision-relevant user and market evidence cards
 docs/sdlc/*.md                 # accepted decisions and detailed records
 docs/sdlc/evidence/*           # durable test, browser, model, or user-check output
 ```
 
-`state.json` is the current execution source. `PROJECT.md`, `work-items.md`, and `issues.md` are generated views. Accepted Intent, Specification, and Plan files remain the source for product decisions; verification and release files remain the source for detailed evidence. Never store secrets or private customer content in any ledger field.
+`state.json` is the current execution source. `PROJECT.md`, `work-items.md`, and `issues.md` are generated views. Accepted Intent, Specification, and Plan files remain the source for product decisions; `discovery-evidence.md` stores only decision-relevant source cards and their limits; verification and release files remain the source for product-result evidence. Never store secrets or private customer content in any ledger field.
 
 ```bash
 python3 <dz-skill>/scripts/dz_state.py init <project> --name "<project name>" --language zh
@@ -111,6 +112,8 @@ An implementation issue may move into implementation only when it links to work 
 
 The ledger records routing; it does not silently rewrite accepted decisions. When the route is Specification, Plan, or Intent, create a complete visible successor Draft or decision-relevant diff and use the normal acceptance lifecycle before implementation. New ideas remain later work until selected. Production feedback stays in its feedback record until human triage. Follow `issue-learning-loop.md` for the interruption boundary and beginner-facing wording.
 
+When records appear duplicated, contradictory, stale, orphaned, or falsely complete, run the focused audit in `project-record-health.md`. Repair generated views from state, preserve historical evidence, and route each material finding through its existing canonical home. Do not create a second permanent status or issue system.
+
 ## Risk decisions and exact action leases
 
 Risk severity never causes an automatic refusal. Explain the concrete consequence, safer option, recovery, missing proof, and exact scope. The owner may choose safer handling, informed continuation, pause, or cancellation when they have authority to decide.
@@ -149,6 +152,8 @@ python3 <dz-skill>/scripts/dz_state.py set-run <project> --status active --next-
 - `finished + verified`: every required current-contract work item passed on the explicit current target.
 
 `finished` is closed to ordinary mutations. Record an outstanding external action outcome if necessary, without reopening or upgrading the finished verdict. To do new project work, explicitly resume the run as `active` first. A move to `waiting_user`, `waiting_authorization`, `blocked`, or `paused` records an honest non-working state and does not permit new product actions.
+
+For a nontechnical user, a pause or close reply is one compact block of at most four one-sentence lines or bullets, normally under about 220 Chinese characters. Group the facts as: what exists and was actually tried; what remains unfinished or unproven; whether an outside task was really stopped; and the saved next step or honest closing result. Do not add a second status list, filenames, or internal codes. A detailed durable handoff may remain in project files or be linked only when the user asks.
 
 On resume or mid-task re-invocation, trust neither chat nor ledger alone and never treat the recorded next action as a command. Run `resume-report` so the tool reads every valid journal record, unresolved issue, and later issue change, then compares the latest saved workspace checkpoint with the current Git worktree. Reconcile that report with the full visible conversation, accepted records, current files, checks, and relevant running state. Preserve work performed after the latest saved record. When a reliable comparison is unavailable, say so and ask the user to correct the uncertain timing. Before new mutations, report the reconciled present, material unresolved problems, and proposed execution in plain language, let the user correct it, and discuss how to proceed. Continue only after that checkpoint is confirmed; it does not retroactively accept product decisions or authorize an external action.
 

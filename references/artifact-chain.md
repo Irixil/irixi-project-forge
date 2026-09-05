@@ -7,6 +7,7 @@ PROJECT.md                         # Status dashboard and links
 .dz/state.json                     # Current execution snapshot
 .dz/journal.jsonl                  # Append-only recovery snapshots
 docs/sdlc/intent.md                # Product decision
+docs/sdlc/discovery-evidence.md    # Optional evidence cards and research limitations supporting Intent
 docs/sdlc/spec.md                  # Product decision
 docs/sdlc/plan.md                  # Product and delivery decision
 docs/sdlc/work-items.md            # Generated work/evidence ledger
@@ -112,7 +113,7 @@ Risk acceptance permits the named action to continue; it never changes a failed 
 
 ## Change routing
 
-First record and classify a material problem through [issue-learning-loop.md](issue-learning-loop.md). Preserve its ID in any successor Draft so later sessions can see why the accepted wording changed.
+First assess a user-proposed modification through [change-proposal-review.md](change-proposal-review.md). If it responds to an observed material problem, also classify that problem through [issue-learning-loop.md](issue-learning-loop.md). Preserve the proposal's conversation or journal reference, or the issue ID when one exists, in any successor Draft so later sessions can see why the accepted wording changed. Do not create an issue merely to store an unsupported feature idea.
 
 - Evidence challenges the problem or outcome: revise and re-accept intent.
 - Experience, MVP, data, permissions, or acceptance changes: revise and re-accept spec.

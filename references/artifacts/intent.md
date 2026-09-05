@@ -22,12 +22,24 @@ Draft only after discovery is concrete enough for review.
 - Current behavior:
 - Main pain or loss:
 - Why the workaround is insufficient:
-- Available evidence:
+- Available evidence IDs, source kinds, and limits:
 
 ## Desired outcome
 - Observable user change:
-- Initial success signals:
+- Initial success signals and whether each is observed evidence or an owner-chosen test threshold:
 - Why now:
+
+## Evidence and current recommendation
+- Recommendation: Proceed / Proceed if / Hold or rethink
+- Strongest supporting evidence:
+- Strongest contrary or missing evidence:
+- Cheapest decisive test:
+
+| Evidence ID | What was observed | Source and date | What it supports | What it does not prove | Confidence |
+|---|---|---|---|---|---|
+| | | | | | |
+
+> Omit the table only when this is a clear personal utility and the owner's own repeated behavior is the direct evidence. Never invent a citation to make the document look complete. Keep detailed cards in `discovery-evidence.md` when research materially affects the decision.
 
 ## Constraints
 - Time, budget, platform, data, privacy, permissions, or policy:
@@ -35,9 +47,9 @@ Draft only after discovery is concrete enough for review.
 ## Assumptions and open questions
 - Assumption — confidence — validation method:
 
-## Changes from recorded problems (successor Draft only)
-| Issue ID | Evidence that challenges the old intent | Complete proposed intent change | Concrete effect on who is helped, which trouble matters, or how usefulness is judged |
-|---|---|---|---|
+## Changes from assessed proposals or recorded problems (successor Draft only)
+| Proposal conversation/journal reference or Issue ID | Intended benefit, professional verdict, and main hole | Evidence that challenges the old intent | Complete proposed intent change | Concrete effect on who is helped, which trouble matters, or how usefulness is judged |
+|---|---|---|---|---|
 
 ## Kill criteria
 - Evidence that would cause us to stop, narrow, or rethink:

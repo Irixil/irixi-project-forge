@@ -1,12 +1,13 @@
 {
   "protocol_version": "1.0",
-  "workflow_version": "2026-09-03.1",
+  "workflow_version": "2026-09-05.3",
   "id": "dz",
   "name": "Irixi Project Forge",
   "description": "A platform-neutral workflow that guides a nontechnical user from an idea or current project state to a verified product or an honest implementation handoff.",
   "source": "https://github.com/Irixil/irixi-project-forge",
   "raw_base_url": "https://raw.githubusercontent.com/Irixil/irixi-project-forge/main/",
   "distribution": {
+    "plugin_version": "1.0.4",
     "default_channel": "main",
     "default_channel_is_mutable": true,
     "reproducible_loading": "Replace main in raw_base_url with an explicit Git commit SHA."
@@ -54,11 +55,18 @@
       "references/guided-dialogue.md",
       "references/takeover-resume.md"
     ],
+    "product_evidence": [
+      "references/evidence-led-discovery.md"
+    ],
+    "change_review": [
+      "references/change-proposal-review.md"
+    ],
     "workflow": [
       "references/phase-gates.md",
       "references/artifact-chain.md",
       "references/project-state.md",
-      "references/issue-learning-loop.md"
+      "references/issue-learning-loop.md",
+      "references/project-record-health.md"
     ],
     "delivery": [
       "references/handbook-routing.md",
@@ -155,6 +163,21 @@
     "decision_completeness_overrides_length_target": true,
     "separate_prebuild_confirmations": 3,
     "capability_truthfulness": true,
+    "problem_evidence_owner_choice_and_outcome_evidence_are_distinct": true,
+    "public_discussion_does_not_prove_market_size_or_payment": true,
+    "worth_building_has_proceed_conditional_or_hold_recommendation": true,
+    "decision_relevant_evidence_is_traceable_with_limits": true,
+    "user_proposed_changes_are_evaluated_before_material_execution": true,
+    "change_review_has_owned_verdict_holes_improvement_and_opportunity_cost": true,
+    "small_reversible_changes_receive_proportionate_review": true,
+    "change_review_routes_to_existing_canonical_records": true,
+    "named_solution_parts_are_routed_now_later_or_wont": true,
+    "external_action_agents_define_retry_duplicate_timeout_and_recovery": true,
+    "autonomous_change_review_checks_scope_impersonation_duplicates_and_recovery": true,
+    "maintenance_release_requires_current_reverification_and_authorization": true,
+    "beginner_takeover_pause_close_and_health_use_one_four_line_block": true,
+    "project_records_have_one_canonical_home": true,
+    "record_health_checks_duplicate_conflict_stale_orphan_and_false_completion": true,
     "anchor_before_reuse_search": true,
     "public_repository_is_not_reuse_permission": true,
     "third_party_parts_require_provenance_tests_and_exit_path": true,

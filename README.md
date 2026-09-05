@@ -63,10 +63,10 @@ DZ 不会为了一个好用的小部分，把别人的整台“机器”搬进�
 这项检查放在原来的流程里，不会多出一套要你学习的步骤：
 
 1. “想解决哪件麻烦”已经写给你看、并由你点头后，DZ 用约 10–20 分钟快速看三到五种现成办法，判断有没有值得继续看的小零件；
-2. “这次做什么和不做什么”已经写给你看、并由你点头后，DZ 再认真检查最合适的一到三个。许可证、依赖和能否安全使用由 DZ 判断；你只需决定是否接受它带来的费用、内容外传或使用变化；
+2. “这次做什么和不做什么”已经写给你看、并由你点头后，DZ 再认真检查最合适的一到三个。DZ 负责做使用许可、依赖和技术风险初筛；遇到法律或开源合规疑问时，由具名且有权的负责人确认。普通用户只需决定是否接受它带来的费用、内容外传或使用变化；
 3. 最后只给出四种结论之一：使用维护好的软件包或稳定接口、改造许可清楚的小模块、只学它的做法后独立实现、明确不用。
 
-GitHub 搜索只代表找到了候选，不代表已经获准使用，也不代表它安全或适合当前产品。Star 多、Demo 能跑都不能替代许可证、来源、安全、维护和真实接入测试。没有清楚许可证的代码不复制，也不拿来运行；能用官方软件包或稳定接口时，优先不剪取别人项目里的内部文件。采用的小零件会固定到不会悄悄变化的代码记录或实际安装包，隔在我们自己的接口后面，并留下来源、所需声明、自己的测试、负责人和移除办法。GitHub 对无许可证公开仓库的说明见[官方文档](https://docs.github.com/en/repositories/managing-your-repositorys-settings-and-features/customizing-your-repository/licensing-a-repository)。
+GitHub 搜索只代表找到了候选，不代表已经获准使用，也不代表它安全或适合当前产品。Star 多、Demo 能跑都不能替代使用许可、来源、安全、维护和真实接入测试。没有清楚许可证，也没有权利人另外明确允许当前改法和发布方式的代码，不复制也不拿来运行；能用官方软件包或稳定接口时，优先不剪取别人项目里的内部文件。采用的小零件会固定到不会悄悄变化的代码记录或实际安装包，隔在我们自己的接口后面，并留下授权凭据、所需声明或免署名许可、自己的测试、负责人和移除办法。GitHub 对无许可证公开仓库的说明见[官方文档](https://docs.github.com/en/repositories/managing-your-repositorys-settings-and-features/customizing-your-repository/licensing-a-repository)；如果出现法律或开源合规疑问，最终由具名且有权的负责人确认。
 
 如果当前 AI 不能联网，DZ 会直说“这次没有实际搜索”，然后给出不含私密内容的搜索词和检查表，不会编造项目、许可证或维护情况。
 
@@ -81,6 +81,26 @@ GitHub 搜索只代表找到了候选，不代表已经获准使用，也不代�
 - 语气尊重成年人，不哄人、不卖萌、不把简单说成啰嗦。
 
 每次回复前，DZ 会在心里检查：一个第一次接触这件事的人，能不能复述“会发生什么、为什么现在要管、我只要回答什么”。复述不了，就重写。
+
+### 先找真凭据，再判断值不值得做
+
+当最说不准的是“别人是不是真有这个麻烦”“他们现在怎么解决”“会不会改变习惯或付钱”时，DZ 会围绕这一件事找材料，而不是为了显得认真硬凑五十条帖子。
+
+它会把三件事分开：用户现在真实做过什么、项目负责人选择怎样试、产品做出来后实际发生了什么。网上有人抱怨，只能说明这种烦恼可能存在，不能直接证明市场很大、大家一定会付费，或应该定下一千个付费用户。重要材料会留下原文或观察、出处、日期、能说明什么、不能说明什么、样本缺了谁，以及相反的证据。
+
+在确认“为什么做”以前，DZ 会明确告诉你：值得继续；先确认一件事再继续；或现在先别投入更多时间。它还会给出最省钱的检查办法，以及出现什么结果就应该缩小或停下。个人给自己做的小工具可以直接使用本人反复遇到的真实情况，不会为了形式强迫做市场报告。详细规则见 [`references/evidence-led-discovery.md`](references/evidence-led-discovery.md)。
+
+### 你提修改意见时，DZ 不会只会点头
+
+你说“加上这个”“改成自动发送”或“把原来的做法换掉”时，DZ 会先弄清你真正想改善什么，再从最相关的专业角度判断，而不是先夸一句就开始改。小而且容易恢复的改动会用一句话说清有没有帮助；会改变使用方法、费用、资料去向、自动化程度或原来约定的改动，会先完整评估。
+
+DZ 必须给一个明确结论：值得做；方向对但应该换一种做法；先做一个便宜的小测试；或这次不值得加。它会告诉你最有价值的地方、最容易忽略的漏洞、会挤掉哪件更重要的事，以及更稳妥的改法。你仍然可以作最终决定；如果你选择了 DZ 不推荐的普通产品取舍，两边的判断都会被如实记住，不会把反对意见改写成赞成。详细规则见 [`references/change-proposal-review.md`](references/change-proposal-review.md)。
+
+### 记录越多，也不会越做越乱
+
+同一件事只保留一个真正作数的位置：为什么做、这次让用户做什么、准备怎样开发、现在修哪件事、哪里出错、实际试出了什么，各回各的位置。其他页面只做索引和摘要，不会悄悄变成第二份标准。
+
+中途接管、累计多次问题、准备重要检查或上线、用户询问“还差什么”时，DZ 会检查重复、互相打架、已经过时、做了却没有来路、写成完成却没有当前证据、链接断掉和漏掉的未解决事项。它保留有用的新改动和旧证据，不会偷偷修改已经确认的内容；需要改变用户会遇到的事情时，仍然先给用户看完整改法。详细规则见 [`references/project-record-health.md`](references/project-record-health.md)。
 
 ### 风险不会变成死胡同
 
@@ -307,7 +327,8 @@ dz/
 ├── tests/
 │   ├── test_dz_state.py
 │   ├── test_dz_codex_stop_hook.py
-│   └── test_install_local_skill.py
+│   ├── test_install_local_skill.py
+│   └── forward-test-report-2026-09-05.md
 ├── assets/
 │   ├── project/AGENTS.md
 │   └── codex-hooks/
@@ -327,6 +348,9 @@ dz/
     ├── artifact-chain.md
     ├── project-state.md
     ├── issue-learning-loop.md
+    ├── evidence-led-discovery.md
+    ├── change-proposal-review.md
+    ├── project-record-health.md
     ├── artifacts/
     │   ├── intent.md
     │   ├── spec.md
@@ -346,7 +370,7 @@ dz/
 
 ### 验证
 
-Skill 与插件分别通过结构校验；项目账本有四十二组可运行测试，Codex 收尾检查有十组，单入口安装有三组，合计五十五组；另定义二十组新上下文行为测试：
+本次发布人工运行了 Skill 与插件结构校验；持续集成会自动运行项目账本四十二组、Codex 收尾检查十组、单入口安装六组，合计五十八组，并检查 Python 和 JSON。另定义二十三组需要新上下文人工执行的行为测试；它们不是持续集成自动门禁：
 
 1. 模糊的“服务所有人”想法；
 2. 区块链、RAG 和多 Agent 技术堆砌；
@@ -368,6 +392,9 @@ Skill 与插件分别通过结构校验；项目账本有四十二组可运行�
 18. 用户可以随时收尾，但构建成功、网址可访问或接受风险都不能冒充验证通过；
 19. 中途再次调用时，必须把旧记录和后来新增的操作重新对齐，先汇报完整现状和准备怎样执行，用户确认后再继续，不能退回旧位置。
 20. 开发中发现的重要问题必须留下记录并由 DZ 自动分流；小修不反复打扰用户，改变原先约定时先给用户看完整改法；只有实际检查通过并留下防复发办法才能说问题解决。
+21. 调研时必须区分真实行为、用户说法、负责人选择和后来试用结果；不能用帖子数量冒充市场规模或用“愿意付费”冒充付款，并要给出继续、有条件继续或先暂停投入的明确判断。
+22. 项目记录体检必须找出重复、冲突、过时、没有来路和假完成，保留有用历史，只修正真正的索引，不能再造一套新的状态标准。
+23. 用户提出修改意见时先给出专业结论、主要漏洞、机会成本和更好改法，再决定是否修改；小改动不被过度评审，大改动不被盲目执行。
 
 行为测试定义见 [`references/forward-tests.md`](references/forward-tests.md)。
 
@@ -442,10 +469,10 @@ DZ does not import someone else's whole “machine” because one small part loo
 This check lives inside the existing workflow, so the user does not have to learn another process:
 
 1. Once the exact first decision about the trouble is visible and accepted, DZ spends about 10–20 minutes scanning three to five approaches to see whether a useful part probably exists.
-2. Once what is included and left out is visible and accepted, DZ deeply reviews the best one to three. DZ owns the license, dependency, and technical-fit checks; you decide only whether to accept changes in cost, information sharing, or user experience.
-3. It records one of four outcomes: use a maintained package or stable API, adapt a small clearly licensed module, learn the behavior and implement it independently, or reject it.
+2. Once what is included and left out is visible and accepted, DZ deeply reviews the best one to three. DZ performs the first-pass rights, dependency, and technical-risk screen; a named authorized owner confirms triggered legal or open-source compliance questions. An ordinary user decides only whether to accept changes in cost, information sharing, or user experience.
+3. It records one of four outcomes: use a maintained package or stable API, adapt a small clearly licensed or separately permitted module, learn the behavior and implement it independently, or reject it.
 
-A GitHub result is only a candidate, not permission, safety evidence, or product fit. Stars and a working demo do not replace licensing, provenance, security, maintenance, and real integration tests. Code without a clear license is neither copied nor executed. A supported package or stable interface is preferred to cutting internal files from another project. Any adopted part is pinned to an immutable source record or exact resolved artifact, wrapped behind a product-owned interface, and recorded with provenance, required notices, product-owned tests, an owner, and a removal path. See GitHub's [official repository licensing guidance](https://docs.github.com/en/repositories/managing-your-repositorys-settings-and-features/customizing-your-repository/licensing-a-repository).
+A GitHub result is only a candidate, not permission, safety evidence, or product fit. Stars and a working demo do not replace rights, provenance, security, maintenance, and real integration tests. Code with neither a clear compatible license nor separate rights-holder permission covering the intended modification and distribution is neither copied nor executed. A supported package or stable interface is preferred to cutting internal files from another project. Any adopted part is pinned to an immutable source record or exact resolved artifact, wrapped behind a product-owned interface, and recorded with permission evidence, required notices or explicit attribution waiver, product-owned tests, an owner, and a removal path. See GitHub's [official repository licensing guidance](https://docs.github.com/en/repositories/managing-your-repositorys-settings-and-features/customizing-your-repository/licensing-a-repository). A named authorized owner makes the final decision when a legal or open-source compliance question is triggered.
 
 If the current AI cannot access the public web, DZ says that no live search occurred and exports sanitized search phrases plus the review card. It does not invent repositories, licenses, or maintenance facts.
 
@@ -460,6 +487,26 @@ If the current AI cannot access the public web, DZ says that no live search occu
 - It speaks to you as a capable adult: respectful, direct, and brief.
 
 Before every reply, DZ silently checks whether someone new to the subject could repeat back what will happen, why it matters now, and the one answer DZ needs. If not, it rewrites the reply.
+
+### Use real evidence before deciding whether to build
+
+When the central unknown is whether other people truly have the problem, what they do today, or whether they will change behavior or pay, DZ investigates that one decision instead of collecting a cosmetic quota of posts.
+
+It keeps three things separate: what users actually do now, what the product owner chooses to test, and what later happens when the product or a manual substitute is tried. A public complaint may support that a frustration exists; it does not establish market size, payment, priority, or a numerical success target. Decision-relevant cards retain the observation or short excerpt, source, date, what it supports, what it does not prove, sample limits, and contrary evidence.
+
+Before the first product decision is accepted, DZ recommends one of three paths: proceed, proceed after checking one named uncertainty, or hold further investment. It also names the cheapest decisive test and the result that should narrow or stop the idea. A clear personal utility can rely on the owner's repeated direct experience instead of a ceremonial market report. See [`references/evidence-led-discovery.md`](references/evidence-led-discovery.md).
+
+### DZ does not merely agree with proposed changes
+
+When you say “add this,” “make sending automatic,” or “replace the current approach,” DZ first identifies the benefit you are pursuing and judges the suggestion through the most relevant professional lens. A small reversible change gets a short honest assessment. A change that affects user behavior, cost, information handling, automation, or an accepted decision receives a complete review before implementation.
+
+DZ gives one clear verdict: adopt it, adopt an improved version, test one uncertainty first, or do not add it now. It names the strongest value, main hole, displaced priority, and better form. You retain the final ordinary product choice. If you knowingly choose against DZ's recommendation, both the professional assessment and your decision remain visible instead of rewriting disagreement as support. See [`references/change-proposal-review.md`](references/change-proposal-review.md).
+
+### More records do not mean more confusion
+
+Each material fact has one governing home: why the product exists, what users may do, how it will be built, current work, observed problems, future ideas, and real results do not compete across duplicate master documents.
+
+On a drifted takeover, after several issue changes, before a consequential review or release, or when the user asks what is missing, DZ checks for duplicates, contradictions, stale claims, orphaned work, false completion, broken source links, and forgotten unresolved items. It preserves useful later work and historical evidence, regenerates derivative views from their sources, and never silently rewrites an accepted product decision. See [`references/project-record-health.md`](references/project-record-health.md).
 
 ### Risk does not become a dead end
 
@@ -684,7 +731,8 @@ dz/
 ├── tests/
 │   ├── test_dz_state.py
 │   ├── test_dz_codex_stop_hook.py
-│   └── test_install_local_skill.py
+│   ├── test_install_local_skill.py
+│   └── forward-test-report-2026-09-05.md
 ├── assets/
 │   ├── project/AGENTS.md
 │   └── codex-hooks/
@@ -704,6 +752,9 @@ dz/
     ├── artifact-chain.md
     ├── project-state.md
     ├── issue-learning-loop.md
+    ├── evidence-led-discovery.md
+    ├── change-proposal-review.md
+    ├── project-record-health.md
     ├── artifacts/
     │   ├── intent.md
     │   ├── spec.md
@@ -723,7 +774,7 @@ dz/
 
 ### Validation
 
-The Skill and plugin each pass their structural validator; the project ledger has forty-two runnable tests, the Codex closeout check has ten, and the single-entry installer has three, for fifty-five total; DZ also defines twenty fresh-context behavioral test families:
+For this release, the Skill and plugin structural validators were run manually. Continuous integration automatically runs forty-two project-ledger tests, ten Codex closeout tests, and six single-entry installer tests, for fifty-eight total, plus Python and JSON checks. DZ also defines twenty-three fresh-context behavioral families that require manual execution and are not an automated CI gate:
 
 1. a vague “product for everyone” idea;
 2. fashionable blockchain, RAG, and multi-agent over-scoping;
@@ -745,6 +796,9 @@ The Skill and plugin each pass their structural validator; the project ledger ha
 18. allow the user to close at any time without treating a build, reachable URL, or risk acceptance as verified evidence;
 19. on mid-task re-invocation, reconcile saved records with later work, report the full present and proposed execution, wait for the user's correction or confirmation, and never jump back to the old stopping point.
 20. persist and route material problems without making beginners classify them, repair bounded defects without repeated interruption, require acceptance before product promises change, and require current Passed evidence plus regression protection before calling an issue fixed.
+21. distinguish observed behavior, stated interest, owner-selected thresholds, and later trial results; never turn post volume into market size or stated willingness into payment, and give a clear proceed, conditional, or hold recommendation.
+22. audit project memory for duplicate, conflicting, stale, orphaned, and falsely complete records while preserving useful history and repairing the existing sources instead of creating a second status system.
+23. evaluate a user's proposed change with an owned expert verdict, main hole, opportunity cost, and better form before editing, while keeping small reversible corrections proportionate and material changes controlled.
 
 See [`references/forward-tests.md`](references/forward-tests.md) for the behavioral oracles.
 

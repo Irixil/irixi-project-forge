@@ -24,7 +24,9 @@ Read accepted `intent.md` before drafting.
 
 ## MVP boundary
 ### Must
-- Capability — observable acceptance scenario:
+| Capability | Why it is included: evidence ID, accepted owner constraint, or required safety behavior | Observable acceptance scenario |
+|---|---|---|
+| | | |
 
 ### Later hypotheses
 - Capability — revisit trigger:
@@ -63,9 +65,9 @@ Read accepted `intent.md` before drafting.
 ## Assumptions and unresolved questions
 - Assumption — confidence — validation method — owner:
 
-## Changes from recorded problems (successor Draft only)
-| Issue ID | Old accepted wording or missing case | Complete proposed wording | Concrete user, information, access, cost, or scope effect |
-|---|---|---|---|
+## Changes from assessed proposals or recorded problems (successor Draft only)
+| Proposal conversation/journal reference or Issue ID | Intended benefit, professional verdict, and main hole | Old accepted wording or missing case | Complete proposed wording | Concrete user, information, access, cost, or scope effect |
+|---|---|---|---|---|
 
 ## Handbook applicability
 - Applicable technical, frontend, and deployment baselines:
