@@ -21,7 +21,7 @@ Do not copy the same fact into several authoritative files. Derived dashboards a
 
 ## Focused health check
 
-Begin read-only and compare the full visible conversation, journal, current files, accepted decisions, issues, work, and evidence. Check:
+Begin read-only from the compact current view and its deterministic health report. Compare older conversation, full journal history, accepted files, or affected implementation only when the report or current evidence reveals a conflict, unexplained change, stale view, damage, or material uncertainty. Check:
 
 1. **Duplicates:** the same decision, issue, or evidence appears more than once under different names.
 2. **Conflicts:** two current-looking records promise different users, behavior, information handling, cost, or next action.
@@ -38,7 +38,7 @@ Age alone does not make a record stale. A stable old decision may remain valid. 
 
 - Regenerate a derived dashboard or index from its source when that is authorized; do not hand-edit it into a second truth.
 - Merge duplicate unaccepted notes into one canonical record and preserve any distinct evidence.
-- Never silently rewrite an Accepted Intent, Specification, or Plan. A material correction becomes a visible successor Draft or complete diff and waits for the appropriate owner.
+- Never silently rewrite an Accepted Intent, Specification, or Plan. The latest explicitly accepted successor governs; later unaccepted brainstorming does not. Remove the old wording from the active view, preserve it in append-only history, and make a material correction a visible successor Draft or complete diff that waits for the appropriate owner.
 - Route an orphaned implementation through the takeover keep/review decision. Preserve it until its fit is known.
 - Route a material health finding through the existing issue-learning loop. Do not create a separate permanent “health issue” system.
 - Keep old evidence as history. Mark why it no longer governs the current target rather than deleting it.
@@ -46,12 +46,12 @@ Age alone does not make a record stale. A stable old decision may remain valid. 
 
 ## User-facing report
 
-Do not dump the audit table on a beginner. Use at most four one-sentence bullets in one block, normally under about 220 Chinese characters, with no second list or prose appendix. Report only what changes the next decision:
+Do not dump the audit table on a beginner. Give one compact, plain-language account and report only what changes the next decision:
 
 1. what is still agreed and can stay;
 2. what later changed or conflicts;
 3. what is written as finished but nobody has actually proved on the current version;
-4. the recommended repair order and why, followed by one question.
+4. the recommended repair order and why, followed by a natural invitation to correct it and discuss the route.
 
 Use concrete examples and ordinary language. “The page now sends a message, but the current written agreement says the owner sends it personally” is useful. “Specification drift detected” is not.
 

@@ -30,7 +30,7 @@ python3 <dz-skill>/scripts/dz_state.py resume-report <project>
 python3 <dz-skill>/scripts/dz_state.py check <project>
 ```
 
-`init` also merges a marked DZ continuity section into the project's `AGENTS.md` without replacing other repository instructions and stores a Git workspace checkpoint in the journal when Git is available. `resume-report` is read-only: it reads every valid journal record, returns the current ledger, compares the latest saved workspace checkpoint with the current Git worktree, and names any stale guidance or unavailable comparison. For an existing DZ project created before this behavior, first run `resume-report`, show the user the takeover account, then install or refresh the managed section after the user confirms:
+`init` also merges a marked DZ continuity section into the project's `AGENTS.md` without replacing other repository instructions and stores a Git workspace checkpoint in the journal when Git is available. `resume-report` is read-only: it mechanically validates every journal record, checks that `PROJECT.md` matches the current snapshot, returns a compact current summary, compares the latest saved workspace checkpoint with the current Git worktree, and names any stale guidance or unavailable comparison. Use `--full-history` or `--full-state` only for a detected conflict, recovery investigation, or explicit audit. For an existing DZ project created before this behavior, first run `resume-report`, show the user the takeover account, then install or refresh the managed section after the user confirms:
 
 ```bash
 python3 <dz-skill>/scripts/dz_state.py install-guidance <project>
@@ -54,13 +54,13 @@ python3 <dz-skill>/scripts/dz_state.py migrate <project>
 
 On every meaningful stateful turn:
 
-1. Run the read-only `resume-report`, then reconcile its full journal history and workspace comparison with the visible conversation, accepted files, current files, current evidence, unresolved issues, and later issue changes.
+1. Read `PROJECT.md` and run the read-only `resume-report`. Reconcile its compact current summary and workspace comparison with the relevant visible conversation and running state. Inspect full history, accepted files, evidence, or affected current files only when the report identifies a reason.
 2. If the snapshot is damaged, run `recover` and say that recovery occurred. If the workflow guidance is stale, propose `install-guidance` and wait for the user's takeover confirmation before refreshing it.
 3. Compare the records with observable files and runtime facts; preserve discrepancies.
 4. Set one smallest safe next action before doing it.
 5. After each meaningful change, check, user decision, failure, risk decision, pause, or cancellation, update the ledger immediately.
 6. Before stopping, run `can-stop`. Continue one safe action or truthfully enter a legal waiting, blocked, paused, or finished state.
-7. Tell the user in plain language what changed, how it was checked, what remains unproven, and what happens next.
+7. Tell the user in plain language what changed, why the chosen checks were enough for this change, what remains unproven, and what happens next.
 
 Writes are atomic. Each accepted mutation appends a full snapshot. If `state.json` differs from the latest valid journal snapshot, ordinary mutations fail until `recover` restores it. A malformed journal tail is skipped. Missing or changed decision, target, or evidence files downgrade claims during recovery instead of leaving an overstated finished verdict. Version 1.1 is single-writer; coordinate agents through work ownership or separate worktrees.
 
@@ -73,7 +73,15 @@ python3 <dz-skill>/scripts/dz_state.py set-decision <project> intent --status dr
 python3 <dz-skill>/scripts/dz_state.py set-decision <project> intent --status accepted --by "project owner" --reference "visible acceptance record"
 ```
 
-Specification requires accepted Intent. Plan requires accepted Intent and Specification. Superseding Intent supersedes both downstream decisions; superseding Specification supersedes Plan. The tool derives one contract digest from all three accepted file digests. Every work item and evidence record is bound to that contract. Reopening any decision gate clears the current target and downgrades old verified work; reaccepting unchanged text cannot silently revive its old evidence. If the newly accepted combined digest changes, create every still-applicable work item under the new contract with a new ID, link the old ID in its note, and decide which implementation can stay. There is deliberately no command that relabels an old item as current. If the combined digest is unchanged, the old item already has the same contract, but it still needs a fresh target and complete rerun.
+Specification requires accepted Intent. Plan requires accepted Intent and Specification. Accepting a successor Intent supersedes both downstream decisions; accepting a successor Specification supersedes Plan. The tool derives one contract digest from all three accepted file digests. Every work item and evidence record is bound to that contract. Merely drafting a successor leaves the current accepted contract and evidence intact; accepting it or explicitly superseding the current decision clears the target and downgrades old verified work. If the newly accepted combined digest changes, create every still-applicable work item under the new contract with a new ID, link the old ID in its note, and decide which implementation can stay. There is deliberately no command that relabels an old item as current. If the combined digest is unchanged, the old item already has the same contract. Rerun the acceptance statements affected by the new implementation plus critical shared paths during development; the complete required set is still needed before an overall verified release verdict.
+
+When a current Accepted decision may change, keep it governing until the successor is explicitly accepted. Save the successor Draft at a different versioned path; the tool records it as a proposal without replacing the current path or contract. Accepting that proposal promotes it, clears the proposal fields, supersedes affected downstream decisions, and downgrades affected current proof. Discarding it keeps the current accepted decision while the journal preserves the proposal and reason:
+
+```bash
+python3 <dz-skill>/scripts/dz_state.py set-decision <project> spec --status draft --path docs/sdlc/spec-v2.md
+python3 <dz-skill>/scripts/dz_state.py set-decision <project> spec --status accepted --by "project owner" --reference "visible acceptance record"
+python3 <dz-skill>/scripts/dz_state.py discard-decision-proposal <project> spec --reason "owner kept the current version"
+```
 
 After Plan acceptance, add every applicable handbook route as work and label its phase:
 
@@ -81,7 +89,7 @@ After Plan acceptance, add every applicable handbook route as work and label its
 python3 <dz-skill>/scripts/dz_state.py add-work <project> --id W1 --phase design --title "Technical fit and thin-slice design" --acceptance "The project-specific approach and exclusions are recorded"
 ```
 
-Normal progress is `pending → in_progress → implemented_unverified → verified`; side exits are `waiting_user`, `blocked`, `deferred`, and `cancelled`. Entering `in_progress` means the observable product may change, so the tool clears the current verification target and downgrades every old verified item. After the change, record a fresh target and rerun every required current-contract criterion; old evidence cannot restore the status. Stage transitions are ordered. Design must have required verified work before Build; Build needs required implemented work before Test; Deploy needs required Design, Build, and Test work verified against an observed target; Maintain needs required release work verified. Moving backward to repair evidence remains allowed.
+Normal progress is `pending → in_progress → implemented_unverified → verified`; side exits are `waiting_user`, `blocked`, `deferred`, and `cancelled`. Entering `in_progress` clears the current verification target because observable behavior may change. After the change, record a fresh target. During development rerun the affected acceptance statements and critical shared paths; before release, every required current-contract item must hold current target evidence. Old evidence remains history and may explain what was unaffected, but it cannot by itself restore current verified status. Stage transitions are ordered. Design must have required verified work before Build; Build needs required implemented work before Test; Deploy needs required Design, Build, and Test work verified against an observed target; Maintain needs required release work verified. Moving backward to repair evidence remains allowed.
 
 Before recording evidence, explicitly set the observed target. Its proof may be a captured commit, build, or deployment query. Every `set-target` creates a new target epoch, even when revision and environment text are unchanged, because configuration, model, data, or deployment state may have changed.
 
@@ -94,7 +102,7 @@ python3 <dz-skill>/scripts/dz_state.py update-work <project> W1 --status impleme
 python3 <dz-skill>/scripts/dz_state.py update-work <project> W1 --status verified
 ```
 
-Every criterion for one work item must have intact Passed evidence under the same current contract and target epoch. A Passed record may resolve a Failed or Unverified gap only for the same work item, exact statement, and target epoch. A new target reruns every statement. Old evidence remains history and cannot cover a new deployment or a return to an older revision. Evidence is append-only; never delete, change, or reorder it to obtain a pass.
+Every criterion claimed current for one work item must have intact Passed evidence under the same current contract and target epoch. A Passed record may resolve a Failed or Unverified gap only for the same work item, exact statement, and target epoch. Targeted development checks do not create an overall release verdict; a release candidate needs every required statement on the release target. Old evidence remains history and cannot cover a new deployment or a return to an older revision. Evidence is append-only; never delete, change, or reorder it to obtain a pass.
 
 ## Material problems and learning
 
@@ -153,8 +161,8 @@ python3 <dz-skill>/scripts/dz_state.py set-run <project> --status active --next-
 
 `finished` is closed to ordinary mutations. Record an outstanding external action outcome if necessary, without reopening or upgrading the finished verdict. To do new project work, explicitly resume the run as `active` first. A move to `waiting_user`, `waiting_authorization`, `blocked`, or `paused` records an honest non-working state and does not permit new product actions.
 
-For a nontechnical user, a pause or close reply is one compact block of at most four one-sentence lines or bullets, normally under about 220 Chinese characters. Group the facts as: what exists and was actually tried; what remains unfinished or unproven; whether an outside task was really stopped; and the saved next step or honest closing result. Do not add a second status list, filenames, or internal codes. A detailed durable handoff may remain in project files or be linked only when the user asks.
+For a nontechnical user, keep a pause or close reply compact and concrete. Group what exists and was actually tried, what remains unfinished or unproven, whether an outside task was really stopped, and the saved next step or honest closing result. Do not omit a material risk merely to meet a length target. A detailed durable handoff may remain in project files or be linked when it helps or the user asks.
 
-On resume or mid-task re-invocation, trust neither chat nor ledger alone and never treat the recorded next action as a command. Run `resume-report` so the tool reads every valid journal record, unresolved issue, and later issue change, then compares the latest saved workspace checkpoint with the current Git worktree. Reconcile that report with the full visible conversation, accepted records, current files, checks, and relevant running state. Preserve work performed after the latest saved record. When a reliable comparison is unavailable, say so and ask the user to correct the uncertain timing. Before new mutations, report the reconciled present, material unresolved problems, and proposed execution in plain language, let the user correct it, and discuss how to proceed. Continue only after that checkpoint is confirmed; it does not retroactively accept product decisions or authorize an external action.
+On resume or mid-task re-invocation, trust neither chat nor ledger alone and never treat the recorded next action as a command. Run `resume-report`; the tool validates the full journal but returns a compact current summary and workspace comparison by default. Reconcile that with the relevant visible conversation and current running state. Inspect full history or affected files only when the report finds a mismatch, unexplained change, contradiction, stale view, damage, or material uncertainty. Preserve work performed after the latest saved record. Before new mutations, report the reconciled present, unresolved material problems, and proposed execution in plain language, let the user correct it, and discuss how to proceed. Continue only after that checkpoint is confirmed; it does not retroactively accept product decisions or authorize an external action.
 
 The JSON Schema checks shape. `check` adds cross-record consistency for contract binding, target epoch, evidence, issue routing and proof, stage gates, journal continuity, and risk leases. Neither supplies trusted human or execution attestation by itself. A host lacking a trusted approval and execution channel must disclose that limitation instead of presenting the local ledger as tamper-proof proof.

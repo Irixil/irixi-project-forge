@@ -17,8 +17,8 @@ Use everyday language with users. Internal state and gate names exist to prevent
 ### Mid-task invocation
 
 - State: `TAKEOVER_AUDIT`.
-- Read the full visible conversation, saved records, and current project state before asking discovery questions or changing files. Look specifically for work performed after the latest saved record.
-- Follow [takeover-resume.md](takeover-resume.md) to run the read-only `resume-report` when available, read every valid saved event, unresolved issue, and later issue change, compare the saved workspace checkpoint with the current project, separate observed work from gate-supported state, preserve valid work, treat the saved next action as advisory until reconciled, and identify the earliest missing or contradicted gate.
+- Start from `PROJECT.md`, the relevant visible conversation, and current running state. Run the read-only `resume-report`; it validates every saved event mechanically and reports the compact current position, unresolved issues, generated-view health, and workspace changes. Read full history or affected files only when the report finds a mismatch, unexplained change, contradiction, damage, or material uncertainty.
+- Follow [takeover-resume.md](takeover-resume.md) to preserve valid later work, treat the saved next action as advisory until reconciled, and identify only the earliest missing or contradicted decision that matters now.
 - Show the reconciled present plus the recommended execution order and reasons. Let the user correct it and discuss how to proceed before making new changes. Then resume from that agreed present position. Do not restart from Discovery when accepted evidence supports a later stage, and do not treat existing code as proof that earlier gates passed.
 
 ### New idea
@@ -71,7 +71,7 @@ Capture what is wanted, why, for whom, under which constraints, in the originato
 
 ### User experience
 
-Ask one question at a time by default. Give a recommendation or example. If the user is unsure, turn uncertainty into a reversible assumption and validation step. Explain that no code will be written yet.
+Keep one decision topic per turn. Ask up to three tightly related questions only when each answer can change that same decision. Give a recommendation or example; if the user is unsure, turn uncertainty into a reversible assumption and validation step. Explain that normal product implementation waits for the three decisions, while approved disposable learning work follows the experiment boundary below.
 
 ### Artifact
 
@@ -209,6 +209,7 @@ Determine whether the real product fulfills the accepted promises. The implement
 - For agents, verify representative cases, permissions, budgets, stopping conditions, tool misuse, and human takeover.
 - For production, verify identity isolation, persistence, backup/restore, observability, cost controls, and rollback.
 - For adopted third-party parts, verify immutable source or exact resolved package plus artifact integrity, provenance, required licenses/notices/source delivery and their shipped locations, an SBOM or minimum dependency inventory bound to the tested artifact, relevant advisories, actual information and network flow, our own happy/failure/recovery tests, and the documented disable or replacement path.
+- Before any deployment intended for internal testing or public use, run an AI preflight with two separately reported parts: (1) trace every current Must and core user path end to end, including important failure and recovery states; (2) review changed code and critical shared paths for correctness, security, exposed secrets, dependency risk, and maintainability. Run safe already-authorized local checks by default. Ask only when the check itself needs new credentials, spending, sensitive information, production access, or an external write. Record each item as Passed, Failed, or Unverified. AI preflight prepares internal human testing; it does not replace it or independent review.
 
 ### Artifacts
 
@@ -237,6 +238,7 @@ Prepare all release work while preserving a human production boundary.
 
 - name the exact target environment and audience;
 - explain the release plan, required accounts, user actions, and cost in plain language;
+- show the AI preflight's end-to-end and code-review results, with Passed, Failed, and Unverified kept distinct;
 - use least-privilege, short-lived credentials and secure secret entry;
 - verify target-runtime compatibility, identity isolation, durable data and files, migrations, backup and restore, logging and alerts, privacy, cost limits, smoke tests, and rollback;
 - verify the shipped third-party inventory or SBOM is bound to the exact release artifact digest, along with immutable pins, required source/attribution/notices and their delivery evidence, current dependency or advisory review, external services and information flows, authorized compliance conclusion when triggered, internal owner, update rule, removal path, and continuing duties for already distributed versions;
@@ -252,7 +254,7 @@ Prepare all release work while preserving a human production boundary.
 
 A named release owner with authority for that environment explicitly approves it after seeing passed, failed, and unverified evidence; the concrete consequences; safer option; cost; and recovery or rollback. An informed owner may approve a residual risk they are entitled to decide, including a high or critical one; severity alone is not a blocker. DZ then proceeds without repeated persuasion while keeping every accepted risk visible. Any triggered legal or open-source compliance boundary also requires the named authorized owner to approve the exact shipped parts, versions, use, and distribution mode; missing reuse rights block release and cannot be recorded as accepted risk. For a personal project the user may be release owner, but do not assume they have organizational or legal authority they have not established. Record each approver's role, exact action, revision, environment, amount/time limit, and evidence; wait if authority is unclear. Earlier requests such as “just deploy it” do not count as informed final approval if readiness information was unavailable at the time.
 
-After release, a successful command or reachable URL proves only part of the path. Run the real production core flow, access-isolation check, persistence/recovery check where relevant, and monitoring check before marking Released.
+After deployment, a successful command or reachable URL proves only part of the path. Internal testers still try the real product and record what passed, failed, or was not tried. For a public release, reconcile those results with the AI preflight and current revision first. Run the real production core flow, access-isolation check, persistence/recovery check where relevant, and monitoring check before marking Released.
 
 ## Risk decision rule
 
@@ -293,14 +295,13 @@ A bounded repair may reuse still-current accepted product and implementation dec
 
 ## Fast Track boundary
 
-Fast Track is allowed only when all are true:
+DZ may recommend Fast Track when all are true:
 
-- the user explicitly requests it;
 - the product is a small utility, not a new uncertain product concept;
 - local, single-user, low-cost, reversible, no sensitive data, no external writes, no paid actions, and no production release;
 - success is objectively verifiable.
 
-It may shorten documents, but the three confirmations still happen separately: show one exact decision, ask one question, wait for the user's reply, and only then show the next decision in a later assistant turn. Never present or accept all three in one round. The first real flow and evidence remain mandatory.
+It may shorten documents and discussion. The three product decisions remain distinct and visible, but tightly related decisions may be presented together when the user can meaningfully review them and each receives unambiguous acceptance. Never infer acceptance from “continue,” and never hide a risky or consequential choice merely to move faster. The first real flow and evidence remain mandatory.
 
 If the utility mutates local user files or data, the accepted specification and plan must include a preview or dry run, collision and idempotency behavior, an inspectable change manifest, a tested undo or rollback path, and fresh authorization for the real apply step. Test on disposable copies before originals.
 

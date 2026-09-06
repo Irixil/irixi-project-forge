@@ -67,7 +67,7 @@ class DzStateTests(unittest.TestCase):
         agents = self.project / "AGENTS.md"
         initial = agents.read_text(encoding="utf-8")
         self.assertIn("DZ-PROJECT-CONTINUITY:START", initial)
-        self.assertIn("$HOME/.agents/skills/dz/SKILL.md", initial)
+        self.assertIn("Load the installed `dz` Skill", initial)
 
         agents.write_text("# Team rule\n\nKeep this.\n\n" + initial, encoding="utf-8")
         self.cli("install-guidance", str(self.project))
@@ -76,12 +76,12 @@ class DzStateTests(unittest.TestCase):
         self.assertIn("# Team rule\n\nKeep this.", refreshed)
         self.assertEqual(refreshed.count("DZ-PROJECT-CONTINUITY:START"), 1)
         self.assertEqual(refreshed.count("DZ-PROJECT-CONTINUITY:END"), 1)
-        self.assertIn("saved `next_action` is an old proposal", refreshed)
+        self.assertIn("saved `next_action`", refreshed)
         self.assertIn(
-            "Do not make new project changes until the user confirms", refreshed
+            "discuss the route before new project changes", refreshed
         )
         self.assertIn("resume-report", refreshed)
-        self.assertIn("2026-09-05.3", refreshed)
+        self.assertIn("2026-09-06.2", refreshed)
 
     def test_resume_report_reads_all_journal_records_and_reports_uncertainty_without_git(self):
         self.cli(
@@ -94,9 +94,14 @@ class DzStateTests(unittest.TestCase):
         )
         report = json.loads(self.cli("resume-report", str(self.project)).stdout)
 
-        self.assertEqual(report["journal_records_reviewed"], len(report["journal_history"]))
         self.assertGreaterEqual(report["journal_records_reviewed"], 3)
-        self.assertEqual(report["journal_history"][-1]["event"], "set_run:waiting_user")
+        self.assertNotIn("journal_history", report)
+        self.assertNotIn("current_state", report)
+        self.assertEqual(
+            report["journal_summary"]["latest_event"]["event"],
+            "set_run:waiting_user",
+        )
+        self.assertTrue(report["generated_views"]["project_dashboard_current"])
         self.assertIsNone(report["workspace"]["changed_since_saved_record"])
         self.assertTrue(report["workspace"]["uncertainty"])
         self.assertTrue(
@@ -141,6 +146,29 @@ class DzStateTests(unittest.TestCase):
         self.assertIn("app.txt", report["workspace"]["changed_paths"])
         self.assertIsNone(report["workspace"]["uncertainty"])
 
+    def test_resume_report_detects_stale_generated_dashboard_and_expands_on_request(self):
+        dashboard = self.project / "PROJECT.md"
+        dashboard.write_text("# stale view\n", encoding="utf-8")
+
+        compact = json.loads(self.cli("resume-report", str(self.project)).stdout)
+        self.assertFalse(compact["generated_views"]["project_dashboard_current"])
+        self.assertTrue(any("PROJECT.md" in item for item in compact["warnings"]))
+        self.assertNotIn("journal_history", compact)
+        self.assertNotIn("current_state", compact)
+
+        expanded = json.loads(
+            self.cli(
+                "resume-report",
+                str(self.project),
+                "--full-history",
+                "--full-state",
+            ).stdout
+        )
+        self.assertEqual(
+            expanded["journal_records_reviewed"], len(expanded["journal_history"])
+        )
+        self.assertEqual(expanded["current_state"]["project"]["name"], "Demo")
+
     def test_install_guidance_refreshes_an_old_workflow_version(self):
         state_path = self.project / ".dz" / "state.json"
         journal_path = self.project / ".dz" / "journal.jsonl"
@@ -160,7 +188,7 @@ class DzStateTests(unittest.TestCase):
         stale = self.cli("check", str(self.project), expected=1)
         self.assertIn("install-guidance", stale.stderr)
         self.cli("install-guidance", str(self.project))
-        self.assertEqual(self.state()["workflow_version"], "2026-09-05.3")
+        self.assertEqual(self.state()["workflow_version"], "2026-09-06.2")
         self.assertEqual(self.state()["issues"], [])
         self.cli("check", str(self.project))
 
@@ -559,7 +587,9 @@ class DzStateTests(unittest.TestCase):
         issue_view = (self.project / "docs" / "sdlc" / "issues.md").read_text()
         self.assertIn("Refresh behavior was never agreed", issue_view)
 
-        report = json.loads(self.cli("resume-report", str(self.project)).stdout)
+        report = json.loads(
+            self.cli("resume-report", str(self.project), "--full-history").stdout
+        )
         self.assertEqual(
             {item["id"] for item in report["unresolved_issues"]},
             {f"I{index}" for index in range(1, 7)},
@@ -1858,6 +1888,107 @@ class DzStateTests(unittest.TestCase):
         self.assertNotEqual(old_contract, current_contract)
         self.assertNotEqual(state["target"].get("contract_sha256"), current_contract)
         self.assertEqual(state["run"]["product_verdict"], "not_assessed")
+
+    def test_successor_proposal_does_not_override_current_decision_until_accepted(self):
+        self.add_work()
+        self.verify_default_work()
+        before = self.state()
+        old_spec_path = before["decisions"]["spec"]["path"]
+        old_spec_digest = before["decisions"]["spec"]["artifact_sha256"]
+        old_contract = before["work_items"][0]["contract_sha256"]
+        old_target = before["target"]["id"]
+
+        proposal_path = self.write_project_file(
+            "docs/sdlc/spec-v2.md", "# spec v2\n\nA proposed later version.\n"
+        )
+        self.cli(
+            "set-decision",
+            str(self.project),
+            "spec",
+            "--status",
+            "draft",
+            "--path",
+            proposal_path,
+        )
+        proposed = self.state()
+        self.assertEqual(proposed["decisions"]["spec"]["status"], "accepted")
+        self.assertEqual(proposed["decisions"]["spec"]["path"], old_spec_path)
+        self.assertEqual(
+            proposed["decisions"]["spec"]["artifact_sha256"], old_spec_digest
+        )
+        self.assertEqual(
+            proposed["decisions"]["spec"]["proposal_path"], proposal_path
+        )
+        self.assertEqual(proposed["work_items"][0]["contract_sha256"], old_contract)
+        self.assertEqual(proposed["target"]["id"], old_target)
+        self.assertEqual(proposed["work_items"][0]["status"], "verified")
+
+        report = json.loads(self.cli("resume-report", str(self.project)).stdout)
+        self.assertEqual(
+            report["current_summary"]["decisions"]["spec"]["path"], old_spec_path
+        )
+        self.assertEqual(
+            report["current_summary"]["decisions"]["spec"]["proposal_path"],
+            proposal_path,
+        )
+
+        self.cli(
+            "set-decision",
+            str(self.project),
+            "spec",
+            "--status",
+            "accepted",
+            "--by",
+            "project owner",
+            "--reference",
+            "accepted visible spec v2",
+        )
+        accepted = self.state()
+        self.assertEqual(accepted["decisions"]["spec"]["path"], proposal_path)
+        self.assertIsNone(accepted["decisions"]["spec"]["proposal_path"])
+        self.assertEqual(accepted["decisions"]["plan"]["status"], "superseded")
+        self.assertIsNone(accepted["target"]["id"])
+        self.assertEqual(
+            accepted["work_items"][0]["status"], "implemented_unverified"
+        )
+
+        history = json.loads(
+            self.cli("resume-report", str(self.project), "--full-history").stdout
+        )["journal_history"]
+        spec_digests = {
+            entry.get("decision_changes", {}).get("spec", {}).get("artifact_sha256")
+            for entry in history
+        }
+        self.assertIn(old_spec_digest, spec_digests)
+        self.assertIn(accepted["decisions"]["spec"]["artifact_sha256"], spec_digests)
+
+    def test_successor_proposal_can_be_discarded_without_changing_current_decision(self):
+        self.accept_chain()
+        old_spec = dict(self.state()["decisions"]["spec"])
+        proposal_path = self.write_project_file(
+            "docs/sdlc/spec-proposed.md", "# proposal to discard\n"
+        )
+        self.cli(
+            "set-decision",
+            str(self.project),
+            "spec",
+            "--status",
+            "draft",
+            "--path",
+            proposal_path,
+        )
+        self.cli(
+            "discard-decision-proposal",
+            str(self.project),
+            "spec",
+            "--reason",
+            "owner kept the accepted version",
+        )
+        current = self.state()["decisions"]["spec"]
+        self.assertEqual(current["path"], old_spec["path"])
+        self.assertEqual(current["artifact_sha256"], old_spec["artifact_sha256"])
+        self.assertEqual(current["status"], "accepted")
+        self.assertIsNone(current["proposal_path"])
 
     def test_resetting_same_revision_creates_a_fresh_target_epoch(self):
         self.add_work()

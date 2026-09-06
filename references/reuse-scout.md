@@ -1,6 +1,6 @@
 # Anchor-First Feature Recon and Reuse
 
-Use this reference for every meaningful new product capability and for a mid-task change that introduces a new capability, dependency, provider, or integration. The beginner-facing name is **“先找现成的小零件”**. This is a check inside Design and Build planning, not a seventh SDLC stage and not a reason to delay a small, already-scoped defect.
+Use this reference when a new capability, dependency, provider, or integration could materially benefit from existing parts. Skip it for trivial behavior, a reliable native feature, a small already-scoped defect, or when the search costs more than the likely saving. The beginner-facing name is **“先找现成的小零件”**. This is a check inside Design and Build planning, not a seventh SDLC stage.
 
 The purpose is to avoid rebuilding a solved problem without letting a popular repository define the product. GitHub is a candidate catalogue, not a requirements document, quality certificate, or permission slip.
 

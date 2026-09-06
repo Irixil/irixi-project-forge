@@ -18,7 +18,7 @@ Compare hashes or an explicit document version before treating a supplied copy a
 
 The handbooks are reference material, not authorization or timeless platform documentation. User-confirmed product decisions, stronger safety rules, current provider documentation, existing repository constraints, and observed evidence take precedence.
 
-Before selecting technical modules for a meaningful new capability, apply [reuse-scout.md](reuse-scout.md). Its quick Design scan and deep pre-Plan paper review decide whether to use a platform feature, maintained package, small licensed module, independently implemented pattern, or a simple in-house build. A search result never overrides the seven product inputs below, and importing an entire application for one useful behavior is not a default build path.
+Before selecting technical modules, apply [reuse-scout.md](reuse-scout.md) only when an existing part could materially save delivery time, reduce technical risk, or lower maintenance. Skip the scan for trivial behavior or a reliable native feature. When used, its paper review decides whether to use a platform feature, maintained package, small licensed module, independently implemented pattern, or a simple in-house build. A search result never overrides the seven product inputs below, and importing an entire application for one useful behavior is not a default build path.
 
 ## When to apply each handbook
 
@@ -244,10 +244,12 @@ The three handbooks are delivery routes, not optional reading. Immediately after
 ### Release route when another person or production environment will use it
 
 1. Record the exact release target, revision, owner, audience, region, identity, data/files, expected cost, provider facts, known risks, and rollback choice.
-2. Check secrets, permissions, package contents, runtime compatibility, migrations, durable storage, user isolation, backup/restore, monitoring redaction, budget controls, and current official provider instructions.
-3. Obtain an informed action-specific release decision. An authorized owner may accept residual gaps they are entitled to decide; preserve them and their recovery path instead of converting them into passed checks.
-4. Deploy the named revision only to the named environment, then separately check the public entry, identity/isolation, core path, real model/tool, persistence, files, monitoring, cost signal, and rollback or restore path.
-5. Update README, access instructions, environment-variable names without values, known gaps, rollback, ownership, and the plain-language user acceptance checklist.
+2. Run the default AI preflight in two parts: trace every current Must and core user path end to end, including important failure and recovery states; then review changed code and critical shared paths for correctness, security, exposed secrets, dependency risk, and maintainability. Safe in-scope local checks run without another permission question. Keep Passed, Failed, and Unverified separate.
+3. Check secrets, permissions, package contents, runtime compatibility, migrations, durable storage, user isolation, backup/restore, monitoring redaction, budget controls, and current official provider instructions.
+4. Obtain an informed action-specific release decision. An authorized owner may accept residual gaps they are entitled to decide; preserve them and their recovery path instead of converting them into passed checks.
+5. Deploy the named revision only to the named environment, then let internal testers try the real product. Record their results separately from the AI preflight. Before public release, reconcile both sets of results against the current revision.
+6. Separately check the public entry, identity/isolation, core path, real model/tool, persistence, files, monitoring, cost signal, and rollback or restore path.
+7. Update README, access instructions, environment-variable names without values, known gaps, rollback, ownership, and the plain-language internal-test and release checklist.
 
 ### Maintain route after release
 

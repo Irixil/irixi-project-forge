@@ -23,7 +23,7 @@ from typing import Any, Callable
 
 
 SCHEMA_VERSION = "1.1"
-WORKFLOW_VERSION = "2026-09-05.3"
+WORKFLOW_VERSION = "2026-09-06.2"
 
 RUN_STATUSES = {
     "active",
@@ -460,6 +460,9 @@ def initial_state(name: str, language: str) -> dict[str, Any]:
                 "accepted_by": None,
                 "acceptance_reference": None,
                 "accepted_at": None,
+                "proposal_path": None,
+                "proposal_sha256": None,
+                "proposal_created_at": None,
             },
             "spec": {
                 "status": "not_created",
@@ -468,6 +471,9 @@ def initial_state(name: str, language: str) -> dict[str, Any]:
                 "accepted_by": None,
                 "acceptance_reference": None,
                 "accepted_at": None,
+                "proposal_path": None,
+                "proposal_sha256": None,
+                "proposal_created_at": None,
             },
             "plan": {
                 "status": "not_created",
@@ -476,6 +482,9 @@ def initial_state(name: str, language: str) -> dict[str, Any]:
                 "accepted_by": None,
                 "acceptance_reference": None,
                 "accepted_at": None,
+                "proposal_path": None,
+                "proposal_sha256": None,
+                "proposal_created_at": None,
             },
         },
         "target": empty_target(),
@@ -772,9 +781,15 @@ def reconcile_stale_artifacts(project: Path, state: dict[str, Any]) -> None:
             project, decision.get("path"), decision.get("artifact_sha256")
         ):
             decision["status"] = "superseded"
+            decision["proposal_path"] = None
+            decision["proposal_sha256"] = None
+            decision["proposal_created_at"] = None
             for downstream in ("intent", "spec", "plan")[index + 1 :]:
                 if decisions[downstream]["status"] != "not_created":
                     decisions[downstream]["status"] = "superseded"
+                    decisions[downstream]["proposal_path"] = None
+                    decisions[downstream]["proposal_sha256"] = None
+                    decisions[downstream]["proposal_created_at"] = None
             invalidated_decision = name
             break
 
@@ -1060,9 +1075,16 @@ def _validate_state(state: dict[str, Any], project_path: Path | None = None) -> 
             "accepted_by",
             "acceptance_reference",
             "accepted_at",
+            "proposal_path",
+            "proposal_sha256",
+            "proposal_created_at",
         }
         unknown = set(decision) - decision_fields
-        missing = decision_fields - set(decision)
+        missing = decision_fields - {
+            "proposal_path",
+            "proposal_sha256",
+            "proposal_created_at",
+        } - set(decision)
         if unknown:
             errors.append(
                 f"unknown decisions.{name} fields: {', '.join(sorted(unknown))}"
@@ -1111,6 +1133,45 @@ def _validate_state(state: dict[str, Any], project_path: Path | None = None) -> 
                 errors.append(f"decisions.{name}: superseded requires its prior artifact digest")
             if not (metadata_empty or metadata_present):
                 errors.append(f"decisions.{name}: superseded acceptance metadata must be complete or empty")
+        proposal = (
+            decision.get("proposal_path"),
+            decision.get("proposal_sha256"),
+            decision.get("proposal_created_at"),
+        )
+        proposal_empty = all(value is None for value in proposal)
+        proposal_digest = decision.get("proposal_sha256")
+        proposal_digest_valid = (
+            isinstance(proposal_digest, str)
+            and len(proposal_digest) == DIGEST_LENGTH
+            and all(character in "0123456789abcdef" for character in proposal_digest)
+        )
+        if not proposal_empty:
+            if decision_status != "accepted":
+                errors.append(
+                    f"decisions.{name}: a successor proposal requires a still-current accepted decision"
+                )
+            if not isinstance(decision.get("proposal_path"), str) or not decision.get(
+                "proposal_path", ""
+            ).strip():
+                errors.append(f"decisions.{name}: proposal_path is required")
+            if not proposal_digest_valid:
+                errors.append(f"decisions.{name}: proposal_sha256 is invalid")
+            if not isinstance(decision.get("proposal_created_at"), str) or not decision.get(
+                "proposal_created_at", ""
+            ).strip():
+                errors.append(f"decisions.{name}: proposal_created_at is required")
+            if (
+                project_path is not None
+                and proposal_digest_valid
+                and not stored_file_matches(
+                    project_path,
+                    decision.get("proposal_path"),
+                    proposal_digest,
+                )
+            ):
+                errors.append(
+                    f"decisions.{name}: proposed artifact is missing, empty, or changed"
+                )
         if (
             project_path is not None
             and decision_status in {"draft", "accepted"}
@@ -2120,6 +2181,10 @@ def label(value: str, language: str) -> str:
             "test": "实际检查",
             "deploy": "准备或执行上线",
             "maintain": "上线后观察和改进",
+            "not_created": "还没写下来",
+            "draft": "正在讨论",
+            "accepted": "已经确认",
+            "superseded": "已有更新版本",
             "pending_authorization": "等这次动作的确认",
             "authorized": "这次动作已获确认",
             "completed": "动作已完成",
@@ -2154,6 +2219,25 @@ def markdown_cell(value: Any) -> str:
     return str(value).replace("\\", "\\\\").replace("|", "\\|").replace("\r\n", "<br>").replace("\n", "<br>")
 
 
+def current_view_fingerprint(state: dict[str, Any]) -> str:
+    """Bind generated human views to the exact machine-readable snapshot."""
+    payload = json.dumps(
+        state, ensure_ascii=False, sort_keys=True, separators=(",", ":")
+    ).encode("utf-8")
+    return hashlib.sha256(payload).hexdigest()
+
+
+def project_dashboard_is_current(project: Path, state: dict[str, Any]) -> bool:
+    dashboard = project_paths(project)["dashboard"]
+    if not dashboard.is_file():
+        return False
+    marker = f"DZ-CURRENT-VIEW:{current_view_fingerprint(state)}"
+    try:
+        return marker in dashboard.read_text(encoding="utf-8")
+    except OSError:
+        return False
+
+
 def render(project: Path, state: dict[str, Any]) -> None:
     paths = project_paths(project)
     language = state["project"]["language"]
@@ -2171,13 +2255,25 @@ def render(project: Path, state: dict[str, Any]) -> None:
         if target.get("id")
         else None
     )
-    contract_digest = accepted_contract_sha256(state.get("decisions", {}))
+    decisions = state.get("decisions", {})
+    contract_digest = accepted_contract_sha256(decisions)
+
+    def decision_view(name: str, title: str) -> str:
+        decision = decisions.get(name, {})
+        current_path = decision.get("path") or "—"
+        proposal_path = decision.get("proposal_path")
+        if language == "zh":
+            proposal_text = f"；待确认的新写法：{proposal_path}" if proposal_path else ""
+            return f"- {title}：{label(decision.get('status', 'not_created'), language)}；当前版本：{current_path}{proposal_text}"
+        proposal_text = f"; pending proposal: {proposal_path}" if proposal_path else ""
+        return f"- {title}: {decision.get('status', 'not_created')}; current: {current_path}{proposal_text}"
 
     if language == "zh":
         dashboard = [
             f"# {state['project']['name']}",
             "",
             "> 本页由 DZ 项目账本生成；真实记录保存在 `.dz/state.json`。",
+            f"<!-- DZ-CURRENT-VIEW:{current_view_fingerprint(state)} -->",
             "",
             "## 现在做到哪",
             f"- 当前情况：{label(run['status'], language)}",
@@ -2193,6 +2289,11 @@ def render(project: Path, state: dict[str, Any]) -> None:
             f"- 阻塞类型：{run.get('blocker_kind') or '无'}",
             f"- 恢复条件：{run.get('resume_when') or '无'}",
             f"- 最后更新：{run['updated_at']}",
+            "",
+            "## 现在按哪个版本做",
+            decision_view("intent", "想解决的事"),
+            decision_view("spec", "这次做什么、不做什么"),
+            decision_view("plan", "准备怎么做和怎样试"),
             "",
             "## 工作概览",
             f"- 共 {len(work_items)} 项；已检查 {sum(i['status'] == 'verified' for i in work_items)} 项；待检查 {sum(i['status'] == 'implemented_unverified' for i in work_items)} 项。",
@@ -2222,6 +2323,7 @@ def render(project: Path, state: dict[str, Any]) -> None:
             f"# {state['project']['name']}",
             "",
             "> Generated from the DZ project ledger; `.dz/state.json` is the source of truth.",
+            f"<!-- DZ-CURRENT-VIEW:{current_view_fingerprint(state)} -->",
             "",
             "## Current position",
             f"- Run: {label(run['status'], language)}",
@@ -2237,6 +2339,11 @@ def render(project: Path, state: dict[str, Any]) -> None:
             f"- Blocker kind: {run.get('blocker_kind') or 'none'}",
             f"- Resume when: {run.get('resume_when') or 'none'}",
             f"- Updated: {run['updated_at']}",
+            "",
+            "## Governing product decisions",
+            decision_view("intent", "Problem and intended change"),
+            decision_view("spec", "What this version does and leaves out"),
+            decision_view("plan", "How it will be made and tried"),
             "",
             "## Work overview",
             f"- {len(work_items)} total; {sum(i['status'] == 'verified' for i in work_items)} verified; {sum(i['status'] == 'implemented_unverified' for i in work_items)} implemented but unverified.",
@@ -2310,6 +2417,11 @@ def render(project: Path, state: dict[str, Any]) -> None:
 
 def persist(project: Path, state: dict[str, Any], event: str) -> None:
     state.setdefault("issues", [])
+    for decision in state.get("decisions", {}).values():
+        if isinstance(decision, dict):
+            decision.setdefault("proposal_path", None)
+            decision.setdefault("proposal_sha256", None)
+            decision.setdefault("proposal_created_at", None)
     if state["run"].get("status") != "finished":
         state["run"]["product_verdict"] = derive_product_verdict(
             state.get("work_items", []),
@@ -2457,6 +2569,8 @@ def resume_report_command(args: argparse.Namespace) -> None:
                 "status": decision.get("status"),
                 "path": decision.get("path"),
                 "artifact_sha256": decision.get("artifact_sha256"),
+                "proposal_path": decision.get("proposal_path"),
+                "proposal_sha256": decision.get("proposal_sha256"),
             }
             for name, decision in decisions.items()
             if isinstance(decision, dict)
@@ -2504,20 +2618,100 @@ def resume_report_command(args: argparse.Namespace) -> None:
         warnings.append(
             "The managed DZ section in AGENTS.md is missing or stale; propose install-guidance after the user confirms the takeover"
         )
+    dashboard_current = project_dashboard_is_current(project, state)
+    if not dashboard_current:
+        warnings.append(
+            "PROJECT.md is missing or does not match the current state snapshot; inspect the affected records and regenerate the views before relying on it"
+        )
     if workspace_comparison["uncertainty"]:
         warnings.append(workspace_comparison["uncertainty"])
+
+    decisions = state.get("decisions", {})
+    work_items = state.get("work_items", [])
+    risks = state.get("risks", [])
+    current_summary = {
+        "project": state.get("project", {}),
+        "run": {
+            key: state.get("run", {}).get(key)
+            for key in (
+                "status",
+                "stage",
+                "product_verdict",
+                "next_action",
+                "waiting_for",
+                "pending_risk_id",
+                "authorized_risk_id",
+                "blocker",
+                "blocker_kind",
+                "resume_when",
+                "updated_at",
+            )
+        },
+        "decisions": {
+            name: {
+                "status": decision.get("status"),
+                "path": decision.get("path"),
+                "artifact_sha256": decision.get("artifact_sha256"),
+                "proposal_path": decision.get("proposal_path"),
+                "proposal_sha256": decision.get("proposal_sha256"),
+            }
+            for name, decision in decisions.items()
+            if isinstance(decision, dict)
+        },
+        "decision_contract_sha256": accepted_contract_sha256(decisions),
+        "target": state.get("target"),
+        "work": {
+            "total": len(work_items),
+            "by_status": {
+                status: sum(item.get("status") == status for item in work_items)
+                for status in sorted(WORK_STATUSES)
+                if any(item.get("status") == status for item in work_items)
+            },
+            "open_items": [
+                {
+                    "id": item.get("id"),
+                    "title": item.get("title"),
+                    "status": item.get("status"),
+                    "phase": item.get("phase"),
+                }
+                for item in work_items
+                if item.get("status") != "verified"
+            ],
+        },
+        "active_risks": [
+            {
+                "id": item.get("id"),
+                "title": item.get("title"),
+                "level": item.get("level"),
+                "decision": item.get("decision"),
+                "action_status": item.get("action_status"),
+            }
+            for item in risks
+            if item.get("decision") not in {"rejected", "mitigated"}
+            or item.get("action_status") in {"pending", "authorized", "running"}
+        ],
+    }
 
     report = {
         "installed_workflow_version": WORKFLOW_VERSION,
         "project_workflow_version": state.get("workflow_version"),
         "journal_records_reviewed": len(records),
-        "journal_history": history,
-        "current_state": state,
+        "invalid_journal_records": invalid_records,
+        "journal_summary": {
+            "first_event": history[0] if history else None,
+            "latest_event": history[-1] if history else None,
+            "recent_changes": history[-5:],
+        },
+        "current_summary": current_summary,
         "unresolved_issues": [
             item
             for item in state.get("issues", [])
             if item.get("status") in UNRESOLVED_ISSUE_STATUSES
         ],
+        "generated_views": {
+            "project_dashboard_current": dashboard_current,
+            "current_view_fingerprint": current_view_fingerprint(state),
+        },
         "workspace": {
             "saved": saved_workspace,
             "current": current_workspace,
@@ -2526,13 +2720,19 @@ def resume_report_command(args: argparse.Namespace) -> None:
         "warnings": warnings,
         "takeover_rules": {
             "saved_next_action_is_advisory": True,
-            "reconcile_visible_conversation_and_current_files": True,
+            "reconcile_visible_conversation_and_running_state": True,
+            "read_affected_files_when_report_requires": True,
+            "full_history_was_mechanically_validated": True,
             "review_unresolved_issues_and_later_issue_changes": True,
             "report_present_and_proposed_execution_first": True,
             "user_confirmation_required_before_new_mutation": True,
             "confirmation_is_not_external_action_authorization": True,
         },
     }
+    if getattr(args, "full_history", False):
+        report["journal_history"] = history
+    if getattr(args, "full_state", False):
+        report["current_state"] = state
     print(json.dumps(report, ensure_ascii=False, indent=2))
 
 
@@ -2675,15 +2875,28 @@ def set_decision_command(args: argparse.Namespace) -> None:
             )
         decision = state["decisions"][args.name]
         current = decision["status"]
-        if current == "accepted" and args.status == "accepted":
-            raise ValueError("An accepted decision is immutable; supersede it before a new draft")
+        has_proposal = bool(decision.get("proposal_path"))
+        if current == "accepted" and args.status == "accepted" and not has_proposal:
+            raise ValueError(
+                "An accepted decision is already current; create a successor draft at a different path first"
+            )
+        if has_proposal and args.status not in {"accepted"}:
+            raise ValueError(
+                "Accept or discard the pending successor proposal before another decision transition"
+            )
         if args.path and args.status != "draft":
             raise ValueError("A decision path may be supplied only while preparing a draft")
         if args.status == "accepted" and (not args.by or not args.reference):
             raise ValueError("Acceptance requires --by and --reference")
         if args.status != "accepted" and (args.by or args.reference):
             raise ValueError("Acceptance metadata is valid only with --status accepted")
-        if args.status != current and args.status not in DECISION_TRANSITIONS[current]:
+        successor_draft = current == "accepted" and args.status == "draft"
+        successor_acceptance = current == "accepted" and args.status == "accepted" and has_proposal
+        if (
+            args.status != current
+            and not successor_draft
+            and args.status not in DECISION_TRANSITIONS[current]
+        ):
             raise ValueError(f"Invalid decision transition: {current} -> {args.status}")
         if args.name == "spec" and args.status in {"draft", "accepted"}:
             if state["decisions"]["intent"]["status"] != "accepted":
@@ -2698,41 +2911,77 @@ def set_decision_command(args: argparse.Namespace) -> None:
             normalized, artifact = project_file(
                 args.project.resolve(), selected_path, f"{args.name} decision artifact"
             )
-            decision.update(
-                {
-                    "status": "draft",
-                    "path": normalized,
-                    "artifact_sha256": sha256_file(artifact),
-                    "accepted_by": None,
-                    "acceptance_reference": None,
-                    "accepted_at": None,
-                }
-            )
+            if successor_draft:
+                if not args.path or normalized == decision.get("path"):
+                    raise ValueError(
+                        "A successor draft must use a new path so the current accepted artifact stays intact"
+                    )
+                decision.update(
+                    {
+                        "proposal_path": normalized,
+                        "proposal_sha256": sha256_file(artifact),
+                        "proposal_created_at": now(),
+                    }
+                )
+            else:
+                decision.update(
+                    {
+                        "status": "draft",
+                        "path": normalized,
+                        "artifact_sha256": sha256_file(artifact),
+                        "accepted_by": None,
+                        "acceptance_reference": None,
+                        "accepted_at": None,
+                        "proposal_path": None,
+                        "proposal_sha256": None,
+                        "proposal_created_at": None,
+                    }
+                )
         elif args.status == "accepted":
+            artifact_path = (
+                decision.get("proposal_path") if successor_acceptance else decision.get("path")
+            )
+            artifact_digest = (
+                decision.get("proposal_sha256")
+                if successor_acceptance
+                else decision.get("artifact_sha256")
+            )
             if not stored_file_matches(
                 args.project.resolve(),
-                decision.get("path"),
-                decision.get("artifact_sha256"),
+                artifact_path,
+                artifact_digest,
             ):
                 raise ValueError("The decision artifact changed after its recorded draft")
             decision.update(
                 {
                     "status": "accepted",
+                    "path": artifact_path,
+                    "artifact_sha256": artifact_digest,
                     "accepted_by": args.by,
                     "acceptance_reference": args.reference,
                     "accepted_at": now(),
+                    "proposal_path": None,
+                    "proposal_sha256": None,
+                    "proposal_created_at": None,
                 }
             )
         else:
             decision["status"] = args.status
-        if args.status == "superseded" and args.name == "intent":
+        accepted_successor = args.status == "superseded" or successor_acceptance
+        if accepted_successor and args.name == "intent":
             for downstream in ("spec", "plan"):
                 if state["decisions"][downstream]["status"] != "not_created":
                     state["decisions"][downstream]["status"] = "superseded"
-        if args.status == "superseded" and args.name == "spec":
+                    state["decisions"][downstream]["proposal_path"] = None
+                    state["decisions"][downstream]["proposal_sha256"] = None
+                    state["decisions"][downstream]["proposal_created_at"] = None
+        if accepted_successor and args.name == "spec":
             if state["decisions"]["plan"]["status"] != "not_created":
                 state["decisions"]["plan"]["status"] = "superseded"
-        if args.status == "superseded":
+                state["decisions"]["plan"]["proposal_path"] = None
+                state["decisions"]["plan"]["proposal_sha256"] = None
+                state["decisions"]["plan"]["proposal_created_at"] = None
+        if accepted_successor:
             invalidate_verification_target(state)
         stage_map = {
             ("intent", "draft"): "intent_draft",
@@ -2745,9 +2994,26 @@ def set_decision_command(args: argparse.Namespace) -> None:
             ("plan", "accepted"): "plan_accepted",
             ("plan", "superseded"): "spec_accepted",
         }
-        state["run"]["stage"] = stage_map[(args.name, args.status)]
+        if not successor_draft:
+            state["run"]["stage"] = stage_map[(args.name, args.status)]
 
     mutate(args.project.resolve(), f"set_decision:{args.name}:{args.status}", change)
+
+
+def discard_decision_proposal_command(args: argparse.Namespace) -> None:
+    def change(state: dict[str, Any]) -> None:
+        decision = state["decisions"][args.name]
+        if decision.get("status") != "accepted" or not decision.get("proposal_path"):
+            raise ValueError("There is no pending successor proposal to discard")
+        decision["proposal_path"] = None
+        decision["proposal_sha256"] = None
+        decision["proposal_created_at"] = None
+
+    mutate(
+        args.project.resolve(),
+        f"discard_decision_proposal:{args.name}:{args.reason}",
+        change,
+    )
 
 
 def set_target_command(args: argparse.Namespace) -> None:
@@ -2984,7 +3250,7 @@ def add_evidence_command(args: argparse.Namespace) -> None:
                 resolved.get("environment"),
             ) != (selected_target[0], args.revision, args.environment):
                 raise ValueError(
-                    "Evidence may resolve a gap only in the same target epoch; rerun every criterion for a new target"
+                    "Evidence may resolve a gap only in the same target epoch; record new evidence for a new target"
                 )
             if resolved.get("result") == "passed":
                 raise ValueError("Passed evidence does not need resolution")
@@ -3268,7 +3534,6 @@ def build_parser() -> argparse.ArgumentParser:
     for name, handler in (
         ("check", check_command),
         ("show", show_command),
-        ("resume-report", resume_report_command),
         ("recover", recover_command),
         ("migrate", migrate_command),
         ("can-stop", can_stop_command),
@@ -3277,6 +3542,20 @@ def build_parser() -> argparse.ArgumentParser:
         command = subparsers.add_parser(name)
         project_arg(command)
         command.set_defaults(handler=handler)
+
+    command = subparsers.add_parser("resume-report")
+    project_arg(command)
+    command.add_argument(
+        "--full-history",
+        action="store_true",
+        help="Include validated journal events for conflict investigation or audit",
+    )
+    command.add_argument(
+        "--full-state",
+        action="store_true",
+        help="Include the complete state for conflict investigation or audit",
+    )
+    command.set_defaults(handler=resume_report_command)
 
     command = subparsers.add_parser("set-run")
     project_arg(command)
@@ -3308,6 +3587,12 @@ def build_parser() -> argparse.ArgumentParser:
     command.add_argument("--by")
     command.add_argument("--reference")
     command.set_defaults(handler=set_decision_command)
+
+    command = subparsers.add_parser("discard-decision-proposal")
+    project_arg(command)
+    command.add_argument("name", choices=("intent", "spec", "plan"))
+    command.add_argument("--reason", required=True)
+    command.set_defaults(handler=discard_decision_proposal_command)
 
     command = subparsers.add_parser("set-target")
     project_arg(command)

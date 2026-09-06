@@ -34,6 +34,8 @@ Do not force every artifact into one status vocabulary:
 | feedback record | New → Triaged → Converted / Closed | Human triage |
 | issue ledger record | Open → Triaged / Waiting / In progress → Implemented unverified → Verified; or Deferred / Dismissed | Observable problem, selected route, current Passed evidence, and retained regression protection |
 
+For a successor decision, Draft does not replace the current Accepted artifact. Keep the accepted file governing, save the proposal at a separate versioned path, and show both in the generated current view. Explicit acceptance promotes the proposal and moves the former version out of the active view while the append-only journal preserves it. An unaccepted note or later brainstorm never becomes current merely because it is newer.
+
 Every artifact records its source of truth, preceding artifact or evidence, relevant revision/environment, and decision or evidence record. For Intent, Specification, and Plan, hash the complete visible Draft and record the unchanged digest, deciding owner, visible acceptance reference, and time. A timestamp, Git author, chat summary, or model assertion is not approval or proof.
 
 Execution state uses a separate lifecycle described in [project-state.md](project-state.md). A run can be paused, cancelled, or finished with unverified work without changing any decision artifact or pretending verification passed.

@@ -65,11 +65,19 @@ class InstallLocalSkillTests(unittest.TestCase):
         manifest = json.loads((ROOT / "dz-manifest.json").read_text(encoding="utf-8"))
         rules = manifest["non_negotiable_behavior"]
         for key in (
-            "named_solution_parts_are_routed_now_later_or_wont",
-            "external_action_agents_define_retry_duplicate_timeout_and_recovery",
-            "autonomous_change_review_checks_scope_impersonation_duplicates_and_recovery",
-            "maintenance_release_requires_current_reverification_and_authorization",
-            "beginner_takeover_pause_close_and_health_use_one_four_line_block",
+            "one_decision_topic_per_turn",
+            "bounded_changes_reopen_only_affected_decisions",
+            "reuse_search_runs_only_when_materially_useful",
+            "resume_mechanically_validates_every_journal_record",
+            "resume_uses_compact_current_summary_by_default",
+            "generated_project_view_is_fingerprint_checked",
+            "clear_current_user_instruction_counts_as_authorization",
+            "ordinary_changes_rerun_affected_and_critical_checks",
+            "release_candidate_requires_full_acceptance_set",
+            "pre_deploy_ai_preflight_is_default",
+            "preflight_separates_end_to_end_and_code_review",
+            "safe_preflight_does_not_require_duplicate_permission",
+            "ai_preflight_does_not_replace_internal_human_testing",
         ):
             self.assertIs(rules[key], True, key)
 
@@ -82,19 +90,30 @@ class InstallLocalSkillTests(unittest.TestCase):
         portable = (ROOT / "portable" / "DZ-UNIVERSAL.md").read_text(
             encoding="utf-8"
         )
+        skill = (ROOT / "SKILL.md").read_text(encoding="utf-8")
+        phase_gates = (ROOT / "references" / "phase-gates.md").read_text(
+            encoding="utf-8"
+        )
+        release_template = (
+            ROOT / "references" / "artifacts" / "review-release.md"
+        ).read_text(encoding="utf-8")
         self.assertIn("duplicate-action prevention", guided)
         self.assertIn("“需要时再看” is not a trigger", guided)
         self.assertIn("impersonates the owner", review)
         self.assertIn("concrete opportunity cost visible", review)
-        self.assertIn("fresh approval for that exact revision and environment", portable)
-        self.assertIn("a branch, commit, pull request", portable)
-        self.assertIn("receive current scope-specific authorization", portable)
-        self.assertIn(
-            "A previous Plan, monitoring setup, or earlier release approval cannot authorize it",
-            portable,
-        )
-        self.assertIn("in the durable project handoff", portable)
-        self.assertIn("do not print a second detail list", portable)
+        self.assertIn("latest explicitly accepted wording is current", portable)
+        self.assertIn("compact present summary by default", portable)
+        self.assertIn("never ask for the same permission twice", portable)
+        self.assertIn("current action-specific authorization", portable)
+        self.assertIn("latest explicitly accepted wording is current", portable)
+        self.assertIn("Leave a handoff containing", portable)
+        self.assertIn("without baby talk or a rigid word blacklist", portable)
+        self.assertIn("two separate results", portable)
+        self.assertIn("prepares internal human testing", portable)
+        self.assertIn("Before deploying to an internal test environment", skill)
+        self.assertIn("two separately reported parts", phase_gates)
+        self.assertIn("AI preflight before internal testing", release_template)
+        self.assertIn("does not claim to replace it", release_template)
 
     def test_replace_existing_repository_symlink_removes_duplicate_layout(self) -> None:
         with tempfile.TemporaryDirectory() as temp:

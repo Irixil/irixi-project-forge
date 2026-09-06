@@ -271,7 +271,10 @@
         "artifact_sha256": {"anyOf": [{"type": "string", "pattern": "^[0-9a-f]{64}$"}, {"type": "null"}]},
         "accepted_by": {"type": ["string", "null"]},
         "acceptance_reference": {"type": ["string", "null"]},
-        "accepted_at": {"type": ["string", "null"], "format": "date-time"}
+        "accepted_at": {"type": ["string", "null"], "format": "date-time"},
+        "proposal_path": {"type": ["string", "null"]},
+        "proposal_sha256": {"anyOf": [{"type": "string", "pattern": "^[0-9a-f]{64}$"}, {"type": "null"}]},
+        "proposal_created_at": {"type": ["string", "null"], "format": "date-time"}
       },
       "allOf": [
         {

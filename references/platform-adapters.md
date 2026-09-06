@@ -12,9 +12,9 @@ Adapt only how the work is carried out:
 |---|---|
 | Conversation only | Guide decisions, review pasted material, and create a copyable handoff. Do not claim implementation or testing. |
 | Read project files | Inspect current state and preserve valid work. Do not claim a change was made. |
-| Read, write, and run commands | Implement verified slices after the three confirmations. |
+| Read, write, and run commands | Implement verified slices after the three product decisions are explicitly accepted. |
 | Browser or computer control | Run real UI-path checks when permitted; otherwise label those checks unproven and give a manual test. |
-| Public web or GitHub reading | Run the sanitized, read-only existing-parts scan after the exact first product decision is accepted. Without it, state that no live search occurred and export search phrases plus an evidence card. |
+| Public web or GitHub reading | Run a sanitized, read-only existing-parts scan only when reuse could materially save time, reduce risk, or reduce maintenance. Without it, do not invent current candidates. |
 | Independent agents or isolated sessions | Delegate fresh review when useful; otherwise perform a clearly separated second-pass review or request another capable reviewer. |
 | Deployment connector | Prepare release evidence, but deploy only under current environment- and revision-specific approval. |
 | Persistent project storage | Save versioned decisions plus the DZ execution snapshot, journal, work ledger, evidence, and risk decisions. Without it, keep exact visible records and export a handoff at every pause or ending. |
@@ -101,7 +101,7 @@ Before a session ends or work moves to another platform, provide one compact han
 3. what everyone agreed to make first and how to try it, if reached;
 4. what was actually observed, changed, and tested;
 5. what remains unknown or unauthorized;
-6. the recommended next actions, order, reasons, and meaningful options; on resume, read every valid saved event, compare a saved workspace checkpoint with the current project when possible, show how later work changed the saved position, name any unavailable comparison, and wait for the user to confirm or correct the account before new mutations;
+6. the recommended next actions, order, reasons, and meaningful options; on resume, mechanically validate every saved event but give the model a compact current summary first, compare a saved workspace checkpoint with the current project when possible, expand only on conflict or material uncertainty, and wait for the user to confirm or correct the account before new mutations;
 7. links or locations of available project records.
 
 Clearly label inference. A handoff preserves context; it does not create approval or turn an unrun check into evidence.

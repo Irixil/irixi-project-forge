@@ -55,6 +55,13 @@ Prepare this before requesting production approval. Approval authorizes deployme
 - Known limitations and accepted risks:
 - Accepted-risk record: concrete consequence, safer option, recovery, decision owner, exact action/revision/environment/amount/time, and decision evidence:
 
+## AI preflight before internal testing or public release
+- End-to-end closure: every current Must and core user path, important failure/recovery states, and Passed/Failed/Unverified result:
+- Code review: changed code and critical shared paths; correctness, security, exposed secrets, dependency risk, maintainability, and Passed/Failed/Unverified result:
+- Checks that could not run and the exact missing capability, credential, cost decision, data, access, or external action:
+- Next useful action for each Failed or Unverified item:
+- Internal human testing still required; this AI preflight does not claim to replace it:
+
 ## Production readiness
 - Identity and access isolation:
 - Secrets and credential lifetime:
