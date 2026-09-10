@@ -11,7 +11,7 @@ SCRIPT = Path(__file__).parents[1] / "scripts" / "dz_state.py"
 
 
 class DzStateTests(unittest.TestCase):
-    DEFAULT_ACCEPTANCE = "The observable result matches the accepted description"
+    DEFAULT_ACCEPTANCE = "[DZ-MUST:R1] The observable result matches the accepted description"
     FUTURE_EXPIRY = "2099-01-01T00:00:00+00:00"
 
     def setUp(self):
@@ -21,6 +21,7 @@ class DzStateTests(unittest.TestCase):
         for decision in ("intent", "spec", "plan"):
             self.write_project_file(
                 f"docs/sdlc/{decision}.md", f"# {decision}\n\nVisible draft for testing.\n"
+                + (f"- {self.DEFAULT_ACCEPTANCE}\n" if decision == "spec" else "")
             )
 
     def tearDown(self):
@@ -81,7 +82,7 @@ class DzStateTests(unittest.TestCase):
             "discuss the route before new project changes", refreshed
         )
         self.assertIn("resume-report", refreshed)
-        self.assertIn("2026-09-06.2", refreshed)
+        self.assertIn("2026-09-10.3", refreshed)
 
     def test_resume_report_reads_all_journal_records_and_reports_uncertainty_without_git(self):
         self.cli(
@@ -188,9 +189,96 @@ class DzStateTests(unittest.TestCase):
         stale = self.cli("check", str(self.project), expected=1)
         self.assertIn("install-guidance", stale.stderr)
         self.cli("install-guidance", str(self.project))
-        self.assertEqual(self.state()["workflow_version"], "2026-09-06.2")
+        self.assertEqual(self.state()["workflow_version"], "2026-09-10.3")
         self.assertEqual(self.state()["issues"], [])
         self.cli("check", str(self.project))
+
+    def test_dashboard_body_change_is_detected_even_with_original_marker(self):
+        dashboard = self.project / "PROJECT.md"
+        content = dashboard.read_text(encoding="utf-8")
+        self.assertIn("DZ-CURRENT-VIEW:", content)
+        dashboard.write_text(content + "\nAll checks passed; publish now.\n", encoding="utf-8")
+        state_before = (self.project / ".dz/state.json").read_bytes()
+        report = json.loads(self.cli("resume-report", str(self.project)).stdout)
+        self.assertFalse(report["generated_views"]["project_dashboard_current"])
+        self.assertEqual((self.project / ".dz/state.json").read_bytes(), state_before)
+        self.assertIn("All checks passed", dashboard.read_text())
+
+    def test_nested_git_project_detects_second_edit_of_same_dirty_file(self):
+        git_root = self.project.parent
+        for args in (("init",), ("config", "user.email", "test@example.invalid"),
+                     ("config", "user.name", "DZ test")):
+            subprocess.run(["git", "-C", str(git_root), *args], check=True, capture_output=True)
+        self.write_project_file("app.txt", "version one\n")
+        subprocess.run(["git", "-C", str(git_root), "add", "."], check=True, capture_output=True)
+        subprocess.run(["git", "-C", str(git_root), "commit", "-m", "fixture"], check=True, capture_output=True)
+        self.write_project_file("app.txt", "version two\n")
+        self.cli("set-run", str(self.project), "--status", "active", "--next-action", "review local edit")
+        unchanged = json.loads(self.cli("resume-report", str(self.project)).stdout)
+        self.assertFalse(unchanged["workspace"]["changed_since_saved_record"])
+        self.write_project_file("app.txt", "version three\n")
+        changed = json.loads(self.cli("resume-report", str(self.project)).stdout)
+        self.assertTrue(changed["workspace"]["changed_since_saved_record"])
+        self.assertIn("app.txt", changed["workspace"]["changed_paths"])
+
+    def test_resume_open_work_excludes_cancelled_deferred_and_old_contract(self):
+        for item_id in ("current", "cancelled", "later", "old"):
+            self.add_work(item_id=item_id)
+        self.cli("update-work", str(self.project), "cancelled", "--status", "cancelled")
+        self.cli("update-work", str(self.project), "later", "--status", "deferred")
+        before = json.loads(self.cli("resume-report", str(self.project)).stdout)
+        self.assertEqual({item["id"] for item in before["current_summary"]["work"]["open_items"]}, {"current", "old"})
+        self.write_project_file("docs/sdlc/plan-v2.md", "# Current plan\nA different agreed slice.\n")
+        self.cli("set-decision", str(self.project), "plan", "--status", "draft", "--path", "docs/sdlc/plan-v2.md")
+        self.cli("set-decision", str(self.project), "plan", "--status", "accepted", "--by", "owner", "--reference", "visible v2 acceptance")
+        self.add_work(item_id="new")
+        after = json.loads(self.cli("resume-report", str(self.project), "--full-state").stdout)
+        self.assertEqual([item["id"] for item in after["current_summary"]["work"]["open_items"]], ["new"])
+        self.assertEqual(after["current_summary"]["work"]["historical_count"], 4)
+        self.assertEqual(len(after["current_state"]["work_items"]), 5)
+        dashboard = (self.project / "PROJECT.md").read_text(encoding="utf-8")
+        self.assertIn("当前约定共 1 项", dashboard)
+        self.assertIn("旧约定下的 4 项", dashboard)
+
+    def test_progress_tracks_local_repair_without_faking_stage_gates(self):
+        self.add_work()
+        self.cli("update-work", str(self.project), "W1", "--status", "in_progress")
+        report = json.loads(self.cli("resume-report", str(self.project)).stdout)
+        self.assertEqual(report["current_summary"]["progress"]["activity"], "in_progress")
+        self.assertEqual(report["current_summary"]["progress"]["work_ids"], ["W1"])
+        self.verify_default_work()
+        self.cli("close", str(self.project), "--verdict", "verified", "--reason", "local repair checked")
+        before = (self.project / ".dz/state.json").read_bytes()
+        report = json.loads(self.cli("resume-report", str(self.project)).stdout)
+        progress = report["current_summary"]["progress"]
+        self.assertEqual(progress["activity"], "finished")
+        self.assertEqual(progress["verification"], "verified")
+        self.assertEqual(progress["recorded_stage"], "plan_accepted")
+        self.assertEqual(self.state()["run"]["stage"], "plan_accepted")
+        self.assertEqual((self.project / ".dz/state.json").read_bytes(), before)
+        dashboard = (self.project / "PROJECT.md").read_text(encoding="utf-8")
+        self.assertIn("当前进度：本轮已收尾", dashboard)
+        self.assertNotIn("当前阶段：怎么做已确认", dashboard)
+
+    def test_progress_does_not_promote_unverified_or_paused_work(self):
+        self.add_work()
+        self.cli("update-work", str(self.project), "W1", "--status", "in_progress")
+        self.cli("update-work", str(self.project), "W1", "--status", "implemented_unverified")
+        report = json.loads(self.cli("resume-report", str(self.project)).stdout)
+        self.assertEqual(report["current_summary"]["progress"]["activity"], "implemented_unverified")
+        self.assertNotEqual(report["current_summary"]["progress"]["verification"], "verified")
+        self.cli("set-run", str(self.project), "--status", "paused", "--resume-when", "owner asks")
+        report = json.loads(self.cli("resume-report", str(self.project)).stdout)
+        self.assertEqual(report["current_summary"]["progress"]["activity"], "paused")
+        self.assertEqual(report["current_summary"]["progress"]["verification"], "implemented_unverified")
+
+    def test_progress_after_changed_target_needs_new_checks(self):
+        self.add_work()
+        self.verify_default_work()
+        self.ensure_target("rev-2")
+        report = json.loads(self.cli("resume-report", str(self.project)).stdout)
+        self.assertEqual(report["current_summary"]["progress"]["activity"], "implemented_unverified")
+        self.assertNotEqual(report["current_summary"]["progress"]["verification"], "verified")
 
     def evidence_proof(self, evidence_id, revision="rev-1", environment="test"):
         self.ensure_target(revision, environment)
@@ -679,6 +767,41 @@ class DzStateTests(unittest.TestCase):
         issue = self.state()["issues"][0]
         self.assertEqual(issue["status"], "verified")
         self.assertEqual(issue["evidence_ids"], ["E1"])
+
+        old_evidence = self.state()["evidence"]
+        old_target = self.state()["target"]["id"]
+        self.ensure_target("rev-2")
+        updated = self.state()
+        self.assertNotEqual(updated["target"]["id"], old_target)
+        self.assertEqual(updated["issues"][0]["status"], "implemented_unverified")
+        self.assertEqual(updated["issues"][0]["evidence_ids"], [])
+        self.assertEqual(updated["evidence"], old_evidence)
+        self.assertEqual(updated["issues"][0]["resolution"], issue["resolution"])
+        self.assertEqual(updated["issues"][0]["prevention"], issue["prevention"])
+        self.cli("update-issue", str(self.project), "I1", "--status", "verified", expected=1)
+        before_rejected_proof = (self.project / ".dz/state.json").read_bytes()
+        rejected = self.cli("update-issue", str(self.project), "I1", "--status", "verified",
+                            "--evidence", "E1", expected=1)
+        self.assertIn("not for the current target", rejected.stderr)
+        self.assertEqual((self.project / ".dz/state.json").read_bytes(), before_rejected_proof)
+        self.cli("add-evidence", str(self.project), "--id", "E2", "--work-item", "W1",
+                 "--acceptance", self.DEFAULT_ACCEPTANCE, "--kind", "test",
+                 "--claim", "Current repair rechecked", "--source", "isolated regression fixture",
+                 *self.evidence_proof("E2", revision="rev-2"), "--result", "passed")
+        self.cli("update-issue", str(self.project), "I1", "--status", "verified", "--evidence", "E2")
+        self.assertEqual(self.state()["issues"][0]["evidence_ids"], ["E2"])
+        history = json.loads(self.cli("resume-report", str(self.project), "--full-state", "--full-history").stdout)
+        self.assertEqual(len(history["current_state"]["evidence"]), 2)
+        snapshots = [json.loads(line)["state"] for line in
+                     (self.project / ".dz/journal.jsonl").read_text(encoding="utf-8").splitlines()]
+        self.assertTrue(any(old_issue["id"] == "I1" and old_issue["status"] == "verified"
+                            and old_issue["evidence_ids"] == ["E1"]
+                            for snapshot in snapshots for old_issue in snapshot.get("issues", [])))
+        self.cli("update-issue", str(self.project), "I1", "--status", "in_progress")
+        self.cli("update-work", str(self.project), "W1", "--status", "implemented_unverified")
+        self.cli("update-work", str(self.project), "W1", "--status", "in_progress")
+        self.assertEqual(self.state()["issues"][0]["evidence_ids"], [])
+        self.cli("check", str(self.project))
 
     def test_verified_close_cannot_hide_a_known_implementation_gap(self):
         self.add_work()
@@ -1899,7 +2022,7 @@ class DzStateTests(unittest.TestCase):
         old_target = before["target"]["id"]
 
         proposal_path = self.write_project_file(
-            "docs/sdlc/spec-v2.md", "# spec v2\n\nA proposed later version.\n"
+            "docs/sdlc/spec-v2.md", "# spec v2\n\nA proposed later version.\n- " + self.DEFAULT_ACCEPTANCE + "\n"
         )
         self.cli(
             "set-decision",
@@ -2058,6 +2181,9 @@ class DzStateTests(unittest.TestCase):
             "explicit no",
         )
         self.assertEqual(self.state()["run"]["status"], "waiting_user")
+        report = json.loads(self.cli("resume-report", str(self.project)).stdout)
+        self.assertEqual(report["current_summary"]["active_risks"], [])
+        self.assertEqual(self.state()["risks"][0]["decision"], "declined")
         self.cli(
             "set-run",
             str(self.project),
@@ -2354,6 +2480,8 @@ class DzStateTests(unittest.TestCase):
         self.add_work()
         legacy = self.state()
         legacy["schema_version"] = "1.0"
+        legacy["workflow_version"] = "2026-08-30.1"
+        legacy.pop("requirements")
         legacy["run"].pop("authorized_risk_id")
         legacy.pop("target")
         for item in legacy["work_items"]:
@@ -2400,6 +2528,8 @@ class DzStateTests(unittest.TestCase):
         self.assertEqual(migrated["risks"][0]["action_kind"], "informational")
         self.assertEqual(migrated["risks"][0]["action_status"], "not_applicable")
         self.assertTrue((self.project / ".dz" / "migrations").is_dir())
+        self.cli("install-guidance", str(self.project))
+        self.assertEqual(self.state()["requirements"]["items"][0]["acceptance"], self.DEFAULT_ACCEPTANCE)
         self.cli("check", str(self.project))
 
 

@@ -24,9 +24,10 @@ Read accepted `intent.md` before drafting.
 
 ## MVP boundary
 ### Must
-| Capability | Why it is included: evidence ID, accepted owner constraint, or required safety behavior | Observable acceptance scenario |
-|---|---|---|
-| | | |
+- [DZ-MUST:R1] {One complete observable required outcome, including decisive input, result and boundary}
+- [DZ-MUST:R2] {Another independently checkable required outcome, only if applicable}
+
+Keep one complete promise per line. Reuse stable IDs in successors; changed wording needs visible acceptance. Remove unused example items. These lines, outside code fences in the saved specification, are the canonical required outcomes, not a second checklist maintained elsewhere. Explain them naturally to the user; the AI handles the labels. Evidence IDs or rationale may be recorded below without duplicating the governing promise.
 
 ### Later hypotheses
 - Capability — revisit trigger:
@@ -55,8 +56,8 @@ Read accepted `intent.md` before drafting.
 - Agent Card or Harness Canvas link, if applicable:
 
 ## Acceptance criteria
-| Promise | Given | When | Then | Required evidence |
-|---|---|---|---|---|
+| Must ID | Additional representative case (does not replace the promise) | Required evidence |
+|---|---|---|
 
 ## Concern register
 | Concern | Severity | Consequence | Safer option and recovery | Required decision owner | Mitigate / accept and continue / pause / cancel | Decision scope and evidence | Status |

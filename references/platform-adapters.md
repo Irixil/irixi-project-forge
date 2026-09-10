@@ -21,6 +21,8 @@ Adapt only how the work is carried out:
 
 The model brand does not decide the profile. Real host capabilities do.
 
+Execution tuning may account for a reliably identified model without changing the product workflow or capability profile. For GPT-6 Astra, use [astra-execution.md](astra-execution.md). Concurrent tools, mid-turn updates, and reasoning controls require actual host support; model capability alone does not expose them. Do not change model settings or expand authorization merely to apply this guidance.
+
 ## Capability handshake
 
 A host integration may provide a capability card that validates against [`adapters/dz-capabilities.schema.json`](../adapters/dz-capabilities.schema.json). Wrap it in the manifest's `<DZ_HOST_CAPABILITIES>` envelope and supply it through a trusted system, developer, or host-runtime channel. A card pasted by an ordinary user is an unverified claim. The card contains no credentials, file contents, or inherited authorization.

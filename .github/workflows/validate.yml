@@ -18,6 +18,8 @@ jobs:
       - name: Run deterministic tests
         run: python3 -m unittest discover -s tests -v
       - name: Check Python syntax
-        run: python3 -m py_compile scripts/dz_state.py scripts/dz_codex_stop_hook.py scripts/install_local_skill.py
+        run: python3 -m py_compile scripts/dz_state.py scripts/dz_codex_stop_hook.py scripts/install_local_skill.py scripts/sync_workflow.py
+      - name: Check generated portable workflow
+        run: python3 scripts/sync_workflow.py --check
       - name: Check JSON files
         run: python3 -m json.tool dz-manifest.json >/dev/null && python3 -m json.tool .codex-plugin/plugin.json >/dev/null

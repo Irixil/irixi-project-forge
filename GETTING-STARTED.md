@@ -44,7 +44,7 @@ DZ 会把开发和试用中真正影响结果的问题写进项目账本，并�
 ```text
 请启动 DZ。
 
-先完整读取“<DZ 文件夹的绝对路径>/SKILL.md”。把它当作本次工作的工作方式，并按照其中“Load references progressively”的规则，只读取当前步骤需要的参考文件，不要一次加载整个 references 文件夹。
+先完整读取“<DZ 文件夹的绝对路径>/SKILL.md”。把它当作本次工作的工作方式，并按照其中“Load references only when routed”的规则，只读取当前步骤需要的参考文件，不要一次加载整个 references 文件夹。
 
 开始前先根据你现在真实拥有的工具，说明你能否读取和修改我的项目、运行命令、打开网页和发布；不能确认的能力按没有处理。如果“<我的项目文件夹>”里已经有 .dz/state.json，先把以前的记录、后来新增的操作和项目现在的内容对一遍。汇报现在做到哪、准备怎样继续，等我确认或更正后再行动；不要重新开始，也不要退回旧位置。
 
@@ -94,6 +94,10 @@ DZ启动：<写下你的想法或当前做到哪里>。
 
 如果它说“DZ 不在可用 Skill 清单”，但它确实可以读取文件，就使用上面的 B 方式给出完整路径。这样是手动加载，仍然可以运行 DZ；原生 Skill 菜单只是更方便的入口。
 
+### 更新后继续旧项目
+
+当前版本为 `2026-09-10.3`。先更新完整文件夹和平台实际加载的安装副本，再在具体项目里调用 DZ。它先核对现在的内容，讨论如何继续，不会回到旧进度或清空历史。旧需求没有逐项标记时，AI 会给你看整理后的完整版本，你同意后再接入漏项检查；旧测试不会因此自动变成当前版本通过。你仍可随时暂停或如实收尾。
+
 ### 给平台开发者
 
 先读取公开的 [`dz-manifest.json`](https://raw.githubusercontent.com/Irixil/irixi-project-forge/main/dz-manifest.json)。支持 Agent Skills 时加载其中的 `agent_skill`；不支持时加载 `universal_prompt`。详细的能力判断、按需参考文件、状态保存和权限边界见 [`adapters/README.md`](adapters/README.md)。
@@ -129,7 +133,7 @@ DZ allows Codex to select it automatically when a request clearly starts or resu
 
 Do not install the same version as both a local Skill and a plugin. That can still show two DZ entries. Older instructions also symlinked the whole repository into Codex's Skill directory, which exposed both the root entry and the nested plugin entry. Run `python3 scripts/install_local_skill.py --replace` from the repository to convert that old symlink into a single-entry installation. The old link moves to `~/.agents/skill-backups/`, and the source repository is not deleted.
 
-To take over the project in a new task tomorrow, open the agent from the exact project folder rather than only its parent container. When DZ initializes its ledger, it merges a continuity section into the project's `AGENTS.md`. On every takeover, it reads `PROJECT.md` and runs the read-only `resume-report`. The tool mechanically validates every journal record, checks that the generated view is current, and compares the saved Git checkpoint with the present worktree while returning a compact summary by default. Full history or affected files are opened only when a conflict, unexplained change, damage, stale view, or material uncertainty requires it. Another host can provide the same continuity only when it supports persistent project instructions and keeps the same project files available.
+To take over the project in a new task tomorrow, open the agent from the exact project folder rather than only its parent container. When DZ initializes its ledger, it merges a continuity section into the project's `AGENTS.md`. On every takeover, it reads `PROJECT.md` and runs the read-only `resume-report`. The tool mechanically validates every journal record, checks that the generated view is current, and compares the saved Git checkpoint with the present worktree while returning a compact summary by default. Relevant accepted requirements and implementation files are still read before acting; full history is opened only for a conflict, unexplained change, damage, stale view, or material uncertainty. Continuous aligned work does not repeat takeover after each question. Another host can provide the same continuity only when it supports persistent project instructions and keeps the same project files available.
 
 DZ records material problems found during implementation or use and chooses whether each belongs in code repair, a product wording change, the technical approach, later work, or a reopened product purpose. The beginner never has to select technical categories. A small defect may be repaired directly when it only restores already accepted behavior. Changes to how people use it, what is stored or sent, who can access it, material cost, or current scope are shown as old wording, proposed wording, and concrete impact before user acceptance. Without a check that exercises the former failure, DZ says the change is implemented but not yet proven.
 
@@ -140,7 +144,7 @@ Place the `dz` folder somewhere the agent can read, then send the following. Rep
 ```text
 Start DZ.
 
-First read “<absolute path to the DZ folder>/SKILL.md” completely. Use it as the working method for this task. Follow its “Load references progressively” rules and read only the references needed for the current step; do not load the whole references folder at once.
+First read “<absolute path to the DZ folder>/SKILL.md” completely. Use it as the working method for this task. Follow its “Load references only when routed” rules and read only the references needed for the current step; do not load the whole references folder at once.
 
 Before starting, use only the tools you can truly access to say whether you can read and modify my project, run commands, browse the web, and publish. Treat anything uncertain as unavailable. If “<my project folder>” already contains .dz/state.json, reconcile prior records and later work with the current project. Report the present and how you propose to continue, then wait for my correction or confirmation before acting. Do not restart or return to the old stopping point.
 
@@ -189,6 +193,10 @@ The first project reply should then demonstrate three things:
 3. It asks one high-value question for a new idea; for an unfinished project, it reconciles saved records and later work with the current contents, reports the proposed execution, and waits for the user's correction or confirmation before acting.
 
 If it says that DZ is absent from the available Skill list but can read files, use method B with the exact path. That is a valid manual load; a native Skill selector is simply the more convenient entry point.
+
+### Continue an older project after updating
+
+The current version is `2026-09-10.3`. Update the whole bundle and the copy actually loaded by your host, then invoke DZ inside the specific project. It reconciles today's records and discusses the route without rolling back progress or clearing history. If older requirements have no indexed promises, AI shows you a complete successor and obtains acceptance before enabling full coverage checks. Old tests never become a fresh pass through an upgrade. You can still pause or close honestly at any time.
 
 ### For host developers
 

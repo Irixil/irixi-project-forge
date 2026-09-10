@@ -1,13 +1,13 @@
 {
   "protocol_version": "1.0",
-  "workflow_version": "2026-09-06.2",
+  "workflow_version": "2026-09-10.3",
   "id": "dz",
   "name": "Irixi Project Forge",
   "description": "A platform-neutral workflow that guides a nontechnical user from an idea or current project state to a verified product or an honest implementation handoff.",
   "source": "https://github.com/Irixil/irixi-project-forge",
   "raw_base_url": "https://raw.githubusercontent.com/Irixil/irixi-project-forge/main/",
   "distribution": {
-    "plugin_version": "1.0.6",
+    "plugin_version": "1.0.9",
     "default_channel": "main",
     "default_channel_is_mutable": true,
     "reproducible_loading": "Replace main in raw_base_url with an explicit Git commit SHA."
@@ -41,6 +41,8 @@
     "issue_guide": "references/issue-learning-loop.md",
     "issue_add_command": "scripts/dz_state.py add-issue",
     "issue_update_command": "scripts/dz_state.py update-issue",
+    "work_reconciliation_command": "scripts/dz_state.py carry-work",
+    "generated_entrypoint_check": "scripts/sync_workflow.py --check",
     "local_skill_installer": "scripts/install_local_skill.py",
     "codex_project_guidance": "assets/project/AGENTS.md",
     "codex_stop_hook": "scripts/dz_codex_stop_hook.py",
@@ -52,12 +54,18 @@
     "codex_skill_metadata": "skills/dz/agents/openai.yaml"
   },
   "reference_sets": {
+    "astra_execution": [
+      "references/astra-execution.md"
+    ],
     "conversation": [
       "references/guided-dialogue.md",
       "references/takeover-resume.md"
     ],
     "product_evidence": [
       "references/evidence-led-discovery.md"
+    ],
+    "workflow_trial": [
+      "references/user-trial.md"
     ],
     "change_review": [
       "references/change-proposal-review.md"
@@ -207,6 +215,10 @@
     "codex_implicit_invocation_enabled": true,
     "codex_project_guidance_on_init": true,
     "work_binds_complete_decision_contract": true,
+    "accepted_must_coverage_prevents_omitted_work_pass": true,
+    "compatible_work_can_be_carried_without_reusing_old_proof": true,
+    "unreconciled_old_work_remains_visible": true,
+    "portable_workflow_is_generated_from_skill": true,
     "verified_requires_semantic_validation": true,
     "passed_evidence_requires_hashed_artifact": true,
     "evidence_binds_explicit_target_epoch": true,

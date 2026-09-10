@@ -10,7 +10,9 @@ Irixi Project Forge 是一套面向非技术产品经理和初学者的跨平台
 
 工作流的短名称是 `dz`。
 
-DZ 不会把“帮我做一个应用”直接理解为立即写代码。它会先用大白话和你说清三件事：想帮谁解决哪件麻烦、这次先做什么和不做什么、准备先从哪一步动手并怎样亲手试。每说清一件都让你看一眼，对了才往下走。
+当前工作流版本：`2026-09-10.3`；插件版本：`1.0.9`。
+
+DZ 不会把“帮我做一个应用”直接理解为立即写代码。它会先用大白话和你说清三件事：想帮谁解决哪件麻烦、这次先做什么和不做什么、准备先从哪一步动手并怎样检查结果。每说清一件都让你看一眼，对了才往下走。技术检查由有工具的 AI 执行，不要求你亲自测试才能进入内部测试。
 
 ### 下载后，一分钟让 Agent 开始使用
 
@@ -52,7 +54,7 @@ DZ 不会把“帮我做一个应用”直接理解为立即写代码。它会�
 - 不让非技术用户选择框架或为技术正确性背书；
 - 在“想解决哪件麻烦”“这次做什么、不做什么”“准备先做哪一步、做完怎样试”分别被你看过并点头前，不开始正式制作；
 - 用真实路径和可复现证据判断完成，而不是只看 Mock、构建成功、部署命令或可访问网址；
-- 可以中途再次接管当前任务：工具检查全部历史，AI 先读一页现状；只有发现矛盾、漏记或不明改动时才回查旧记录和相关文件；
+- 可以中途再次接管当前任务：工具检查全部历史，AI 先读一页现状；动手前仍读这次相关、已经确认的要求和文件，发现矛盾、漏记或不明改动时才追查旧记录；
 - 每次有效动作后记录做了什么、证据在哪里、还差什么和下一步是什么；在能再次读取同一项目的环境里可以换对话恢复，普通聊天则带上导出的交接记录；
 - 把“这次工作能不能停”“用户是否决定收尾”“产品是否真的试过”分开，不用验收把用户困住。
 
@@ -115,6 +117,31 @@ DZ 必须给一个明确结论：值得做；方向对但应该换一种做法�
 ### 在不同 AI 上怎么用
 
 所有平台都使用同一套 DZ 流程，不按品牌另写一套。能接收文字的平台至少可以手动粘贴通用版；要自动读取下载的完整文件夹，平台还必须支持 Skill 或文件读取。能否读取项目、写代码、运行测试或上线，只看当前平台实际开放的工具。WorkBuddy、Kimi、智谱、DeepSeek、Claude、Gemini、Codex、私有模型和以后出现的新平台都按这条规则处理，但这不代表我们已经逐个平台保证原生兼容。后文的 Codex 只是一个完整接入示例。
+
+### 这次修好了什么
+
+六阶段主流程和三份技术手册不变，这次补的是容易漏事、返工和反复提问的地方：
+
+- **防漏事**：你点头的“这次一定要做到的事”，AI 会在原需求文档里逐项标记。工具检查每项有没有任务、有没有实际检查结果，不再只看已登记的任务是否全部做完。标记由 AI 维护，不用你学。
+- **改方向不等于推倒重来**：先说明哪些保留、哪些修改、哪些不做。保留的成果直接接到新方案下面，不重新抄；旧测试留作历史，不冒充新版本通过。
+- **少问没必要的问题**：开头只聊眼下最重要的事，后面需要时再补细节；重要边界仍须在决定或行动前说清。已说定的监测如果包含把发现写进指定项目记录，AI 就按原授权记录，不反复问；改代码或对外操作另看授权。
+- **减少几份规则打架**：通用版从主规则自动生成，发布时检查是否一致；项目里的接续说明只负责带 AI 找到当前规则。
+
+旧项目不会被偷偷重写或清空。更新 DZ 后先核对现在的记录，再讨论怎么继续；旧需求如果还没有逐项标记，AI 会把整理后的完整版本给你看，同意后才替换当前版本。在此之前可以继续已获准的工作、暂停或如实收尾，但不能声称已经证明所有需求都完成。
+
+工具只能检查已经写进需求文档的事项，不能保证 AI 从未理解错或漏写你的想法。真实新项目是否更好用，仍待后续使用反馈；不会把自动测试当成你的体验已经通过。检查范围见 [本次修缮报告](tests/workflow-refinement-2026-09-10.md)。
+
+### GPT-6 Astra 专项调整
+
+`2026-09-10.2` 没有重做主流程，而是针对 Astra 的执行方式作了调整：已经说定的工作持续做完；中间插问，回答后继续；如果你说“这不是我要的”，先停下受影响的工作，评估并与你对齐改法，再按新约定继续。小而明确的范围内修改不反复确认。检查够了就收尾，专业建议用短段落说清，不给每次回复套一整份报告。
+
+“一页现状”只是目录，不代替已确认的要求；过时、取消和留到以后的任务不会混进当前待办。内部测试前由 AI 检查使用链路和代码，需要测试环境才能确认的内容如实标成未验证，不强迫项目负责人亲自测试。
+
+当前进度由工作和检查结果自动生成，和需要逐步通过的流程记录分开。小修已经完成，就显示本轮收尾与实际验证情况，不会仍用“方案已确认”冒充实际进度；也不会为让标签好看而把没做的设计或上线检查写成通过。接续与六阶段验证的范围、结果和限制见 [补充实测报告](tests/continuity-validation-2026-09-10.md)。
+
+这些调整依据 [OpenAI 的 Astra 指南](https://developers.openai.com/api/docs/guides/latest-model)，细则见 [`references/astra-execution.md`](references/astra-execution.md)。它们不改变 Anthropic SDLC、三份手册、用户的最终决定权和跨平台能力判断，也不会擅自切换模型、调整推理档位或增加工具。更多上下文不等于永久记忆，持续接续仍依赖平台保留并开放项目记录。检查范围与未验证部分见 [本次检查报告](tests/astra-audit-2026-09-10.md)。
+
+### 跨平台加载入口
 
 | 平台提供的入口 | 统一加载方式 | 实际结果 |
 |---|---|---|
@@ -374,7 +401,7 @@ dz/
 
 ### 验证
 
-当前自动套件包含项目账本四十五组、Codex 收尾检查十组、单入口安装六组，合计六十一组，并检查 Python 和 JSON。另定义二十三组需要新上下文人工执行的行为测试；它们不是持续集成自动门禁：
+自动套件覆盖项目账本、需求漏项、旧任务承接、Codex 收尾、单入口安装和隔离的完整流程，并检查 Python、JSON 和通用版同步；当前数量与结果见 [本次修缮报告](tests/workflow-refinement-2026-09-10.md)，此前的检查保留在 [接续实测报告](tests/continuity-validation-2026-09-10.md)。自动测试证明工具行为，不证明所有 AI 都会遵循规则。另定义二十三组需要新上下文人工执行的行为测试；它们不是持续集成自动门禁：
 
 1. 模糊的“服务所有人”想法；
 2. 区块链、RAG 和多 Agent 技术堆砌；
@@ -420,7 +447,7 @@ Irixi Project Forge is a cross-platform AI product workflow for nontechnical pro
 
 Its short name is `dz`.
 
-DZ does not interpret “build me an app” as permission to code immediately. It first settles three things in everyday language: who needs help with which trouble, what to do and leave out this time, and what to make first and personally try afterward. You see and approve each one before the work moves on.
+DZ does not interpret “build me an app” as permission to code immediately. It first settles three things in everyday language: who needs help with which trouble, what to do and leave out this time, and what to make first and how to check the result. You see and approve each one before the work moves on. An equipped AI runs technical checks; personal owner testing is not a prerequisite for entering internal testing.
 
 ### Start it in any agent in one minute
 
@@ -526,6 +553,31 @@ You may pause, cancel, or close at any time. DZ leaves an honest handoff, but it
 
 Every platform uses the same DZ workflow instead of a brand-specific edition. A host that accepts text can at least receive the universal edition manually; automatic loading of the downloaded full folder also requires Skill support or file access. Whether it can read a project, write code, run tests, or release depends only on the tools actually available. WorkBuddy, Kimi, Zhipu, DeepSeek, Claude, Gemini, Codex, private models, and future hosts all follow this rule, but this is not a claim of tested native compatibility with every host. Codex appears later only as one complete integration example.
 
+### What this refinement changes
+
+Current workflow: `2026-09-10.3`; plugin: `1.0.9`. The six-stage flow and three technical handbooks remain intact.
+
+- **Catch omitted work:** AI labels every mandatory promise in the same visible specification. The tool checks whether each has current required work and real verification, instead of counting only registered tasks. The beginner does not manage these labels.
+- **Preserve useful work after a change:** explain what stays, changes, or is retired. Carry compatible implementation into the accepted new plan without copying records by hand. Preserve old evidence as history; never count it as a fresh pass.
+- **Reduce unnecessary questions:** discuss the next meaningful decision first and introduce detail when it matters, while settling material boundaries before decisions or actions. An agreed monitor may save findings to the named local records within its existing authority; code changes and outside actions need their own applicable authority.
+- **Keep entry points consistent:** generate the universal edition from the canonical Skill and check it before publication. Project continuity instructions route back to that Skill rather than duplicating the workflow.
+
+Old projects are not silently rewritten or cleared. Reconcile their present state before proceeding. If an older accepted specification has no indexed promises, show a complete successor and obtain acceptance before making it current. Previously authorized work, honest pause and partial close remain possible; an overall verified claim does not.
+
+The tool only checks promises actually written in the specification; it cannot guarantee that AI understood or captured every user intention. Real new-project usability remains for later feedback, not a passed test. See the [refinement report](tests/workflow-refinement-2026-09-10.md).
+
+### GPT-6 Astra execution tuning
+
+`2026-09-10.2` keeps the product workflow and tunes execution: finish aligned work and resume after a side question. A direction correction is different: stop affected work, assess the change, and align the revised route before continuing. Small explicit in-scope corrections need no repeated approval. Stop checking when adequate evidence exists. Explain recommendations and results in concise paragraphs rather than making every reply a full report.
+
+The one-page view is an index, not a replacement for accepted requirements. Historical, cancelled, and deferred work stays out of the active to-do list. AI checks the user journey and code before internal deployment; environment-dependent results remain unverified until actually exercised. Personal owner testing is not compulsory.
+
+Current progress is derived from work and verification, separately from controlled workflow gates. A completed local fix displays its actual closeout and verification instead of showing an earlier planning label as activity. This never fabricates design or release approval. See the [follow-up validation report](tests/continuity-validation-2026-09-10.md) for continuity and six-stage test scope, results, and limitations.
+
+Based on [OpenAI's Astra guidance](https://developers.openai.com/api/docs/guides/latest-model), with details in [`references/astra-execution.md`](references/astra-execution.md). These changes preserve Anthropic SDLC, the three handbooks, user decisions, and capability-based cross-platform routing. They do not switch models, change reasoning settings, or grant tools. A larger context is not permanent memory; continuity still requires accessible project records. See the [audit report](tests/astra-audit-2026-09-10.md) for tested scope and limits.
+
+### Cross-platform loading entry points
+
 | What the host accepts | Unified loading form | Result |
 |---|---|---|
 | Skills or `SKILL.md` | Install the full repository bundle | Keep the full workflow and decide what can be done from tools the host explicitly exposes |
@@ -587,7 +639,7 @@ Material problems found during implementation, testing, use, or production are r
 
 “Changed” is not “fixed.” Until a check actually exercises the former failure, DZ records the issue as implemented but unproven. It becomes verified only when the current target passes and a repeatable regression check or equivalent prevention is retained.
 
-On Codex, ledger initialization also merges a short marked continuity section into the project's `AGENTS.md` without replacing existing rules. A later task opened from that exact project folder, or a mid-task re-invocation, reads `PROJECT.md` and runs the read-only `resume-report`. The tool mechanically validates every journal record, checks that the generated view is current, and compares the latest saved Git checkpoint with the current worktree; it returns a compact present summary by default. DZ opens full history or affected files only when it finds a conflict, unexplained change, damage, stale view, or material uncertainty. The saved next action remains an old proposal. DZ explains the present and proposed execution in plain language and lets the user correct it and discuss the route before continuing.
+On Codex, ledger initialization also merges a short marked continuity section into the project's `AGENTS.md` without replacing existing rules. A later task opened from that exact project folder, or a mid-task re-invocation, reads `PROJECT.md` and runs the read-only `resume-report`. The tool mechanically validates every journal record, checks that the generated view is current, and compares the latest saved Git checkpoint with the current worktree; it returns a compact present summary by default. Before acting, DZ reads affected accepted requirements, the plan, and implementation files. Full history is opened when a conflict, unexplained change, damage, stale view, or material uncertainty requires it. The saved next action remains an old proposal. DZ explains the present and proposed execution in plain language and lets the user correct it and discuss the route before continuing. Continuous aligned work does not repeat this takeover ceremony after every turn or side question.
 
 State schema `1.1` requires an explicit migration from `1.0`. The tool first backs up the legacy snapshot and journal, preserves history, and downgrades records that cannot honestly be tied to the current contract and target instead of guessing. The local ledger checks consistency and artifact integrity; it is not trusted proof of human approval or test execution when the same AI can write its files and invoke its CLI. Tamper-resistant approvals and Passed claims require a host-controlled approval surface and runner outside the model's write authority. Other integrations must persist the equivalent structure; plain chat can only export a copyable handoff. `PROJECT.md` does not replace product decisions or verification evidence.
 
@@ -595,7 +647,7 @@ Those English names and filenames stay inside the project. With a beginner, DZ s
 
 ### Mid-task takeover
 
-You can invoke DZ again halfway through the same conversation or development task. When it can read the project, its state tool checks the entire journal while the AI starts from the compact current view. Full history and affected files are opened only when a conflict or unexplained change requires them. DZ does not roll the project back to the latest save or delete later work merely because workflow records are behind. It reports the current position and proposed execution, lets the user correct and discuss it, and continues only after confirmation. If it cannot read prior conversation or project evidence, it says so and requests the smallest handoff record.
+You can invoke DZ again halfway through the same conversation or development task. When it can read the project, its state tool checks the entire journal while the AI starts from the compact current view. Relevant current requirements and files are read before acting; older history is opened when a conflict or unexplained change requires it. DZ does not roll the project back to the latest save or delete later work merely because workflow records are behind. It reports the current position and proposed execution, lets the user correct and discuss it, and continues only after confirmation. If it cannot read prior conversation or project evidence, it says so and requests the smallest handoff record.
 
 DZ first inspects without changing anything, then normally uses four short lines; it may add a necessary line rather than hide a material conflict:
 
@@ -782,7 +834,7 @@ dz/
 
 ### Validation
 
-The automated suite currently contains forty-five project-ledger tests, ten Codex closeout tests, and six single-entry installer tests, for sixty-one total, plus Python and JSON checks. DZ also defines twenty-three fresh-context behavioral families that require manual execution and are not an automated CI gate:
+The automated suite covers the ledger, omitted requirements, work carry-forward, Codex closeout, single-entry installation and an isolated full lifecycle, plus Python, JSON and generated-entrypoint checks. See the [current refinement report](tests/workflow-refinement-2026-09-10.md) for run counts and results; earlier evidence remains in the [continuity report](tests/continuity-validation-2026-09-10.md). These checks establish tool behavior, not universal agent compliance. DZ also defines twenty-three fresh-context behavioral families that require manual execution and are not an automated CI gate:
 
 1. a vague “product for everyone” idea;
 2. fashionable blockchain, RAG, and multi-agent over-scoping;

@@ -13,6 +13,7 @@ import copy
 import hashlib
 import json
 import os
+import re
 import stat
 import subprocess
 import sys
@@ -23,7 +24,7 @@ from typing import Any, Callable
 
 
 SCHEMA_VERSION = "1.1"
-WORKFLOW_VERSION = "2026-09-06.2"
+WORKFLOW_VERSION = "2026-09-10.3"
 
 RUN_STATUSES = {
     "active",
@@ -313,6 +314,11 @@ def workspace_snapshot(project: Path) -> dict[str, Any]:
             "reason": "Git working tree is unavailable; later file changes cannot be dated reliably",
         }
 
+    prefix_output = git_bytes(project, "rev-parse", "--show-prefix")
+    if prefix_output is None:
+        return {"kind": "unavailable", "reason": "Git project-relative paths could not be resolved"}
+    project_prefix = os.fsdecode(prefix_output).rstrip("\r\n")
+
     status_output = git_bytes(
         project,
         "-c",
@@ -347,6 +353,13 @@ def workspace_snapshot(project: Path) -> dict[str, Any]:
             if index < len(tokens) and tokens[index]:
                 source_value = os.fsdecode(tokens[index])
                 index += 1
+        # Porcelain -z reports repository-root paths even from a child project.
+        if project_prefix:
+            if not path_value.startswith(project_prefix):
+                continue
+            path_value = path_value[len(project_prefix):]
+            if source_value is not None and source_value.startswith(project_prefix):
+                source_value = source_value[len(project_prefix):]
         if workspace_path_ignored(path_value):
             continue
         entry: dict[str, Any] = {
@@ -371,7 +384,7 @@ def workspace_snapshot(project: Path) -> dict[str, Any]:
             "utf-8"
         )
     ).hexdigest()
-    return {"kind": "git", "digest": digest, **payload}
+    return {"kind": "git", "digest": digest, "project_prefix": project_prefix, **payload}
 
 
 def compare_workspace_snapshots(
@@ -389,6 +402,12 @@ def compare_workspace_snapshots(
             "changed_since_saved_record": None,
             "changed_paths": [],
             "uncertainty": reason,
+        }
+    if saved.get("project_prefix", "") != current.get("project_prefix", ""):
+        return {
+            "changed_since_saved_record": None,
+            "changed_paths": [],
+            "uncertainty": "The older checkpoint has no matching child-project path basis; inspect current changes and save a new checkpoint after alignment",
         }
 
     saved_entries = {entry.get("path"): entry for entry in saved.get("entries", [])}
@@ -488,6 +507,7 @@ def initial_state(name: str, language: str) -> dict[str, Any]:
             },
         },
         "target": empty_target(),
+        "requirements": {"spec_sha256": None, "items": []},
         "work_items": [],
         "evidence": [],
         "risks": [],
@@ -540,6 +560,65 @@ def accepted_contract_sha256(decisions: dict[str, Any]) -> str | None:
     return hashlib.sha256("\0".join(digests).encode("ascii")).hexdigest()
 
 
+def read_required_outcomes(project: Path, decision: dict[str, Any]) -> dict[str, Any]:
+    """Index exact, visible Must lines; the accepted specification remains canonical."""
+    if decision.get("status") != "accepted" or not stored_file_matches(
+        project, decision.get("path"), decision.get("artifact_sha256")
+    ):
+        return {"spec_sha256": None, "items": []}
+    _, path = project_file(project, decision["path"], "specification")
+    items = []
+    fence = None
+    for line in path.read_text(encoding="utf-8").splitlines():
+        stripped = line.strip()
+        marker = re.match(r"^(`{3,}|~{3,})", stripped)
+        if marker:
+            token = marker.group(1)
+            if fence is None:
+                fence = token
+            elif token[0] == fence[0] and len(token) >= len(fence):
+                fence = None
+            continue
+        if fence is not None:
+            continue
+        match = re.fullmatch(r"- \[DZ-MUST:([A-Za-z0-9][A-Za-z0-9_.-]*)\] (\S.*)", line)
+        if match:
+            items.append({"id": match.group(1), "acceptance": line[2:]})
+        elif "[DZ-MUST:" in line:
+            raise ValueError("Malformed Must line; use - [DZ-MUST:R1] complete observable promise")
+    if len({item["id"] for item in items}) != len(items):
+        raise ValueError("Duplicate Must IDs in specification")
+    return {"spec_sha256": decision["artifact_sha256"], "items": items}
+
+
+def requirement_coverage(
+    work_items: list[dict[str, Any]], decisions: dict[str, Any], requirements: dict[str, Any] | None
+) -> dict[str, Any]:
+    indexed = bool(requirements and requirements.get("items") and
+                   requirements.get("spec_sha256") == decisions.get("spec", {}).get("artifact_sha256")
+                   and decisions.get("spec", {}).get("status") == "accepted")
+    contract = accepted_contract_sha256(decisions)
+    work = [item for item in work_items if item.get("contract_sha256") == contract
+            and item.get("required") is True and item.get("status") not in {"deferred", "cancelled"}]
+    rows = []
+    for requirement in (requirements or {}).get("items", []) if indexed else []:
+        matches = [item for item in work if requirement["acceptance"] in item.get("acceptance", [])]
+        rows.append({**requirement, "work_ids": [item["id"] for item in matches],
+                     "verified": bool(matches) and all(item["status"] == "verified" for item in matches)})
+    return {"indexed": indexed, "items": rows,
+            "missing_work": [row["id"] for row in rows if not row["work_ids"]],
+            "unverified": [row["id"] for row in rows if not row["verified"]],
+            "complete": indexed and bool(rows) and all(row["verified"] for row in rows)}
+
+
+def reconciliation_candidates(state: dict[str, Any]) -> list[dict[str, Any]]:
+    contract = accepted_contract_sha256(state["decisions"])
+    carried = {item.get("carried_from") for item in state["work_items"]}
+    return [{"id": item["id"], "title": item["title"], "status": item["status"]}
+            for item in state["work_items"] if item["contract_sha256"] != contract
+            and item["id"] not in carried and item["status"] not in {"cancelled", "deferred"}]
+
+
 def current_target(state: dict[str, Any]) -> tuple[str, str, str] | None:
     target = state.get("target")
     if not isinstance(target, dict):
@@ -566,6 +645,14 @@ def invalidate_verification_target(state: dict[str, Any]) -> None:
         if isinstance(item, dict) and item.get("status") == "verified":
             item["status"] = "implemented_unverified"
             item["updated_at"] = now()
+    for issue in state.get("issues", []):
+        if issue.get("status") == "verified" or issue.get("evidence_ids"):
+            if issue.get("status") == "verified":
+                issue["status"] = "implemented_unverified"
+            # Active proof links expire with the target. Global evidence and
+            # prior journal snapshots retain the complete historical links.
+            issue["evidence_ids"] = []
+            issue["updated_at"] = now()
 
 
 def risk_context_matches(state: dict[str, Any], risk: dict[str, Any]) -> bool:
@@ -632,6 +719,7 @@ def derive_product_verdict(
     work_items: list[dict[str, Any]],
     decisions: dict[str, Any],
     issues: list[dict[str, Any]] | None = None,
+    requirements: dict[str, Any] | None = None,
 ) -> str:
     if not accepted_decision_chain(decisions):
         return "not_assessed"
@@ -656,7 +744,10 @@ def derive_product_verdict(
             for item in (issues or [])
             if isinstance(item, dict)
         )
-        return "partially_verified" if blocking_issue else "verified"
+        coverage_gap = requirements is not None and not requirement_coverage(
+            work_items, decisions, requirements
+        )["complete"]
+        return "partially_verified" if blocking_issue or coverage_gap else "verified"
     if verified_count:
         return "partially_verified"
     if any(status in {"in_progress", "implemented_unverified"} for status in statuses):
@@ -682,6 +773,10 @@ def stage_transition_errors(
     state: dict[str, Any], old_stage: str, new_stage: str
 ) -> list[str]:
     errors: list[str] = []
+    if new_stage in {"deploy", "maintain"} and not requirement_coverage(
+        state.get("work_items", []), state.get("decisions", {}), state.get("requirements")
+    )["complete"]:
+        errors.append("Verified release gates require every accepted Must to have current work and proof")
     if (old_stage, new_stage) == ("design", "build"):
         items = current_plan_work(state, {"design"})
         if not items or any(item.get("status") != "verified" for item in items):
@@ -854,7 +949,7 @@ def reconcile_stale_artifacts(project: Path, state: dict[str, Any]) -> None:
             }
         )
     derived_verdict = derive_product_verdict(
-        state["work_items"], decisions, state.get("issues", [])
+        state["work_items"], decisions, state.get("issues", []), state.get("requirements")
     )
     if (
         run.get("status") == "finished"
@@ -895,8 +990,11 @@ def _validate_state(state: dict[str, Any], project_path: Path | None = None) -> 
         "evidence",
         "risks",
         "issues",
+        "requirements",
     }
-    required_root_fields = root_fields - {"issues"}
+    required_root_fields = root_fields - {"issues", "requirements"}
+    if state.get("workflow_version") == WORKFLOW_VERSION:
+        required_root_fields.add("requirements")
     unknown_root = set(state) - root_fields
     missing_root = required_root_fields - set(state)
     if unknown_root:
@@ -1299,13 +1397,15 @@ def _validate_state(state: dict[str, Any], project_path: Path | None = None) -> 
         "note",
         "blocker",
         "updated_at",
+        "carried_from",
     }
     in_progress = 0
+    active_contract = accepted_contract_sha256(decisions)
     work_by_id: dict[str, dict[str, Any]] = {}
     for item in work_items:
         item_id = item.get("id") if is_canonical_id(item.get("id")) else ""
         unknown = set(item) - work_fields
-        missing = work_fields - set(item)
+        missing = (work_fields - {"carried_from"}) - set(item)
         if unknown:
             errors.append(f"{item_id or 'work item'}: unknown fields: {', '.join(sorted(unknown))}")
         if missing:
@@ -1318,6 +1418,8 @@ def _validate_state(state: dict[str, Any], project_path: Path | None = None) -> 
             errors.append(f"{item_id or 'work item'}: title is required")
         if item_id:
             work_by_id[item_id] = item
+        if "carried_from" in item and not is_canonical_id(item["carried_from"]):
+            errors.append(f"{item_id}: carried_from must be a canonical work ID")
         if not isinstance(item.get("required"), bool):
             errors.append(f"{item_id or 'work item'}: required must be boolean")
         plan_digest = item.get("contract_sha256")
@@ -1331,7 +1433,7 @@ def _validate_state(state: dict[str, Any], project_path: Path | None = None) -> 
             errors.append(f"{item_id or 'work item'}: invalid work phase")
         if item.get("status") not in WORK_STATUSES:
             errors.append(f"{item_id or 'work item'}: invalid work status")
-        if item.get("status") == "in_progress":
+        if item.get("status") == "in_progress" and plan_digest == active_contract:
             in_progress += 1
         acceptance = item.get("acceptance")
         if not isinstance(acceptance, list) or not acceptance or any(
@@ -1360,7 +1462,7 @@ def _validate_state(state: dict[str, Any], project_path: Path | None = None) -> 
         ).strip():
             errors.append(f"{item_id or 'work item'}: updated_at is required")
     if in_progress > 1:
-        errors.append("only one work item may be in_progress")
+        errors.append("only one current-contract work item may be in_progress")
     evidence_fields = {
         "id",
         "work_item_id",
@@ -1817,7 +1919,35 @@ def _validate_state(state: dict[str, Any], project_path: Path | None = None) -> 
         elif status == "active" and not risk_context_matches(state, authorized_risk):
             errors.append("active authorized risk lease no longer matches the current contract and target")
 
-    derived_verdict = derive_product_verdict(work_items, decisions, issues)
+    requirements = state.get("requirements")
+    if requirements is not None:
+        if not isinstance(requirements, dict) or set(requirements) != {"spec_sha256", "items"}:
+            errors.append("requirements must be a derived specification index")
+        else:
+            if requirements["spec_sha256"] is not None and not re.fullmatch(
+                r"[a-f0-9]{64}", str(requirements["spec_sha256"])
+            ):
+                errors.append("requirements.spec_sha256 must be null or a SHA-256 digest")
+            indexed_items = requirements["items"]
+            if not isinstance(indexed_items, list) or any(
+                not isinstance(item, dict) or set(item) != {"id", "acceptance"}
+                or not isinstance(item.get("id"), str)
+                or not re.fullmatch(r"[A-Za-z0-9][A-Za-z0-9_.-]*", item["id"])
+                or not isinstance(item.get("acceptance"), str)
+                or not item["acceptance"].startswith(f"[DZ-MUST:{item['id']}] ")
+                for item in indexed_items
+            ):
+                errors.append("requirements.items must contain exact Must IDs and promises")
+            elif len({item["id"] for item in indexed_items}) != len(indexed_items):
+                errors.append("requirements contains duplicate IDs")
+            if project_path is not None and decisions.get("spec", {}).get("status") == "accepted":
+                if requirements != read_required_outcomes(project_path, decisions["spec"]):
+                    errors.append("requirements index differs from the accepted specification")
+    for item in work_items:
+        predecessor = item.get("carried_from")
+        if predecessor and (predecessor not in work_by_id or predecessor == item.get("id")):
+            errors.append(f"{item.get('id')}: invalid carried_from work")
+    derived_verdict = derive_product_verdict(work_items, decisions, issues, requirements)
     if status != "finished" and verdict in PRODUCT_VERDICTS and verdict != derived_verdict:
         errors.append(
             f"active product_verdict must match current records: {derived_verdict}"
@@ -2231,17 +2361,55 @@ def project_dashboard_is_current(project: Path, state: dict[str, Any]) -> bool:
     dashboard = project_paths(project)["dashboard"]
     if not dashboard.is_file():
         return False
-    marker = f"DZ-CURRENT-VIEW:{current_view_fingerprint(state)}"
     try:
-        return marker in dashboard.read_text(encoding="utf-8")
-    except OSError:
+        return dashboard.read_text(encoding="utf-8") == render_dashboard(state)
+    except (OSError, UnicodeError):
         return False
 
 
-def render(project: Path, state: dict[str, Any]) -> None:
-    paths = project_paths(project)
+def current_progress(state: dict[str, Any]) -> dict[str, Any]:
+    """Describe observed work without advancing a separately controlled stage gate."""
+    run = state["run"]
+    contract = accepted_contract_sha256(state["decisions"])
+    work = [item for item in state["work_items"] if item.get("contract_sha256") == contract]
+    focus = []
+    for status in ("in_progress", "implemented_unverified", "waiting_user", "blocked", "pending"):
+        focus = [item for item in work if item["status"] == status]
+        if focus:
+            break
+    if run["status"] != "active":
+        activity = run["status"]
+    elif focus:
+        activity = focus[0]["status"]
+    elif run["product_verdict"] == "verified":
+        activity = "verified"
+    else:
+        activity = "no_active_work" if work else "decision"
+    language = state["project"]["language"]
+    special = {
+        "zh": {"pending": "已列入待办，尚未开始", "no_active_work": "暂无可继续执行的工作"},
+        "en": {"pending": "Planned, not started", "no_active_work": "No actionable work"},
+    }
+    summary = special.get(language, {}).get(activity, label(activity, language))
+    if activity == "decision":
+        summary = label(run["stage"], language)
+    elif activity == "finished":
+        summary += f" ({label(run['product_verdict'], language)})"
+    return {
+        "activity": activity,
+        "summary": summary,
+        "verification": run["product_verdict"],
+        "work_ids": [item["id"] for item in focus],
+        "work_phases": sorted({item["phase"] for item in focus}),
+        "recorded_stage": run["stage"],
+        "stage_is_not_activity": True,
+    }
+
+
+def render_dashboard(state: dict[str, Any]) -> str:
     language = state["project"]["language"]
     run = state["run"]
+    progress = current_progress(state)
     work_items = state["work_items"]
     risks = state["risks"]
     evidence = state["evidence"]
@@ -2257,6 +2425,8 @@ def render(project: Path, state: dict[str, Any]) -> None:
     )
     decisions = state.get("decisions", {})
     contract_digest = accepted_contract_sha256(decisions)
+    historical_work_count = sum(item.get("contract_sha256") != contract_digest for item in work_items)
+    work_items = [item for item in work_items if item.get("contract_sha256") == contract_digest]
 
     def decision_view(name: str, title: str) -> str:
         decision = decisions.get(name, {})
@@ -2278,7 +2448,8 @@ def render(project: Path, state: dict[str, Any]) -> None:
             "## 现在做到哪",
             f"- 当前情况：{label(run['status'], language)}",
             f"- 产品情况：{label(run['product_verdict'], language)}",
-            f"- 当前阶段：{label(run['stage'], language)}",
+            f"- 当前进度：{progress['summary']}",
+            f"- 流程检查位置（不代替实际进度）：{label(run['stage'], language)}",
             f"- 当前约定指纹：{contract_digest[:12] if contract_digest else '无'}",
             f"- 当前检查对象：{target_summary or '无'}",
             f"- 下一步：{run.get('next_action') or '无'}",
@@ -2296,7 +2467,8 @@ def render(project: Path, state: dict[str, Any]) -> None:
             decision_view("plan", "准备怎么做和怎样试"),
             "",
             "## 工作概览",
-            f"- 共 {len(work_items)} 项；已检查 {sum(i['status'] == 'verified' for i in work_items)} 项；待检查 {sum(i['status'] == 'implemented_unverified' for i in work_items)} 项。",
+            f"- 当前约定共 {len(work_items)} 项；已检查 {sum(i['status'] == 'verified' for i in work_items)} 项；待检查 {sum(i['status'] == 'implemented_unverified' for i in work_items)} 项；留到以后或取消 {sum(i['status'] in {'deferred', 'cancelled'} for i in work_items)} 项。",
+            f"- 旧约定下的 {historical_work_count} 项保留在历史里，不算本次待办。",
             "- 详细记录：[docs/sdlc/work-items.md](docs/sdlc/work-items.md)",
             f"- 共记录 {len(issues)} 个重要问题；其中 {len(unresolved_issues)} 个还没有彻底解决。",
             "- 问题记录：[docs/sdlc/issues.md](docs/sdlc/issues.md)",
@@ -2310,7 +2482,7 @@ def render(project: Path, state: dict[str, Any]) -> None:
             )
         else:
             dashboard.append("- 暂无记录。")
-        dashboard.extend(["", "## 最近证据"])
+        dashboard.extend(["", "## 最近证据", "以下是历史索引，不代表当前版本已通过；以相同检查对象和当前要求下的有效证据为准。"])
         if evidence:
             dashboard.extend(
                 f"- {item['id']}：{item['claim']} — {item['result']}"
@@ -2328,7 +2500,8 @@ def render(project: Path, state: dict[str, Any]) -> None:
             "## Current position",
             f"- Run: {label(run['status'], language)}",
             f"- Product: {label(run['product_verdict'], language)}",
-            f"- Stage: {run['stage']}",
+            f"- Current progress: {progress['summary']}",
+            f"- Recorded workflow gate (not activity): {run['stage']}",
             f"- Decision contract: {contract_digest[:12] if contract_digest else 'none'}",
             f"- Verification target: {target_summary or 'none'}",
             f"- Next action: {run.get('next_action') or 'none'}",
@@ -2346,7 +2519,8 @@ def render(project: Path, state: dict[str, Any]) -> None:
             decision_view("plan", "How it will be made and tried"),
             "",
             "## Work overview",
-            f"- {len(work_items)} total; {sum(i['status'] == 'verified' for i in work_items)} verified; {sum(i['status'] == 'implemented_unverified' for i in work_items)} implemented but unverified.",
+            f"- Current contract: {len(work_items)} total; {sum(i['status'] == 'verified' for i in work_items)} verified; {sum(i['status'] == 'implemented_unverified' for i in work_items)} implemented but unverified; {sum(i['status'] in {'deferred', 'cancelled'} for i in work_items)} deferred or cancelled.",
+            f"- {historical_work_count} older-contract items remain in history, not the current to-do list.",
             "- Details: [docs/sdlc/work-items.md](docs/sdlc/work-items.md)",
             f"- {len(issues)} material issues recorded; {len(unresolved_issues)} are not fully resolved.",
             "- Issues: [docs/sdlc/issues.md](docs/sdlc/issues.md)",
@@ -2360,12 +2534,34 @@ def render(project: Path, state: dict[str, Any]) -> None:
             ]
             or ["- None recorded."]
         )
-        dashboard.extend(["", "## Recent evidence"])
+        dashboard.extend(["", "## Recent evidence", "Historical index only, not a current Passed verdict; valid evidence must match the current target and requirement."])
         dashboard.extend(
             [f"- {item['id']}: {item['claim']} — {item['result']}" for item in evidence[-5:]]
             or ["- None recorded."]
         )
 
+    coverage = requirement_coverage(state["work_items"], decisions, state.get("requirements"))
+    candidates = reconciliation_candidates(state)
+    if language == "zh":
+        dashboard.extend(["", "## 有没有漏掉要求",
+                          "- 必做要求已登记。" if coverage["indexed"] else "- 必做要求尚未形成可核对的清单；不能据此声称全部完成。",
+                          f"- 漏记任务的要求：{', '.join(coverage['missing_work']) or '无'}",
+                          f"- 尚未通过的要求：{', '.join(coverage['unverified']) or '无'}",
+                          f"- 旧任务待判断保留或调整：{', '.join(item['id'] for item in candidates) or '无'}"])
+    else:
+        dashboard.extend(["", "## Requirement coverage",
+                          f"- Must index available: {coverage['indexed']}",
+                          f"- Missing work: {', '.join(coverage['missing_work']) or 'none'}",
+                          f"- Unverified requirements: {', '.join(coverage['unverified']) or 'none'}",
+                          f"- Prior work awaiting reconciliation: {', '.join(item['id'] for item in candidates) or 'none'}"])
+    return "\n".join(dashboard) + "\n"
+
+
+def render(project: Path, state: dict[str, Any]) -> None:
+    paths = project_paths(project)
+    language = state["project"]["language"]
+    work_items = state["work_items"]
+    issues = state.get("issues", [])
     work_doc = [
         "# 工作账本" if language == "zh" else "# Work ledger",
         "",
@@ -2410,7 +2606,7 @@ def render(project: Path, state: dict[str, Any]) -> None:
     if not issues:
         issue_doc.append("| — | — | — | — | — | — | — | — | — |")
 
-    atomic_write(paths["dashboard"], "\n".join(dashboard) + "\n")
+    atomic_write(paths["dashboard"], render_dashboard(state))
     atomic_write(paths["work_items"], "\n".join(work_doc) + "\n")
     atomic_write(paths["issues"], "\n".join(issue_doc) + "\n")
 
@@ -2427,6 +2623,7 @@ def persist(project: Path, state: dict[str, Any], event: str) -> None:
             state.get("work_items", []),
             state.get("decisions", {}),
             state.get("issues", []),
+            state.get("requirements"),
         )
     state["run"]["updated_at"] = now()
     errors = validate_state(state, project)
@@ -2498,6 +2695,8 @@ def install_guidance_command(args: argparse.Namespace) -> None:
     target = install_project_guidance(project)
     if state is not None:
         state["workflow_version"] = WORKFLOW_VERSION
+        state["requirements"] = read_required_outcomes(project, state["decisions"]["spec"])
+        reconcile_stale_artifacts(project, state)
         persist(project, state, "install_guidance")
     print(target)
 
@@ -2614,6 +2813,10 @@ def resume_report_command(args: argparse.Namespace) -> None:
         warnings.append(
             "Project workflow guidance is older than the installed DZ Skill; propose install-guidance after the user confirms the takeover"
         )
+    if state.get("decisions", {}).get("spec", {}).get("status") == "accepted" and not requirement_coverage(
+        state.get("work_items", []), state.get("decisions", {}), state.get("requirements")
+    )["indexed"]:
+        warnings.append("Accepted Must coverage is unavailable; an older verified label does not establish complete requirement coverage. Review a visible specification successor without rewriting old approval.")
     if not project_guidance_is_current(project):
         warnings.append(
             "The managed DZ section in AGENTS.md is missing or stale; propose install-guidance after the user confirms the takeover"
@@ -2629,8 +2832,11 @@ def resume_report_command(args: argparse.Namespace) -> None:
     decisions = state.get("decisions", {})
     work_items = state.get("work_items", [])
     risks = state.get("risks", [])
+    current_contract = accepted_contract_sha256(decisions)
+    current_work = [item for item in work_items if item.get("contract_sha256") == current_contract]
     current_summary = {
         "project": state.get("project", {}),
+        "progress": current_progress(state),
         "run": {
             key: state.get("run", {}).get(key)
             for key in (
@@ -2659,13 +2865,16 @@ def resume_report_command(args: argparse.Namespace) -> None:
             if isinstance(decision, dict)
         },
         "decision_contract_sha256": accepted_contract_sha256(decisions),
+        "requirement_coverage": requirement_coverage(work_items, decisions, state.get("requirements")),
+        "work_to_reconcile": reconciliation_candidates(state),
         "target": state.get("target"),
         "work": {
-            "total": len(work_items),
+            "total": len(current_work),
+            "historical_count": len(work_items) - len(current_work),
             "by_status": {
-                status: sum(item.get("status") == status for item in work_items)
+                status: sum(item.get("status") == status for item in current_work)
                 for status in sorted(WORK_STATUSES)
-                if any(item.get("status") == status for item in work_items)
+                if any(item.get("status") == status for item in current_work)
             },
             "open_items": [
                 {
@@ -2674,8 +2883,13 @@ def resume_report_command(args: argparse.Namespace) -> None:
                     "status": item.get("status"),
                     "phase": item.get("phase"),
                 }
-                for item in work_items
-                if item.get("status") != "verified"
+                for item in current_work
+                if item.get("status") not in {"verified", "cancelled", "deferred"}
+            ],
+            "deferred_or_cancelled_items": [
+                {"id": item.get("id"), "title": item.get("title"), "status": item.get("status")}
+                for item in current_work
+                if item.get("status") in {"deferred", "cancelled"}
             ],
         },
         "active_risks": [
@@ -2687,8 +2901,8 @@ def resume_report_command(args: argparse.Namespace) -> None:
                 "action_status": item.get("action_status"),
             }
             for item in risks
-            if item.get("decision") not in {"rejected", "mitigated"}
-            or item.get("action_status") in {"pending", "authorized", "running"}
+            if item.get("decision") not in {"declined", "mitigated"}
+            or item.get("action_status") in {"pending_authorization", "authorized"}
         ],
     }
 
@@ -2965,6 +3179,10 @@ def set_decision_command(args: argparse.Namespace) -> None:
                     "proposal_created_at": None,
                 }
             )
+            if args.name == "spec":
+                state["requirements"] = read_required_outcomes(args.project.resolve(), decision)
+                if not state["requirements"]["items"]:
+                    raise ValueError("Specification needs visible - [DZ-MUST:R1] promise lines before acceptance")
         else:
             decision["status"] = args.status
         accepted_successor = args.status == "superseded" or successor_acceptance
@@ -3113,7 +3331,7 @@ def update_work_command(args: argparse.Namespace) -> None:
                 state["decisions"]
             ):
                 raise ValueError(
-                    "This work belongs to an older decision contract; create a new current-contract work item with a new ID and link the old ID in its note"
+                    "This work belongs to an older decision contract; use carry-work after reviewing its fit to retain compatible work without re-entering it"
                 )
             if args.status == "in_progress" and args.status != current:
                 if authorized_action(state) is not None:
@@ -3131,6 +3349,55 @@ def update_work_command(args: argparse.Namespace) -> None:
         item["updated_at"] = now()
 
     mutate(args.project.resolve(), f"update_work:{args.id}", change)
+
+
+def carry_work_command(args: argparse.Namespace) -> None:
+    """Retain inspected implementation through linked new-contract work, never old proof."""
+    def change(state: dict[str, Any]) -> None:
+        contract = accepted_contract_sha256(state["decisions"])
+        if contract is None or authorized_action(state) is not None:
+            raise ValueError("Accept current decisions and finish/cancel any action lease before reconciling work")
+        if not args.reason.strip() or len(set(args.ids)) != len(args.ids):
+            raise ValueError("Reconciliation needs a reason and distinct old work IDs")
+        if args.acceptance and (len(args.ids) != 1 or args.disposition != "revise"):
+            raise ValueError("Changed acceptance is only for one explicitly revised work item")
+        if "requirements" not in state:
+            raise ValueError("Refresh this older project's guidance after takeover before carrying work")
+        current_promises = {item["acceptance"] for item in state["requirements"]["items"]}
+        for old_id in args.ids:
+            old = find_by_id(state["work_items"], old_id, "work item")
+            if old["contract_sha256"] == contract:
+                raise ValueError(f"{old_id}: already belongs to the current decisions")
+            if any(item.get("carried_from") == old_id for item in state["work_items"]):
+                raise ValueError(f"{old_id}: already reconciled; use its successor")
+            if args.disposition == "retire":
+                old.update(status="cancelled", blocker=None, updated_at=now())
+                old["note"] = (old.get("note") or "") + f"\nRetired after decision change: {args.reason}"
+                continue
+            if old["status"] in {"cancelled", "deferred"}:
+                raise ValueError(f"{old_id}: deferred/cancelled work needs a separate current selection, not implicit revival")
+            acceptance = args.acceptance or old["acceptance"]
+            if any(value.startswith("[DZ-MUST:") and value not in current_promises for value in acceptance):
+                raise ValueError(f"{old_id}: old Must wording changed; revise it against the accepted current promise")
+            new_id = f"{old_id}@{contract[:12]}"
+            if any(item["id"] == new_id for item in state["work_items"]):
+                raise ValueError(f"Successor ID already exists: {new_id}")
+            item = copy.deepcopy(old)
+            item.update(id=new_id, contract_sha256=contract, carried_from=old_id,
+                        acceptance=acceptance, evidence_ids=[], updated_at=now())
+            if args.disposition == "revise":
+                item.update(status="pending", blocker=None)
+            elif item["status"] == "verified":
+                item["status"] = "implemented_unverified"
+            item["note"] = (old.get("note") or "") + f"\n{args.disposition} from {old_id}: {args.reason}; fresh checks required"
+            state["work_items"].append(item)
+            for issue in state.get("issues", []):
+                if issue.get("work_item_id") == old_id and issue["status"] not in {"dismissed", "deferred"}:
+                    issue.update(work_item_id=new_id, evidence_ids=[], updated_at=now())
+                    if issue["status"] == "verified":
+                        issue["status"] = "implemented_unverified"
+
+    mutate(args.project.resolve(), f"carry_work:{args.disposition}:{','.join(args.ids)}", change)
 
 
 def add_issue_command(args: argparse.Namespace) -> None:
@@ -3618,6 +3885,14 @@ def build_parser() -> argparse.ArgumentParser:
     command.add_argument("--note")
     command.add_argument("--blocker")
     command.set_defaults(handler=update_work_command)
+
+    command = subparsers.add_parser("carry-work")
+    project_arg(command)
+    command.add_argument("ids", nargs="+")
+    command.add_argument("--disposition", choices=("keep", "revise", "retire"), required=True)
+    command.add_argument("--reason", required=True)
+    command.add_argument("--acceptance", action="append")
+    command.set_defaults(handler=carry_work_command)
 
     command = subparsers.add_parser("add-issue")
     project_arg(command)

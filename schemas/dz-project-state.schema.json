@@ -47,6 +47,17 @@
       }
     },
     "target": {"$ref": "#/$defs/target"},
+    "requirements": {
+      "type": "object", "additionalProperties": false,
+      "required": ["spec_sha256", "items"],
+      "properties": {
+        "spec_sha256": {"type": ["string", "null"], "pattern": "^[0-9a-f]{64}$"},
+        "items": {"type": "array", "items": {
+          "type": "object", "additionalProperties": false, "required": ["id", "acceptance"],
+          "properties": {"id": {"type": "string", "pattern": "^[A-Za-z0-9][A-Za-z0-9_.-]*$"}, "acceptance": {"type": "string", "minLength": 1}}
+        }}
+      }
+    },
     "work_items": {
       "type": "array",
       "items": {"$ref": "#/$defs/workItem"}
@@ -317,6 +328,7 @@
       "properties": {
         "id": {"type": "string", "pattern": "^[^\\s]+$"},
         "title": {"type": "string", "minLength": 1},
+        "carried_from": {"type": "string", "minLength": 1},
         "required": {"type": "boolean"},
         "contract_sha256": {"type": "string", "pattern": "^[0-9a-f]{64}$"},
         "phase": {"enum": ["design", "build", "test", "deploy", "maintain"]},

@@ -17,7 +17,7 @@ Use everyday language with users. Internal state and gate names exist to prevent
 ### Mid-task invocation
 
 - State: `TAKEOVER_AUDIT`.
-- Start from `PROJECT.md`, the relevant visible conversation, and current running state. Run the read-only `resume-report`; it validates every saved event mechanically and reports the compact current position, unresolved issues, generated-view health, and workspace changes. Read full history or affected files only when the report finds a mismatch, unexplained change, contradiction, damage, or material uncertainty.
+- Start from `PROJECT.md`, the relevant visible conversation, and current running state. Run the read-only `resume-report`; it validates every saved event mechanically and reports the compact current position, unresolved issues, generated-view health, and workspace changes. Read current accepted requirements and affected files before acting; expand full history for a mismatch, unexplained change, contradiction, damage, or material uncertainty.
 - Follow [takeover-resume.md](takeover-resume.md) to preserve valid later work, treat the saved next action as advisory until reconciled, and identify only the earliest missing or contradicted decision that matters now.
 - Show the reconciled present plus the recommended execution order and reasons. Let the user correct it and discuss how to proceed before making new changes. Then resume from that agreed present position. Do not restart from Discovery when accepted evidence supports a later stage, and do not treat existing code as proof that earlier gates passed.
 
@@ -110,7 +110,7 @@ Compress requirements and experience design into a specification the implementat
 - determine application, deterministic workflow, agent, or hybrid;
 - define acceptance criteria before implementation;
 - run a professional concern review across adoption, data, AI necessity, quality, safety, privacy, permissions, accessibility, cost, and operations;
-- after the required behavior is anchored, decompose meaningful new capabilities and run the time-bounded quick discovery scan in [reuse-scout.md](reuse-scout.md); compare native, maintained-package, licensed-module, independent-pattern, and self-build options without importing another product's scope;
+- after the required behavior is anchored, use [reuse-scout.md](reuse-scout.md) if existing parts could materially save time, reduce risk, or reduce maintenance; compare viable approaches without a search quota or importing another product's scope;
 - bring only user-visible third-party consequences—new accounts, spending, information sent elsewhere, attribution, failure behavior, or exit limits—into the Specification;
 - route genuine high-uncertainty questions to a bounded experiment.
 
@@ -149,7 +149,7 @@ Make the work inspectable before coding, then build one independently acceptable
 ### Planning work
 
 - perform read-only repository and environment intake;
-- complete the deep paper review in [reuse-scout.md](reuse-scout.md) for the best one to three candidates; record the exact source and immutable commit or published artifact, relevant files permitted for review, actual use/distribution mode, license and notices, authorized compliance evidence when triggered, dependencies, integrity record, security and maintenance evidence, chosen disposition, integration boundary, owner, update rule, and exit path;
+- when a reuse candidate is actually under consideration, complete the focused paper review in [reuse-scout.md](reuse-scout.md); record the exact source and immutable commit or published artifact, relevant files permitted for review, actual use/distribution mode, license and notices, authorized compliance evidence when triggered, dependencies, integrity record, security and maintenance evidence, chosen disposition, integration boundary, owner, update rule, and exit path;
 - choose backend-first or end-to-end vertical slice;
 - retain reasonable existing architecture;
 - apply mandatory baselines, default choices, and requirement-triggered modules;
@@ -181,6 +181,8 @@ For each approved thin slice:
 7. Record evidence in `verification.md`.
 
 The next reversible slice may proceed under the approved plan. Pause at scope changes, new credentials, material cost, sensitive data, external writes, destructive or irreversible actions, incompatible migrations, or release to explain the exact action and obtain current authorization. Once the authorized user accepts the disclosed residual risk, continue inside that exact scope; do not convert the risk into an automatic refusal or repeatedly request the same decision.
+
+A normal question or progress request does not cancel this loop. Answer it and continue the still-authorized work. When the user changes a requirement, preserve completed compatible work, reconcile the affected decision, and stop only the dependent actions while that choice is unresolved.
 
 ## Stage 4 — TEST: continuous feedback and independent verification
 
@@ -234,6 +236,8 @@ Read accepted artifacts, all available verification, review results, risk decisi
 
 Prepare all release work while preserving a human production boundary.
 
+Deploying a restricted test environment may be necessary to collect real evidence during Build/Test. Use current authorization for that exact environment and record missing checks; this does not require claiming the overall Deploy gate has passed. Public release and a fully verified verdict still follow their own evidence and authorization rules. A chosen internal-testing process does not require the product owner personally to perform every test.
+
 ### Required work
 
 - name the exact target environment and audience;
@@ -260,12 +264,7 @@ After deployment, a successful command or reachable URL proves only part of the 
 
 Risk is not the same as impossibility. For any risk level, including critical:
 
-1. name the exact action and concrete worst consequence;
-2. state the level, affected people or information, safer option, recovery, and unverified parts;
-3. let the authorized user choose safer handling, informed continuation, pause, or cancellation;
-4. bind acceptance to the action, target, revision, environment, amount, and time;
-5. after acceptance, add practical protection and continue without repeatedly reopening the same decision;
-6. keep failures and unverified evidence unchanged.
+Use the canonical **Risk, external actions, and stopping** rule in SKILL.md. The exact recording mechanism is in project-state.md; stage-specific release evidence remains above. Do not maintain another general approval checklist here.
 
 Use `blocked` only when execution is impossible, required authority or access is absent, the host or platform forbids the action, or lawful third-party rights cannot be obtained. Every blocker names what must change before work can resume.
 
@@ -289,7 +288,7 @@ Keep the product aligned with user outcomes and turn real failures into durable 
 
 `docs/sdlc/feedback/<record>.md`; human-triaged product changes create a new `intent.md` and re-enter Plan.
 
-Monitoring may diagnose read-only and present a feedback or proposed-intent Draft without persisting it. Writing that record, creating code, a branch, commit, PR, external write, or production change must re-enter the applicable gates and receive fresh authorization; monitoring cannot inherit that authority by triggering itself.
+At monitoring setup, agree on what may be observed, which named local records may receive redacted findings, and the applicable duration and information boundary. Within that existing authority, save findings without asking again; recording does not accept a new requirement or authorize a fix. A read-only-only task reports the finding and that it was not saved. Code changes, commits/PRs, spending, external writes and production actions still require their applicable current authority; monitoring never grants those powers to itself. The common authority rule lives in SKILL.md.
 
 A bounded repair may reuse still-current accepted product and implementation decisions, but never a former release decision. Before the repair reaches production, rerun the affected checks on the new revision, retain independent review where required, show what passed, failed, and remains untried, and obtain fresh release authorization for that exact revision and environment. Tell the user this path when presenting the repair or PR; do not let the workflow appear to end at “open a PR.”
 
@@ -303,7 +302,7 @@ DZ may recommend Fast Track when all are true:
 
 It may shorten documents and discussion. The three product decisions remain distinct and visible, but tightly related decisions may be presented together when the user can meaningfully review them and each receives unambiguous acceptance. Never infer acceptance from “continue,” and never hide a risky or consequential choice merely to move faster. The first real flow and evidence remain mandatory.
 
-If the utility mutates local user files or data, the accepted specification and plan must include a preview or dry run, collision and idempotency behavior, an inspectable change manifest, a tested undo or rollback path, and fresh authorization for the real apply step. Test on disposable copies before originals.
+If the utility batch-renames, deletes, migrates or overwrites pre-existing user files or records, include a preview or dry run, collision and idempotency behavior, an inspectable change manifest, a tested undo or rollback path, and action-specific authorization before applying to originals. Test on disposable copies first. Ordinary user-initiated saves within the accepted product design, and bounded edits/tests within the already authorized development workspace, do not need a separate preview and approval for every operation; privacy, destructive-action and external-action boundaries still apply.
 
 ## Reopening rules
 

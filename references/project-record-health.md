@@ -21,7 +21,7 @@ Do not copy the same fact into several authoritative files. Derived dashboards a
 
 ## Focused health check
 
-Begin read-only from the compact current view and its deterministic health report. Compare older conversation, full journal history, accepted files, or affected implementation only when the report or current evidence reveals a conflict, unexplained change, stale view, damage, or material uncertainty. Check:
+Begin read-only from the compact current view and its deterministic health report. Read the accepted files and affected implementation needed to evaluate the current claim. Compare older conversation and full journal history when the report or current evidence reveals a conflict, unexplained change, stale view, damage, or material uncertainty. Check:
 
 1. **Duplicates:** the same decision, issue, or evidence appears more than once under different names.
 2. **Conflicts:** two current-looking records promise different users, behavior, information handling, cost, or next action.

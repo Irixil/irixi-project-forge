@@ -54,6 +54,8 @@ Read accepted intent and specification, repository rules, code, and environment.
 | Stage | User-visible result | Dependencies | Files/modules | Verification | Risks | Parallel? |
 |---|---|---|---|---|---|---|
 
+Map every Must ID in the accepted Specification to required work using its exact promise as an acceptance criterion. Technical route items may have additional criteria. Before a successor Plan is accepted, identify old work to keep, revise or retire and why; use carry-work after acceptance instead of retyping compatible tasks. Preserving implementation never transfers old Passed evidence.
+
 ## Alternatives not chosen
 - Alternative — why rejected now — revisit trigger:
 

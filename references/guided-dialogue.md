@@ -25,7 +25,7 @@ The internal workflow may use precise English names and status codes. Do not mak
 |---|---|
 | Intent | who needs help, when, and with which specific trouble |
 | Specification | what we will do this time and what we will leave out |
-| Plan | what we will do first and how we will personally try it afterward |
+| Plan | what we will do first and how we will check that the result works |
 | Gate | ask whether the few visible sentences are correct |
 | Artifact | “I wrote down what we just agreed below” |
 | Verification | make it do the real job once and inspect the result |
@@ -96,7 +96,7 @@ Use Must / Later / Won't internally. To a beginner say “这次做 / 以后再�
 
 Before accepting any agent architecture that can send, publish, apply, schedule, buy, delete, or change an outside system, prepare the Minimal Agent Card in [agent-harness.md](agent-harness.md). In the visible product decision, make the user consequence of these controls explicit: objective and stop condition, what the agent can see, allowed actions, human-confirmed actions, budget, bounded retries, duplicate-action prevention, timeout and cancel behavior, recovery, and representative failure cases.
 
-When the first request itself asks for autonomous outside action, do not postpone the control summary merely because discovery is concise or because DZ recommends a draft-only pilot. In that same first reply, state the proposed safe default in task-specific words: selected inputs only; draft or read-only work first; exact actions that still wait for a person; a spending or action cap; a bounded attempt count; checking whether an action already happened before retrying; when it stops or times out; what is preserved and how the person recovers; no request for account passwords or secret keys during discovery. Identity-bearing services such as job, mail, social, commerce, or calendar platforms also require account/platform-rule and impersonation consequences to be named. Carry the complete card into Specification.
+When the first request asks for autonomous outside action, explain the immediate safe boundary: start with selected inputs and drafts/read-only work; sending, buying or changing an outside system still requires the applicable exact authority. Ask the next decision-changing question. Do not squeeze the entire Agent Card into this first reply. Complete its budget, retry, duplicate-effect, timeout, cancellation, recovery and representative failure decisions before Specification acceptance and before any affected action. For identity-bearing services, include account/platform-rule and impersonation consequences at that decision. Do not ask for passwords or secret keys in discovery.
 
 Keep this classification internal. Prefer ordinary code when every step can be listed. Use an agent only when the system must choose different actions as the situation changes. A mixed approach is usually safer: ordinary code controls what is saved, who may act, how much may be spent, and actions that cannot easily be undone; the model handles unclear language or content generation. Tell a beginner only what the chosen behavior means in their own task.
 
@@ -127,7 +127,7 @@ Apply all five steps internally, but do not present them as a five-part form:
 2. Recommend one low-risk, reversible default using current evidence.
 3. Name one alternative only if it changes a meaningful tradeoff.
 4. Record the recommendation as a `testable assumption`, not a confirmed requirement; tell the user “我们先这样试，不合适就换.”
-5. Give a cheap validation method and ask the user only to accept, modify, or defer it.
+5. Give a cheap validation method and, only when still undecided, ask the user to accept, modify, or defer it. If the current message already says “don't build yet” or chooses to defer, honor that choice without asking again or starting the experiment.
 
 Beginner-facing example:
 
@@ -182,12 +182,12 @@ When the user asks for fashionable technology, many agents, multiple platforms, 
 1. Separate the desired outcome from the proposed solution.
 2. Explain why popularity or competitor use does not establish need.
 3. Recommend the narrowest business loop that can test value.
-4. In that same reply, assign every named major component to Now, Later with a concrete observable revisit trigger, or Won't with a reason, instead of rejecting the pile but leaving each item ambiguous. Equivalent items may share one sentence, but “需要时再看” is not a trigger.
+4. Recommend the smallest next slice now; classify the remaining major components as Now, Later with an observable revisit trigger, or Won't before Specification acceptance. Do not overload the first response or let an unclassified suggestion become a promise. Equivalent items may share one explanation.
 5. If the user insists, preserve their authority over product direction but do not abandon professional judgment; state the cost, evidence gap, and acceptance impact clearly.
 
-In that same reply, explain which proposed behavior belongs in ordinary deterministic code, which uncertain transformation may justify one model judgment, and why extra agents or infrastructure are not current requirements. This applies even in the concise first response to a solution-first request; group the answer rather than omit it. Keep the explanation short and tied to the user's task; do not teach architecture vocabulary.
+Explain code versus model choices only when they affect the current product decision. Complete the rationale in planning; do not make the beginner sit through architecture classification before the problem is clear.
 
-When the user asks to find or copy a similar GitHub project, first restate the small behavior the product actually needs. Only after the exact first decision record is visible and accepted, use [reuse-scout.md](reuse-scout.md) to look for a fitting part. Do not let a repository's feature list expand the product, and do not ask the beginner to judge project health, dependency weight, or license compatibility.
+When the user asks to find or compare a similar GitHub project, first anchor the small behavior under discussion. A standalone read-only comparison can proceed under that request; new product implementation still follows its accepted decisions. Use [reuse-scout.md](reuse-scout.md) when reuse matters. Do not let a repository's feature list expand the product, and do not ask the beginner to judge project health, dependency weight, or license compatibility.
 
 If two requirements conflict, present the conflict as a decision with a recommended resolution. Do not encode both and hope implementation will reconcile them.
 

@@ -53,7 +53,7 @@ class InstallLocalSkillTests(unittest.TestCase):
             (ROOT / "scripts" / "dz_state.py").read_text(encoding="utf-8"),
         )
         self.assertIn(
-            f"DZ workflow version: `{version}`",
+            f"# DZ Universal Workflow — {version}",
             (ROOT / "portable" / "DZ-UNIVERSAL.md").read_text(encoding="utf-8"),
         )
         self.assertIn(
@@ -61,7 +61,7 @@ class InstallLocalSkillTests(unittest.TestCase):
             (ROOT / "assets" / "project" / "AGENTS.md").read_text(encoding="utf-8"),
         )
 
-    def test_behavioral_hardening_is_present_in_skill_and_portable_prompt(self) -> None:
+    def test_distribution_preserves_declared_controls_and_routes(self) -> None:
         manifest = json.loads((ROOT / "dz-manifest.json").read_text(encoding="utf-8"))
         rules = manifest["non_negotiable_behavior"]
         for key in (
@@ -81,39 +81,18 @@ class InstallLocalSkillTests(unittest.TestCase):
         ):
             self.assertIs(rules[key], True, key)
 
-        guided = (ROOT / "references" / "guided-dialogue.md").read_text(
-            encoding="utf-8"
-        )
-        review = (ROOT / "references" / "change-proposal-review.md").read_text(
-            encoding="utf-8"
-        )
-        portable = (ROOT / "portable" / "DZ-UNIVERSAL.md").read_text(
-            encoding="utf-8"
-        )
-        skill = (ROOT / "SKILL.md").read_text(encoding="utf-8")
-        phase_gates = (ROOT / "references" / "phase-gates.md").read_text(
-            encoding="utf-8"
-        )
-        release_template = (
-            ROOT / "references" / "artifacts" / "review-release.md"
-        ).read_text(encoding="utf-8")
-        self.assertIn("duplicate-action prevention", guided)
-        self.assertIn("“需要时再看” is not a trigger", guided)
-        self.assertIn("impersonates the owner", review)
-        self.assertIn("concrete opportunity cost visible", review)
-        self.assertIn("latest explicitly accepted wording is current", portable)
-        self.assertIn("compact present summary by default", portable)
-        self.assertIn("never ask for the same permission twice", portable)
-        self.assertIn("current action-specific authorization", portable)
-        self.assertIn("latest explicitly accepted wording is current", portable)
-        self.assertIn("Leave a handoff containing", portable)
-        self.assertIn("without baby talk or a rigid word blacklist", portable)
-        self.assertIn("two separate results", portable)
-        self.assertIn("prepares internal human testing", portable)
-        self.assertIn("Before deploying to an internal test environment", skill)
-        self.assertIn("two separately reported parts", phase_gates)
-        self.assertIn("AI preflight before internal testing", release_template)
-        self.assertIn("does not claim to replace it", release_template)
+        # Packaging integrity is not a behavioral test of an AI. Real dialogue
+        # scenarios are evaluated independently, never by matching prose fragments.
+        with tempfile.TemporaryDirectory() as temp:
+            target = Path(temp) / "dz"
+            MODULE.install(ROOT, target)
+            for relative in (
+                "SKILL.md", "portable/DZ-UNIVERSAL.md",
+                "references/guided-dialogue.md", "references/change-proposal-review.md",
+                "references/phase-gates.md", "references/artifacts/review-release.md",
+                "references/user-trial.md", "scripts/sync_workflow.py",
+            ):
+                self.assertEqual((target / relative).read_bytes(), (ROOT / relative).read_bytes(), relative)
 
     def test_replace_existing_repository_symlink_removes_duplicate_layout(self) -> None:
         with tempfile.TemporaryDirectory() as temp:
