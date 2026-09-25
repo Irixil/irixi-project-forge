@@ -22,8 +22,9 @@ Inspect only what is available and relevant:
 1. The current user's latest request and the relevant visible conversation: corrections, explicit decisions, rejected options, tool results, failures, unfinished questions, and work performed since DZ last wrote project state. Start from the compact current view; revisit older conversation only when a conflict or missing fact requires it.
 2. Repository guidance and state the host can access: `AGENTS.md`, `CLAUDE.md`, `GEMINI.md`, or another active instruction file; `PROJECT.md`; `docs/sdlc`; README; version-control status and diff; branch or isolated workspace; relevant source and tests; run instructions; and current plan.
    When `.dz/state.json` exists, run the current DZ state tool's read-only `resume-report`. It validates every journal record mechanically, returns a compact current summary, checks the generated dashboard, lists unresolved issues, and compares the latest saved workspace checkpoint with the current Git worktree when available. Read relevant accepted requirements and affected files before acting; request full history/state for a mismatch, unexplained change, contradiction, stale view, damage, or material uncertainty. If no saved comparison exists, state that the timing of later changes is uncertain instead of guessing. If the snapshot is damaged, propose recovery from `.dz/journal.jsonl` after alignment rather than writing during read-only inspection. If project guidance is stale, propose `install-guidance` and wait for the takeover confirmation before running it. The ledger is a saved account of execution, not permission to ignore later work and not proof that a decision was accepted or a test passed.
-3. Evidence: exact commands and outputs, test or eval results, screenshots or browser evidence, review findings, release records, and known failures.
-4. Operational state when relevant: running task or terminal state, migrations, external side effects, deployment environment, and rollback readiness.
+3. Inspect the report's diagnostics before trusting its saved summary. Changed accepted files, expired authority and stale generated pages still permit explanation; they do not permit implementation under old approval. If the current snapshot is damaged, a journal fallback is a recovery baseline, not an automatically restored current state. Use the available facts to discuss the smallest authorized repair.
+4. Evidence: exact commands and outputs, test or eval results, screenshots or browser evidence, review findings, release records, and known failures.
+5. Operational state when relevant: running task or terminal state, migrations, external side effects, deployment environment, and rollback readiness.
 
 Do not open or reveal secrets. Do not assume another task, hidden conversation, or undocumented approval is available. If required context is not visible, name the gap instead of inventing it.
 
@@ -31,11 +32,11 @@ Do not open or reveal secrets. Do not assume another task, hidden conversation, 
 
 Apply these rules together:
 
-1. The user's current correction or changed goal overrides older product assumptions, but may reopen a gate.
-2. An exact Accepted artifact or valid scope-specific decision record establishes a gate. In conversation, a valid decision record requires that the exact Draft or complete decision-relevant diff was visible and the relevant owner explicitly accepted that version. A filename, heading, old summary, informal plan, or code comment does not.
+1. Compare the saved `DZ-GOAL` with the latest explicit user decisions first. The user's definite correction overrides stale saved wording; synchronize it via SKILL.md's correction procedure without asking them to approve their exact words again. A proposal or question is not a decision. A method, feature or priority change updates its affected record, not necessarily Intent. Never resume a route the user rejected merely because its successor has not yet been saved.
+2. An exact Accepted artifact or valid scope-specific decision record establishes a gate. For AI-authored choices, the complete Draft or decision-relevant diff must have been visible and accepted. A later exact user-authored correction is itself the decision on that delta under SKILL.md's correction rule; do not require the AI to restate it for another approval. A filename, heading, old summary, informal plan, or code comment does not establish acceptance.
 3. Reproducible tests and observed behavior establish implementation evidence, not product intent or approval.
 4. Current code, UI, schemas, prompts, and infrastructure reveal candidate behavior and constraints. They may be retained, but they do not prove that users wanted them.
-5. Conversation facts may be carried forward without making the user repeat them. If an exact artifact was never shown and accepted, reconstruct it as Draft rather than silently marking it Accepted.
+5. Conversation facts may be carried forward without making the user repeat them. Reconstruct missing initial agreements as Draft, not invented past approval. When an accepted agreement exists and the user explicitly corrects it, save that delta plus unchanged wording through the core procedure instead of reopening every settled decision.
 6. Existing authorization remains valid only for its named action, target, environment, cost, and time. Invoking DZ neither revokes a current scope-specific authorization nor expands it.
 7. A recorded accepted risk remains valid only for the same action and scope. Do not ask for the same decision again merely because the session changed; reopen it when the action, target, revision, environment, amount, time, consequence, or decision owner changes.
 
@@ -45,9 +46,10 @@ Infer only the highest **contiguous** supported gate chain. A later artifact tha
 
 ## Produce a plain-language continuity summary
 
-The first substantive takeover response should be a compact, user-readable summary, not the new-idea interview scaffold. It must describe the present after reconciling the whole available history with changes made since the latest saved record. Keep the precise internal assessment, but explain it so a complete beginner can repeat it back. Use concrete work and results, not category words:
+The first substantive takeover response should describe the reconciled current goal, not blindly quote an older accepted Intent. If the user's later decision has not been saved, say so and include synchronization in the route. With no settled decision, label the goal provisional. Describe the present and useful later work, not a new-idea interview. Classify genuine suggestions against that reconciled goal without demoting an explicit correction into a suggestion. Use concrete work and results:
 
 ```text
+现在最终要达成的是：[exact accepted goal, or clearly labelled provisional goal].
 以前已经做到：[name the visible result, not “progress”].
 后来又发生了：[name work or changes after the latest saved record, or say that none were found]. These can stay: [name the useful part].
 现在还不能确定：[name the exact conflict, missing agreement, or untried result]. If skipped, [one concrete consequence].
@@ -95,7 +97,7 @@ Compact example:
 
 - Identify the earliest artifact contradicted by current evidence or the user's changed goal.
 - A decision artifact needs a successor only when a material contradiction affects its user, outcome, scope, acceptance, data, permissions, architecture, cost, or other governing boundary. Age alone is not enough.
-- Keep the latest explicitly Accepted artifact governing while a successor is only proposed. Treat contradictory code as candidate work that does not yet match the current decision. Save the successor Draft at a separate versioned path and obtain fresh acceptance. Once accepted, promote it to the active view and retain the former accepted artifact only as history. Do not let an unaccepted note replace the current decision or invent a `Pending` lifecycle status.
+- For a genuine unaccepted proposal, retain the current decision. For a definite later user correction, follow SKILL.md's correction procedure: suspend the rejected route, record the exact delta and refresh the current views; ask only about missing material choices. Save successors at separate versioned paths and preserve history. Never equate an unsaved decision with an unaccepted suggestion or invent a `Pending` lifecycle status.
 - Verification, review, and release evidence are bound to the recorded code revision, configuration, environment, and test inputs. A later revision does not erase that evidence, but it cannot govern the new revision until the affected checks are repeated.
 - `PROJECT.md` is derivative. If it conflicts with accepted artifacts or observed evidence, report the conflict and update the dashboard only when writing is authorized; never use it to overrule the source artifacts.
 - Reconcile downstream artifacts and implementation only after the earliest affected successor is accepted. Keep unaffected historical records intact.
@@ -110,10 +112,11 @@ Compact example:
 
 - This checkpoint is for a new task, explicit DZ re-invocation, or actual drift. After alignment, continue the agreed work across ordinary messages and tool results without repeating the same confirmation. A side question is answered within the active task. Before changing behavior, read the current accepted requirements and affected files; a healthy summary is an index, not sufficient implementation context.
 - Route from the reconciled present, not automatically from Discovery, the newest code, the last saved stopping point, or the ledger's old proposed next action. Use the earliest unsupported or contradicted gate only to decide which agreement governs the next change.
+- Compare the proposed execution with the active goal before any mutation. Preserve the chain `goal → Must → current work item → next action`; defer or reject an attractive step that breaks it unless the user explicitly chooses a successor goal.
 - Preserve previously accepted exact artifacts unless current evidence reopens them.
 - Preserve valid implementation work whenever it can satisfy the accepted contract safely.
 - A missing artifact requires retrospective alignment, not retrospective fiction. Never invent past approval.
-- The continuity summary is not formal acceptance of a product artifact, but it is a required resume checkpoint. Before new project mutations, show the summary and proposed execution, let the user correct them, and wait for confirmation. Read-only inspection needed to prepare that summary may run first. After confirmation, carry out the agreed work without repeatedly asking about unchanged details.
+- The continuity summary is a resume checkpoint, not approval of invented product choices or outside actions. A current user instruction that already corrects the exact position and directs the continuation can satisfy the matching checkpoint; do not ask the same question again. Otherwise show the present and proposed route and wait for alignment. After alignment, synchronize actual decisions before implementation.
 - Keep just-in-time boundaries for credentials, sensitive data, paid calls, external writes, destructive actions, migrations, and release.
 - At handoff or pause, update `PROJECT.md` and the current evidence artifact only when writing is authorized, so a later task can resume without reconstructing everything again.
 - When persistent state is available, update `.dz/state.json` after every meaningful change and regenerate `PROJECT.md`, `work-items.md`, and `issues.md`. A user pause, cancellation, or early closure is a legal stopping state and never becomes verified completion.
@@ -122,7 +125,7 @@ Compact example:
 
 Takeover is complete when:
 
-- the current objective and active work item are clear;
+- the active final goal is quoted or clearly marked provisional, and the current Must, active work item, and next action can each be traced back to it;
 - observed work and gate-supported state are separately identified;
 - existing changes have a keep/review decision rather than being ignored;
 - the earliest missing or reopened gate is named;

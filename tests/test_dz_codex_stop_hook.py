@@ -46,13 +46,104 @@ class CodexStopHookTests(unittest.TestCase):
         with tempfile.TemporaryDirectory() as directory:
             self.assertEqual(self.hook(Path(directory)), {})
 
-    def test_incomplete_dz_directory_is_treated_as_a_damaged_ledger(self) -> None:
+    def test_container_finds_one_direct_child_and_preserves_second_stop_escape(self) -> None:
+        with tempfile.TemporaryDirectory() as directory:
+            container = Path(directory)
+            self.init(container / "only-project")
+            output = self.hook(container)
+            self.assertEqual(output.get("decision"), "block")
+            self.assertIn("active", output["reason"])
+            second = self.hook(container, already_continued=True)
+            self.assertNotIn("decision", second)
+            self.assertIn("避免死循环", second["systemMessage"])
+
+    def test_container_does_not_resume_a_paused_or_cancelled_child(self) -> None:
+        with tempfile.TemporaryDirectory() as directory:
+            container = Path(directory)
+            project = container / "only-project"
+            self.init(project)
+            self.state(project, "set-run", "--status", "paused", "--resume-when", "user continues")
+            before = (project / ".dz" / "state.json").read_bytes()
+            self.assertEqual(self.hook(container), {})
+            self.assertEqual((project / ".dz" / "state.json").read_bytes(), before)
+            self.state(project, "close", "--verdict", "cancelled", "--reason", "user cancelled")
+            self.assertEqual(self.hook(container), {})
+
+    def test_container_with_multiple_children_reports_ambiguity_without_mutation(self) -> None:
+        with tempfile.TemporaryDirectory() as directory:
+            container = Path(directory)
+            projects = [container / name for name in ("first-project", "second-project")]
+            for project in projects:
+                self.init(project)
+            (projects[0] / ".dz" / "state.json").write_text("{broken", encoding="utf-8")
+            before = [(project / ".dz" / "state.json").read_bytes() for project in projects]
+            output = self.hook(container)
+            self.assertEqual(output.get("decision"), "block")
+            self.assertIn("多个 DZ 项目", output["reason"])
+            self.assertIn("first-project", output["reason"])
+            self.assertIn("second-project", output["reason"])
+            self.assertIn("暂停或取消", output["reason"])
+            second = self.hook(container, already_continued=True)
+            self.assertNotIn("decision", second)
+            self.assertIn("多个 DZ 项目", second["systemMessage"])
+            self.assertEqual([(project / ".dz" / "state.json").read_bytes() for project in projects], before)
+
+    def test_current_project_takes_precedence_over_children(self) -> None:
         with tempfile.TemporaryDirectory() as directory:
             project = Path(directory)
+            self.init(project)
+            self.state(project, "set-run", "--status", "paused", "--resume-when", "user continues")
+            self.init(project / "active-child")
+            self.init(project / "other-active-child")
+            self.assertEqual(self.hook(project), {})
+
+    def test_direct_child_takes_precedence_over_an_ancestor_project(self) -> None:
+        with tempfile.TemporaryDirectory() as directory:
+            ancestor = Path(directory)
+            self.init(ancestor)
+            container = ancestor / "projects"
+            project = container / "only-project"
+            self.init(project)
+            self.state(project, "set-run", "--status", "paused", "--resume-when", "user continues")
+            self.assertEqual(self.hook(container), {})
+
+    def test_separate_git_workspace_does_not_inherit_an_ancestor_ledger(self) -> None:
+        with tempfile.TemporaryDirectory() as directory:
+            ancestor = Path(directory)
+            self.init(ancestor)
+            for name in ("repository", "worktree"):
+                with self.subTest(name=name):
+                    workspace = ancestor / name
+                    workspace.mkdir()
+                    if name == "repository":
+                        (workspace / ".git").mkdir()
+                    else:
+                        (workspace / ".git").write_text("gitdir: /synthetic/fixture\n", encoding="utf-8")
+                    source = workspace / "src"
+                    source.mkdir()
+                    self.assertEqual(self.hook(workspace), {})
+                    self.assertEqual(self.hook(source), {})
+
+    def test_child_discovery_is_one_level_and_does_not_follow_directory_links(self) -> None:
+        with tempfile.TemporaryDirectory() as directory:
+            root = Path(directory)
+            container = root / "container"
+            self.init(container / "group" / "nested-project")
+            self.init(root / "external-project")
+            (container / "linked-project").symlink_to(root / "external-project", target_is_directory=True)
+            self.assertEqual(self.hook(container), {})
+
+    def test_incomplete_dz_directory_is_treated_as_a_damaged_ledger(self) -> None:
+        with tempfile.TemporaryDirectory() as directory:
+            container = Path(directory)
+            project = container / "only-project"
+            project.mkdir()
             (project / ".dz").mkdir()
-            output = self.hook(project)
-            self.assertEqual(output["decision"], "block")
-            self.assertIn("`.dz/state.json` 不存在", output["reason"])
+            for cwd in (project, container):
+                with self.subTest(cwd=cwd):
+                    output = self.hook(cwd)
+                    self.assertEqual(output["decision"], "block")
+                    self.assertIn("`.dz/state.json` 不存在", output["reason"])
 
     def test_active_project_is_blocked_from_a_subdirectory(self) -> None:
         with tempfile.TemporaryDirectory() as directory:

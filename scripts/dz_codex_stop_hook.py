@@ -17,9 +17,29 @@ def emit(value: dict[str, Any]) -> int:
 
 def find_project(start: Path) -> Path | None:
     current = start.resolve()
+    if (current / ".dz").is_dir():
+        return current
+    children = sorted(
+        candidate
+        for candidate in current.iterdir()
+        if not candidate.is_symlink()
+        and candidate.is_dir()
+        and (candidate / ".dz").is_dir()
+    )
+    if len(children) > 1:
+        names = "、".join(candidate.name for candidate in children)
+        raise ValueError(
+            f"当前目录有多个 DZ 项目（{names}），无法确定本任务对应哪一个。"
+            "先说明需要选择项目，不要猜测、读取或修改其中任何账本，也不要盲目继续开发。"
+            "用户要求暂停或取消时直接遵从，不要为了通过检查而要求继续。"
+        )
+    if children:
+        return children[0]
     for candidate in (current, *current.parents):
         if (candidate / ".dz").is_dir():
             return candidate
+        if (candidate / ".git").exists():
+            break
     return None
 
 
@@ -48,7 +68,13 @@ def main() -> int:
     cwd = event.get("cwd")
     if not isinstance(cwd, str) or not Path(cwd).is_dir():
         return emit({"systemMessage": "DZ Stop hook 没收到可用的项目路径；本次未执行账本拦截。"})
-    project = find_project(Path(cwd))
+    try:
+        project = find_project(Path(cwd))
+    except (OSError, ValueError) as exc:
+        reason = f"DZ 项目路径无法确定：{exc}"
+        if event.get("stop_hook_active") is True:
+            return emit({"systemMessage": reason + " Stop hook 已请求过一次，本次为避免死循环放行。"})
+        return block(reason)
     if project is None:
         return emit({})
 

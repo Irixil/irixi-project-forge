@@ -27,20 +27,20 @@ Do not force every artifact into one status vocabulary:
 
 | Artifact | Lifecycle statuses | What changes the status |
 |---|---|---|
-| `intent.md`, `spec.md`, `plan.md` | Draft → Accepted → Superseded | Explicit acceptance of the exact Draft or decision-relevant diff by the relevant owner |
+| `intent.md`, `spec.md`, `plan.md` | Draft → Accepted → Superseded | The owner's exact decision under SKILL.md's correction/confirmation rule; no approval inferred from silence or AI-authored additions |
 | `verification.md` | In progress → Passed / Blocked → Superseded | Reproducible checks against frozen criteria |
 | `review.md` | In review → Changes required / Passed → Superseded | Independent reviewer disposition |
 | `release.md` | Draft → Approved → Deploying → Released / Rolled back → Superseded | Authorized approval, deployment, and post-release evidence |
 | feedback record | New → Triaged → Converted / Closed | Human triage |
 | issue ledger record | Open → Triaged / Waiting / In progress → Implemented unverified → Verified; or Deferred / Dismissed | Observable problem, selected route, current Passed evidence, and retained regression protection |
 
-For a successor decision, Draft does not replace the current Accepted artifact. Keep the accepted file governing, save the proposal at a separate versioned path, and show both in the generated current view. Explicit acceptance promotes the proposal and moves the former version out of the active view while the append-only journal preserves it. An unaccepted note or later brainstorm never becomes current merely because it is newer.
+An unaccepted successor Draft does not replace the current decision. A definite user-authored correction, however, is already a decision: apply SKILL.md's explicit-correction procedure without a duplicate approval round. Save successors at separate versioned paths, move obsolete wording out of the active view, and retain old files/journal history. An unaccepted note or brainstorm does not become current merely because it is newer; nor may a stale file overrule a later explicit decision.
 
 Every artifact records its source of truth, preceding artifact or evidence, relevant revision/environment, and decision or evidence record. For Intent, Specification, and Plan, hash the complete visible Draft and record the unchanged digest, deciding owner, visible acceptance reference, and time. A timestamp, Git author, chat summary, or model assertion is not approval or proof.
 
 Execution state uses a separate lifecycle described in [project-state.md](project-state.md). A run can be paused, cancelled, or finished with unverified work without changing any decision artifact or pretending verification passed.
 
-A conversational decision record is valid only when the exact Draft or complete decision-relevant diff was visible and the relevant owner explicitly accepted that version. Determine workflow authority from the highest contiguous accepted artifact chain; a later file cannot bridge an earlier missing or contradicted gate.
+A conversational decision record is valid when the owner explicitly accepts the visible Draft/diff or personally states the exact correction to an existing decision. The latter approves only that delta plus explicitly retained boundaries, not invented additional choices. Synchronize the accepted artifact chain before implementation; missing paperwork does not authorize the rejected route.
 
 User-facing acceptance does not require lifecycle jargon or a magic sentence. Introduce the visible record with everyday wording such as “我把刚才说定的事写成几句话,” “这次先做什么、不做什么,” or “准备先做哪一步，做完怎样检查结果.” Ask what is wrong and let the user reply naturally. “对，就是这个意思” or “没问题” can be explicit acceptance when it unambiguously refers to that exact visible content. A bare “continue” with no clear reference to the shown decision, silence, enthusiasm, or approval of another action is not acceptance.
 
@@ -50,6 +50,8 @@ For personal product choices, the user is normally the decision owner. For organ
 
 For `intent.md`, `spec.md`, and `plan.md`:
 
+Use the following review loop for new or genuinely undecided content. An already explicit user-authored delta uses SKILL.md's correction procedure and the atomic `--user-change` path in project-state.md; do not ask the owner to accept the same delta again after transcription.
+
 1. Write the artifact with `Status: Draft` only when the stage is decision-mature.
 2. Show the exact artifact or a complete decision-relevant diff.
    If plain-language presentation needs multiple messages, number every part, state the total, and do not request or record acceptance until the final part is visible. The acceptance must clearly refer to the complete set.
@@ -58,7 +60,7 @@ For `intent.md`, `spec.md`, and `plan.md`:
 5. Hash the unchanged visible Draft and record acceptance in the ledger: digest, deciding owner, visible acceptance reference, and time. Do not then edit its embedded `Status: Draft` line: that would change the accepted bytes and invalidate the hash. The ledger and generated view show its effective Accepted status; a text change needs a new visible version.
 6. Version it with the code when a repository exists; do not push externally unless requested.
 
-Never silently overwrite an Accepted artifact. A material change reopens the appropriate gate and produces a visible revision.
+Never silently overwrite an Accepted artifact. A material change produces a visible successor; only still-undecided content needs a new acceptance round under the core correction rule.
 
 ## PROJECT.md dashboard
 

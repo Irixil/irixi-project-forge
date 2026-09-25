@@ -6,12 +6,13 @@ DZ 的项目账本是持久记录，Codex Stop hook 只是一道本机收尾检�
 
 ## 它做什么
 
-- 从 Codex Stop 事件的 `cwd` 开始向上查找最近的 `.dz/`。
+- 优先检查 Codex Stop 事件的 `cwd` 本身。若没有 `.dz/`，只检查一层直接子目录，不跟随目录软链接；唯一子项目直接使用，多个候选则列出名称、说明需要选定项目，不读取任何候选账本，也不猜测下一步。若没有子项目，再向上查找最近的 `.dz/`，遇到独立 Git 工作区的 `.git` 目录或文件就停止回退，避免使用无关上级项目的账本。
 - 没有 `.dz/` 时直接放行，不影响普通项目。有 `.dz/` 但缺少 `state.json` 按损坏账本处理。
 - 通过同版本 `scripts/dz_state.py can-stop` 完成结构、证据文件、决策摘要和跨记录规则的语义检查，不维护第二套校验逻辑。
 - 有效账本为 `active` 时第一次输出顶层 `decision: "block"` 和 `reason`，提醒 Codex 不能照着旧 `next_action` 直接做。它必须先运行只读 `resume-report`，把全部有效记录与项目现在的内容对齐；用户还没确认时先汇报并记录为等待，已经确认且没有不明变化时继续当前约定内能执行的工作，不逐项重复确认。是否真的继续仍受 hook 信任、平台策略、其他 Stop hook 和宿主行为影响，DZ 不能保证。若同一 Stop 已经请求过一次仍是 `active`，第二次带警告放行，保留未完状态，避免工具故障把用户困在死循环里。
 - `waiting_user`、`waiting_authorization`、`blocked`、`paused` 和 `finished` 时输出空 JSON 对象并放行。
 - 账本损坏时第一次请求恢复、暂停、取消或诚实收尾。若同一轮已经请求续跑但仍无法恢复，第二次放行并警告不得宣称已验证。
+- 项目路径有歧义或无法检查时，第一次仅请求说明需要选定项目或检查路径；不要求盲目续跑。第二次仍未解决则带说明放行，避免死循环。用户要求暂停或取消时仍应直接遵从，不因路径选择而继续开发。
 
 同一任务已经对齐时，继续完成约定内可执行的工作；不因为普通提问或某一步工具完成就重新要求接管确认。用户任何时候都可以暂停、取消或提前收尾。只要把选择和真实产品结果写入账本，hook 就会放行；它不要求把未通过的检查改成通过。
 
@@ -23,4 +24,4 @@ DZ Codex 插件默认读取 `hooks/hooks.json`，命令通过 Codex 提供的 `$
 
 ## English summary
 
-The hook finds the nearest DZ ledger, delegates consistency validation to the same-version `dz_state.py can-stop`, and requests one continuation attempt for an active or damaged run. It cannot guarantee continuation: trust policy, host behavior, or another matching Stop hook can take precedence. On a second Stop this hook does not repeat its request; it warns and leaves the ledger honestly unfinished, so this hook cannot loop by itself. Waiting, blocked, paused, finished, and non-DZ runs stop normally. Plugin installs use `${PLUGIN_ROOT}` and require explicit review in `/hooks`; the inert project template must be edited to a reviewed absolute Skill path and never overwrites existing hook configuration.
+The hook first checks the current directory, then its direct child directories without following directory symlinks. It uses a unique child project; multiple candidates are named without reading their ledgers or guessing which to continue. With no child candidate it falls back to the nearest ancestor ledger, stopping at a Git workspace boundary (`.git` directory or file). It delegates consistency validation to the same-version `dz_state.py can-stop` and requests one continuation attempt for an active or damaged run. An ambiguous or unreadable path requests only a project-selection or path-check explanation; a pause or cancellation never authorizes further development. It cannot guarantee continuation: trust policy, host behavior, or another matching Stop hook can take precedence. On a second Stop this hook does not repeat its request; it warns and leaves the ledger honestly unfinished, so this hook cannot loop by itself. Waiting, blocked, paused, finished, and non-DZ runs stop normally. Plugin installs use `${PLUGIN_ROOT}` and require explicit review in `/hooks`; the inert project template must be edited to a reviewed absolute Skill path and never overwrites existing hook configuration.

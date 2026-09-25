@@ -17,6 +17,15 @@
         "language": {"enum": ["zh", "en"]}
       }
     },
+    "goal": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["intent_sha256", "statement"],
+      "properties": {
+        "intent_sha256": {"type": ["string", "null"], "pattern": "^[0-9a-f]{64}$"},
+        "statement": {"type": ["string", "null"], "minLength": 1}
+      }
+    },
     "run": {
       "type": "object",
       "additionalProperties": false,
@@ -329,6 +338,9 @@
         "id": {"type": "string", "pattern": "^[^\\s]+$"},
         "title": {"type": "string", "minLength": 1},
         "carried_from": {"type": "string", "minLength": 1},
+        "mode": {"enum": ["implementation", "read_only"]},
+        "mode_reason": {"type": ["string", "null"]},
+        "evidence_floor": {"type": "integer", "minimum": 0},
         "required": {"type": "boolean"},
         "contract_sha256": {"type": "string", "pattern": "^[0-9a-f]{64}$"},
         "phase": {"enum": ["design", "build", "test", "deploy", "maintain"]},
@@ -347,6 +359,18 @@
         {
           "if": {"properties": {"status": {"const": "blocked"}}},
           "then": {"properties": {"blocker": {"type": "string", "minLength": 1}}}
+        },
+        {
+          "if": {"required": ["mode"], "properties": {"mode": {"const": "read_only"}}},
+          "then": {
+            "required": ["mode_reason"],
+            "properties": {
+              "mode_reason": {"type": "string", "minLength": 1},
+              "phase": {"enum": ["design", "test", "maintain"]},
+              "status": {"not": {"const": "implemented_unverified"}}
+            }
+          },
+          "else": {"properties": {"mode_reason": {"const": null}}}
         }
       ]
     },
@@ -390,6 +414,7 @@
         "evidence_ids": {"type": "array", "items": {"type": "string", "pattern": "^[^\\s]+$"}, "uniqueItems": true},
         "resolution": {"type": ["string", "null"]},
         "prevention": {"type": ["string", "null"]},
+        "evidence_floor": {"type": "integer", "minimum": 0},
         "created_at": {"type": "string", "format": "date-time"},
         "updated_at": {"type": "string", "format": "date-time"}
       },

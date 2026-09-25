@@ -10,6 +10,11 @@ Read accepted `intent.md` before drafting.
 > Based on: Accepted [intent.md](intent.md)
 > Decision record: Pending
 
+## Goal trace
+- Active `DZ-GOAL` copied exactly from accepted Intent:
+- How this version measurably advances that goal:
+- Any part of the final goal deliberately left for a later version:
+
 ## Product definition
 - One-sentence product:
 - Product shape: application / deterministic workflow / agent / hybrid
@@ -28,6 +33,8 @@ Read accepted `intent.md` before drafting.
 - [DZ-MUST:R2] {Another independently checkable required outcome, only if applicable}
 
 Keep one complete promise per line. Reuse stable IDs in successors; changed wording needs visible acceptance. Remove unused example items. These lines, outside code fences in the saved specification, are the canonical required outcomes, not a second checklist maintained elsewhere. Explain them naturally to the user; the AI handles the labels. Evidence IDs or rationale may be recorded below without duplicating the governing promise.
+
+Every Must must support the active `DZ-GOAL`, and the Must set must cover every promise this version claims. A valuable capability that does not advance the goal belongs in Later or Won't unless the user explicitly accepts a successor Intent.
 
 ### Later hypotheses
 - Capability — revisit trigger:

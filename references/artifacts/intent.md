@@ -25,9 +25,12 @@ Draft only after discovery is concrete enough for review.
 - Available evidence IDs, source kinds, and limits:
 
 ## Desired outcome
-- Observable user change:
+- [DZ-GOAL] {One observable, solution-independent final result for the primary user}
+- Success condition that would show this result was reached:
 - Initial success signals and whether each is observed evidence or an owner-chosen test threshold:
 - Why now:
+
+Keep exactly one `DZ-GOAL` line outside fenced examples. It is the active goal anchor after this Intent is accepted. Features, tools, architecture, milestones, and the next action are ways to reach it, not substitutes for it.
 
 ## Evidence and current recommendation
 - Recommendation: Proceed / Proceed if / Hold or rethink
@@ -48,8 +51,8 @@ Draft only after discovery is concrete enough for review.
 - Assumption — confidence — validation method:
 
 ## Changes from assessed proposals or recorded problems (successor Draft only)
-| Proposal conversation/journal reference or Issue ID | Intended benefit, professional verdict, and main hole | Evidence that challenges the old intent | Complete proposed intent change | Concrete effect on who is helped, which trouble matters, or how usefulness is judged |
-|---|---|---|---|---|
+| Proposal conversation/journal reference or Issue ID | Goal relationship: supports / replaces / deviates / unclear | Intended benefit, professional verdict, and main hole | Old and proposed goal wording | Evidence that challenges the old intent | Concrete effect on who is helped, which trouble matters, or how usefulness is judged |
+|---|---|---|---|---|---|
 
 ## Kill criteria
 - Evidence that would cause us to stop, narrow, or rethink:
@@ -58,4 +61,4 @@ Draft only after discovery is concrete enough for review.
 - Problems or users this intent does not cover:
 ```
 
-Acceptance means the user has inspected and accepted this exact Draft's user, situation, problem, desired outcome, success signals, and material constraints. It does not approve features, architecture, or implementation.
+Acceptance means the user has inspected and accepted this exact Draft's user, situation, one `DZ-GOAL` final-result anchor, success condition, success signals, and material constraints. It does not approve features, architecture, or implementation.

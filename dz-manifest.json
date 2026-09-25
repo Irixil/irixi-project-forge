@@ -1,13 +1,13 @@
 {
   "protocol_version": "1.0",
-  "workflow_version": "2026-09-10.3",
+  "workflow_version": "2026-09-25.2",
   "id": "dz",
   "name": "Irixi Project Forge",
   "description": "A platform-neutral workflow that guides a nontechnical user from an idea or current project state to a verified product or an honest implementation handoff.",
   "source": "https://github.com/Irixil/irixi-project-forge",
   "raw_base_url": "https://raw.githubusercontent.com/Irixil/irixi-project-forge/main/",
   "distribution": {
-    "plugin_version": "1.0.9",
+    "plugin_version": "1.0.11",
     "default_channel": "main",
     "default_channel_is_mutable": true,
     "reproducible_loading": "Replace main in raw_base_url with an explicit Git commit SHA."
@@ -206,6 +206,12 @@
     "issue_routing_is_ai_owned": true,
     "accepted_product_records_never_change_silently": true,
     "latest_explicitly_accepted_decision_is_current": true,
+    "accepted_intent_has_one_indexed_final_goal_anchor": true,
+    "final_goal_governs_must_work_and_next_action": true,
+    "suggestions_are_classified_against_the_final_goal": true,
+    "explicit_user_goal_changes_are_recorded_without_duplicate_approval": true,
+    "accepted_change_replaces_stale_next_action": true,
+    "professional_advice_never_silently_substitutes_an_easier_goal": true,
     "unaccepted_successor_does_not_override_current_decision": true,
     "superseded_decisions_leave_active_view_but_remain_history": true,
     "bounded_defects_do_not_require_duplicate_product_approval": true,

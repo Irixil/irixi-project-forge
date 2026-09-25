@@ -35,7 +35,7 @@ DZ 允许 Codex 根据“开始或继续做应用、Agent、产品”的请求�
 
 想让第二天的新任务接管昨天的项目，请从具体项目文件夹打开 Agent，而不是只打开它的上一级大文件夹。DZ 建立项目账本时会把一段接续说明合并进项目的 `AGENTS.md`。每次重新接管时，它会先运行只读 `resume-report`，读完每条有效日志、还没解决的问题和后来对问题做过的处理，并在 Git 可用时比较上次保存的文件状态和现在的内容。旧项目说明过期时，它会先把刷新 `install-guidance` 列入建议，等用户确认接管后再执行。其他平台只有在支持长期项目指令并持续开放同一批项目文件时，才能做到同样的接续。
 
-DZ 会把开发和试用中真正影响结果的问题写进项目账本，并自己判断该去修代码、补充原先说法、修改动手办法、留到以后还是重新讨论。小白不用选择技术分类。只是修回原先已经说定的行为时可以直接小修；如果会改变用户怎么用、保存或传出什么、谁能看到、花多少钱或这次做多少，DZ 会先把原话、建议改法和影响给用户看。没有实际跑过能重现原问题的检查时，只能说“已经改了，但还没证明真的解决”。
+DZ 会把开发和试用中真正影响结果的问题写进项目账本，并自己判断该去修代码、补充原先说法、修改动手办法、留到以后还是重新讨论。小白不用选择技术分类。只是修回原先已经说定的行为时可以直接小修；你明确说清的改法直接更新记录，不重复批准。只有仍没决定的使用方式、内容保存或外传、权限、费用和范围才继续讨论。问题重开后要重新检查；没有实际跑过能重现原问题的检查时，只能说“已经改了，但还没证明真的解决”。
 
 #### B. Agent 能读取本地文件或项目文件夹，但没有 Skill 安装功能
 
@@ -96,7 +96,9 @@ DZ启动：<写下你的想法或当前做到哪里>。
 
 ### 更新后继续旧项目
 
-当前版本为 `2026-09-10.3`。先更新完整文件夹和平台实际加载的安装副本，再在具体项目里调用 DZ。它先核对现在的内容，讨论如何继续，不会回到旧进度或清空历史。旧需求没有逐项标记时，AI 会给你看整理后的完整版本，你同意后再接入漏项检查；旧测试不会因此自动变成当前版本通过。你仍可随时暂停或如实收尾。
+当前版本为 `2026-09-25.2`。先更新完整文件夹和平台实际加载的安装副本，再在具体项目里调用 DZ。它核对最新明确决定和现有记录；旧文件不能压过你后来明确修改的目标。可以说：“按我们最新确认的目标，把本地目标、需求、待办和下一步同步好，保留兼容成果；只有缺少关键决定才问我。”AI 必须真的保存并读回核对；读不到最近的决定就问，不准猜。尚在讨论的建议不会自动变成决定。旧文件、证据保留为历史，不清空；没有逐项标记的旧要求先整理给你看，不偷偷接受新内容。你仍可随时暂停或如实收尾。
+
+文件变化、授权过期或生成清单不一致时，DZ 先解释实际差异，再按已允许的范围修复记录，不会因为能读出旧记录就继续旧操作。单纯查看情况不会让其他已验证工作全部重来。旧项目升级不会自动启动已经结束的开发。
 
 ### 给平台开发者
 
@@ -135,7 +137,7 @@ Do not install the same version as both a local Skill and a plugin. That can sti
 
 To take over the project in a new task tomorrow, open the agent from the exact project folder rather than only its parent container. When DZ initializes its ledger, it merges a continuity section into the project's `AGENTS.md`. On every takeover, it reads `PROJECT.md` and runs the read-only `resume-report`. The tool mechanically validates every journal record, checks that the generated view is current, and compares the saved Git checkpoint with the present worktree while returning a compact summary by default. Relevant accepted requirements and implementation files are still read before acting; full history is opened only for a conflict, unexplained change, damage, stale view, or material uncertainty. Continuous aligned work does not repeat takeover after each question. Another host can provide the same continuity only when it supports persistent project instructions and keeps the same project files available.
 
-DZ records material problems found during implementation or use and chooses whether each belongs in code repair, a product wording change, the technical approach, later work, or a reopened product purpose. The beginner never has to select technical categories. A small defect may be repaired directly when it only restores already accepted behavior. Changes to how people use it, what is stored or sent, who can access it, material cost, or current scope are shown as old wording, proposed wording, and concrete impact before user acceptance. Without a check that exercises the former failure, DZ says the change is implemented but not yet proven.
+DZ records material problems and chooses their existing home: code repair, product wording, technical approach, later work or product purpose. The beginner never selects technical categories. An in-contract defect may be repaired directly. A precise user-decided change updates the records without duplicate approval; only unsettled behavior, information handling, access, cost or scope needs further discussion. Reopened problems require a new check. Without a check that exercises the former failure, DZ says the change is implemented but not yet proven.
 
 #### B. The agent can read local or project files but cannot install Skills
 
@@ -196,7 +198,9 @@ If it says that DZ is absent from the available Skill list but can read files, u
 
 ### Continue an older project after updating
 
-The current version is `2026-09-10.3`. Update the whole bundle and the copy actually loaded by your host, then invoke DZ inside the specific project. It reconciles today's records and discusses the route without rolling back progress or clearing history. If older requirements have no indexed promises, AI shows you a complete successor and obtains acceptance before enabling full coverage checks. Old tests never become a fresh pass through an upgrade. You can still pause or close honestly at any time.
+The current version is `2026-09-25.2`. Update the bundle and the copy actually loaded by your host, then invoke DZ inside the specific project. Ask it to synchronize the goal, requirements, work and next action with your latest explicit decision while preserving compatible work. It must save and read back the result, not let stale files overrule that decision. If the decision is inaccessible, it must ask rather than guess. Unaccepted ideas remain proposals; old files and evidence remain history, not current proof. Legacy missing labels are reconciled visibly, never by accepting invented content. You may still pause or close honestly.
+
+Changed files, expired permission and stale generated lists produce diagnosis rather than permission to continue old actions. Repair only within the agreed scope. Read-only inspection preserves unrelated valid proof, and upgrading a closed project does not restart development.
 
 ### For host developers
 

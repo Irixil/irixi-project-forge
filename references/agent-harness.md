@@ -24,7 +24,9 @@ The delivery AI drafts the card; the user confirms the product behavior, while a
 
 ```markdown
 ## Minimal Agent Card
-- Objective and verifiable stopping condition:
+- Final goal anchor and verifiable success condition:
+- Current assignment and how it advances that goal:
+- Rule for suggestions: support / replace / deviate / unclear; replacement requires human acceptance before it governs:
 - Data or environment the agent can observe:
 - Available tools and actions:
 - Actions that require action-specific human confirmation and the required owner role:
@@ -53,7 +55,9 @@ Use the full canvas if any of the following applies:
 # Agent Harness Canvas
 
 ## Objective and Stopping Conditions
-- Whose objective the agent serves and what it must accomplish:
+- Exact final goal anchor, whose objective it serves, and what success looks like:
+- Current assignment and its trace through Must / work item to the goal:
+- How new suggestions are classified; who may accept a replacement goal:
 - When it starts:
 - What counts as complete:
 - When it must stop and return control to the user:
@@ -106,6 +110,7 @@ Use the full canvas if any of the following applies:
 ## Harness implementation principles
 
 - Make tools atomic, composable, and clearly described; validate parameters and outputs against structured schemas.
+- Keep the accepted final goal separate from the current plan. Before each substantive action, trace `goal → Must → work item → next action`; route a new suggestion as support, explicit replacement, later work, or clarification. Never let the latest observation or tool result silently redefine success.
 - Return tool-execution errors as observable results instead of allowing the entire task to fail silently.
 - Centralize model-service integration, and make prompt, model, configuration, and tool versions traceable.
 - Validate structured outputs, bound retries, and define an explicit exit condition.

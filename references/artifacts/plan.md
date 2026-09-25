@@ -2,6 +2,8 @@
 
 Read accepted intent and specification, repository rules, code, and environment. Perform read-only intake before drafting.
 
+This is a menu of decision-relevant fields, not a form the beginner must fill. Keep the first usable slice, promised checks, real constraints and any necessary authority explicit. Include other sections only when triggered; a short “not applicable — no external service” is enough for an irrelevant category. A precise user-decided successor follows SKILL.md's correction rule; do not request duplicate acceptance because a template was rewritten. Do not invent a compliance department or a wrapper layer for a simple local utility.
+
 ```markdown
 # Plan: {iteration}
 
@@ -43,6 +45,7 @@ Read accepted intent and specification, repository rules, code, and environment.
 - Secrets, identity, files, logging, and cost boundaries:
 
 ## First thin slice
+- Active `DZ-GOAL` and Must IDs advanced by this slice:
 - User-visible loop:
 - Files or modules affected:
 - Explicit exclusions:
@@ -54,7 +57,7 @@ Read accepted intent and specification, repository rules, code, and environment.
 | Stage | User-visible result | Dependencies | Files/modules | Verification | Risks | Parallel? |
 |---|---|---|---|---|---|---|
 
-Map every Must ID in the accepted Specification to required work using its exact promise as an acceptance criterion. Technical route items may have additional criteria. Before a successor Plan is accepted, identify old work to keep, revise or retire and why; use carry-work after acceptance instead of retyping compatible tasks. Preserving implementation never transfers old Passed evidence.
+Map every Must ID in the accepted Specification to required work using its exact promise as an acceptance criterion, and keep the chain `DZ-GOAL → Must → work item → next action` visible. Technical route items may have additional criteria. Before a successor Plan is accepted, identify old work to keep, revise or retire and why; use carry-work after acceptance instead of retyping compatible tasks. Preserving implementation never transfers old Passed evidence.
 
 ## Alternatives not chosen
 - Alternative — why rejected now — revisit trigger:
@@ -71,6 +74,6 @@ Map every Must ID in the accepted Specification to required work using its exact
 - Remaining ambiguity:
 ```
 
-Acceptance means the user has inspected and accepted this exact Draft's product impact, platforms, material cost, deferred capabilities, and stage order. Any triggered organizational policy, legal or open-source compliance, security, privacy, financial, regulated, or production risk boundary requires its named authorized owner and evidence for the exact version and use. Plan acceptance cannot create missing reuse rights or waive a hard gate. An execution-capable delivery AI remains accountable for technical correctness through implementation, tests, and independent review; a chat-only AI must hand this responsibility to a capable execution environment.
+For new or undecided content, acceptance means the user has inspected and accepted this exact Draft's product impact, platforms, material cost, deferred capabilities, and stage order. Apply the core correction rule to already-decided changes. Any actually triggered organizational policy, legal or open-source compliance, security, privacy, financial, regulated, or production risk boundary requires the relevant authorized owner and evidence for the exact version and use. Plan acceptance cannot create missing reuse rights or waive a hard gate. An execution-capable delivery AI remains accountable for technical correctness through implementation, proportionate tests and review; a chat-only AI must hand this responsibility to a capable execution environment.
 
 Immediately after acceptance, create required project-ledger work items for every applicable general-build, frontend, release, and maintain route item. Do not leave the handbook only as prose in this Plan.

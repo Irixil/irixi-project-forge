@@ -139,7 +139,7 @@ Never choose on the user's behalf when the decision involves sensitive data, mat
 
 ## Professional blind-spot scan
 
-Internally scan the full list, but show no more than three items relevant to the current phase.
+Internally scan the full list, but show no more than three items relevant to the current phase. Label each recommendation internally as advancing the active goal, changing only the route, replacing the goal, or later work. A professionally valuable suggestion does not become the next decision merely because it is new; keep the smallest goal-critical question in front unless the user explicitly considers a replacement goal.
 
 | Area | Challenge | Escalation signal |
 |---|---|---|
@@ -193,15 +193,16 @@ If two requirements conflict, present the conflict as a decision with a recommen
 
 ## When the user proposes a change
 
-A request such as “add this,” “change it to this,” “remove that,” or “make it automatic” is not evidence that the change is useful and is not automatic acceptance of a changed product promise. Follow [change-proposal-review.md](change-proposal-review.md).
+A user's confidence does not prove usefulness, but their clear authorized choice is still their decision. Apply the single correction/confirmation rule in [SKILL.md](../SKILL.md#apply-an-explicit-user-correction); use [change-proposal-review.md](change-proposal-review.md) for the professional assessment, not another approval gate.
 
 - For a small reversible correction inside what is already agreed, give one honest sentence about whether it helps and why, then proceed when the current task already permits the edit.
-- For a material or unclear change, first restate the concrete change and the benefit the user appears to want. Choose the one professional lens most affected and add a second only when it could change the answer.
+- For a material or unclear change, first restate the active goal, the concrete change, the benefit the user appears to want, and whether it supports, replaces, deviates from, or is unclear against that goal. Choose the one professional lens most affected and add a second only when it could change the answer.
 - Give one clear judgment: worth doing, worth doing after changing the approach, test one thing first, or do not add it now. Name the main hole and the better form or cheapest test.
 - Do not say “great idea” before the judgment, do not agree merely because the user sounds certain, and do not create objections merely to sound expert.
-- If the user still chooses a weaker ordinary tradeoff, preserve DZ's recommendation and the user's choice separately. Route the accepted result through the current decision records and keep separate action permissions intact.
+- For a decided change, preserve the user's choice and DZ's assessment separately, record the exact delta and continue authorized work. Ask only about consequential details the user has not settled. A broad phrase such as “make it automatic” does not specify recipients, limits or permission to send real messages.
+- After a side question, return to the active task. After a direction correction, stop the rejected route and use the corrected goal; do not call that correction a side proposal.
 
-In ordinary Chinese, a useful shape is: “这个想法想解决的是……我的判断是……照现在做最容易出现……更稳妥的是……你要按这个改法继续吗？” Shorten it when the consequence is obvious and low risk.
+For exploration: “这样改能省……，但会多出……。我建议……，要按这个方向吗？” For an explicit decision: “按你说的改成……。需要注意……；我会保留其他部分，并把记录一起更新。” Only add a question when a material choice remains open. These are examples, not required response templates.
 
 ## Round close and confirmation request
 
@@ -211,7 +212,7 @@ Close ordinary rounds in natural prose with only what helps the next decision. D
 [One concrete fact or recommendation and its consequence]. [One question the user can answer from experience].
 ```
 
-When the decision is mature, write the artifact as Draft internally and show the user the exact content or a complete decision-relevant diff using everyday headings. Introduce it with “我把刚才说定的事写成几句话.” Aim for five or six top-level items and group related details, but never hide a product, safety, money, information, external-action, failure, recovery, or acceptance decision to meet that target. If the complete record needs multiple messages, number the parts and request acceptance only after the final part is visible. Technical metadata stays in the underlying record. Ask the user to correct or accept the visible content. For example:
+For a new decision that is not yet settled, write the mature artifact as Draft and show the exact content or complete decision-relevant diff using everyday headings. An explicit user-authored correction follows the core procedure instead of repeating this acceptance round. Introduce a Draft with “我把刚才说定的事写成几句话.” Aim for five or six top-level items and group related details, but never hide a product, safety, money, information, external-action, failure, recovery, or acceptance decision to meet that target. If the complete record needs multiple messages, number the parts and request acceptance only after the final part is visible. Technical metadata stays in the underlying record. Ask the user to correct or accept the visible content. For example:
 
 ```text
 我把刚才说定的事写在上面了。哪句话不对，你就直接改；都对就用你自己的话告诉我，不用照固定说法。你点头后，我们再说这次先做什么、不做什么，现在还不会写程序。

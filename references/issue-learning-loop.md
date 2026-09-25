@@ -42,7 +42,7 @@ Do not repeatedly interrupt for an ordinary implementation defect when all of th
 - the fix fits an accepted current work item and plan;
 - the AI can make a small reversible repair and verify it.
 
-Record the issue, repair it, and report what happened with the evidence. If any condition is false or uncertain, pause before implementation and show the user:
+Record the issue, repair it, and report what happened with the evidence. If a boundary changes, first check whether the current user message already decides that exact delta; if so, apply SKILL.md's correction procedure and do not ask again. If a consequential choice remains genuinely unresolved, pause dependent implementation and show the user:
 
 ```text
 原来写的是：[old accepted wording]

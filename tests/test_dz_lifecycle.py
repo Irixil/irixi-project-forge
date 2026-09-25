@@ -57,6 +57,7 @@ CRITERIA = {
 INTENT = """# Intent
 Status: Draft
 Source: synthetic lifecycle-test request; no real user approval.
+- [DZ-GOAL] A single local operator receives the exact ordered tokens and count for supplied sample text.
 A single local operator wants to inspect words in short public sample text.
 The current workaround is counting whitespace-separated tokens by hand.
 Success means entering text and receiving the ordered tokens and exact count.
@@ -472,8 +473,9 @@ print(json.dumps({'sha256': hashlib.sha256(path.read_bytes()).hexdigest(), 'impo
         self.accept_visible_decisions()
         for work_id, acceptance in CRITERIA.items():
             phase = "test" if work_id == "review" else work_id
+            mode = ["--mode", "read_only", "--reason", "Observe the unchanged local release without implementing or releasing anything"] if work_id == "maintain" else []
             self.cli("add-work", "--id", work_id, "--phase", phase,
-                     "--title", "Execute " + work_id + " fixture route", "--acceptance", acceptance)
+                     "--title", "Execute " + work_id + " fixture route", "--acceptance", acceptance, *mode)
 
         self.enter_stage("design")
         self.rejected_without_mutation("set-run", "--status", "active", "--stage", "build", "--next-action", "skip design proof")
@@ -526,15 +528,12 @@ print(json.dumps({'sha256': hashlib.sha256(path.read_bytes()).hexdigest(), 'impo
         })
 
         self.enter_stage("maintain")
+        release_target = self.state()["target"]
+        verified_release_work = self.state()["work_items"][:-1]
         self.begin_work("maintain")
         maintenance_results = self.check_maintenance(deployed)
-        self.finish_implementation("maintain")
-        # Starting work creates a new epoch even for this read-only monitoring
-        # slice. Repeat the required restore and checks, retaining all old proof.
-        release_results = self.check_release(deployed)
-        self.observe_target(deployed)
-        self.verify_current(["design", "build", "test", "review"], deployed)
-        self.record_pass("deploy", release_results)
+        self.assertEqual(self.state()["target"], release_target)
+        self.assertEqual(self.state()["work_items"][:-1], verified_release_work)
         self.record_pass("maintain", maintenance_results)
         self.cli("close", "--verdict", "verified", "--reason",
                  "All required synthetic fixture checks executed; no real user acceptance or production claim")
@@ -545,7 +544,7 @@ print(json.dumps({'sha256': hashlib.sha256(path.read_bytes()).hexdigest(), 'impo
         self.assertEqual(state["run"]["stage"], "maintain")
         self.assertEqual(state["run"]["product_verdict"], "verified")
         self.assertEqual(state["run"]["status"], "finished")
-        self.assertEqual(len(self.epochs), 5)
+        self.assertEqual(len(self.epochs), 4)
         for work_id in CRITERIA:
             self.assertIn(state["target"]["id"], self.check_runs[work_id])
         for evidence in state["evidence"]:

@@ -2,7 +2,7 @@
 
 Read for Astra-specific maintenance or when trusted host metadata identifies `gpt-6-astra`. Keep the same product decisions, current-truth rules, evidence standard, and informed risk choices on all platforms. A model name cannot grant a tool or change the capability profile.
 
-Official basis, checked 2026-09-10: OpenAI documents Astra's tendency toward clarification, sensitivity to Skill/AGENTS instructions, detailed formatting, and thorough testing. The following are DZ's concrete design choices, not a claim that a prompt guarantees compliance. [Astra guidance](https://developers.openai.com/api/docs/guides/latest-model)
+Official basis, checked 2026-09-25: OpenAI documents Astra's tendency toward clarification, sensitivity to Skill/AGENTS instructions, detailed formatting, and thorough testing. The following are DZ's concrete design choices, not a claim that a prompt guarantees compliance. [Astra guidance](https://developers.openai.com/api/docs/guides/latest-model), [Rethinking skills and prompts for GPT-6 Astra](https://developers.openai.com/blog/rethinking-skills-and-prompts-for-gpt-6-astra).
 
 ## Carry the user's work through
 
@@ -17,6 +17,8 @@ Use the current request and existing authorization together. Prepare inspectable
 When a Skill causes a pause, link the exact file and quote the relevant short instruction. Explain what decision is missing and what work has already been prepared. Apply scope-specific rules only when their trigger exists; for example a release checklist is not an opening questionnaire for an idea.
 
 ## Keep context useful
+
+Maintain one core decision/confirmation rule in SKILL.md. References describe their phase-specific procedure and link back; do not restate stronger approval defaults in dialogue guides, templates or evaluation rubrics. Let current user decisions govern over stale saved wording. Keep stable project instructions short and load details only for the current action.
 
 The current summary identifies the next relevant files. Read their accepted wording and the affected implementation before acting. Older history is needed only to resolve drift, uncertainty, or an audit. After host compaction, preserve the original objective and accepted corrections; do not assume the latest side question replaced the task. A larger model context does not provide access to invisible chats or permanent memory.
 

@@ -19,8 +19,14 @@ class DzStateTests(unittest.TestCase):
         self.project = Path(self.temp.name) / "demo"
         self.cli("init", str(self.project), "--name", "Demo")
         for decision in ("intent", "spec", "plan"):
+            goal = (
+                "- [DZ-GOAL] The operator completes the intended job with an observable correct result\n"
+                if decision == "intent"
+                else ""
+            )
             self.write_project_file(
                 f"docs/sdlc/{decision}.md", f"# {decision}\n\nVisible draft for testing.\n"
+                + goal
                 + (f"- {self.DEFAULT_ACCEPTANCE}\n" if decision == "spec" else "")
             )
 
@@ -82,7 +88,7 @@ class DzStateTests(unittest.TestCase):
             "discuss the route before new project changes", refreshed
         )
         self.assertIn("resume-report", refreshed)
-        self.assertIn("2026-09-10.3", refreshed)
+        self.assertIn("2026-09-25.2", refreshed)
 
     def test_resume_report_reads_all_journal_records_and_reports_uncertainty_without_git(self):
         self.cli(
@@ -176,6 +182,7 @@ class DzStateTests(unittest.TestCase):
         state = self.state()
         state["workflow_version"] = "2026-09-02.1"
         state.pop("issues")
+        state.pop("goal")
         state_path.write_text(
             json.dumps(state, ensure_ascii=False, indent=2) + "\n", encoding="utf-8"
         )
@@ -183,15 +190,58 @@ class DzStateTests(unittest.TestCase):
         latest = json.loads(records[-1])
         latest["state"]["workflow_version"] = "2026-09-02.1"
         latest["state"].pop("issues")
+        latest["state"].pop("goal")
         records[-1] = json.dumps(latest, ensure_ascii=False, separators=(",", ":"))
         journal_path.write_text("\n".join(records) + "\n", encoding="utf-8")
 
         stale = self.cli("check", str(self.project), expected=1)
         self.assertIn("install-guidance", stale.stderr)
         self.cli("install-guidance", str(self.project))
-        self.assertEqual(self.state()["workflow_version"], "2026-09-10.3")
+        self.assertEqual(self.state()["workflow_version"], "2026-09-25.2")
         self.assertEqual(self.state()["issues"], [])
         self.cli("check", str(self.project))
+
+    def test_install_guidance_keeps_legacy_accepted_intent_without_rewriting_it(self):
+        self.cli("set-decision", str(self.project), "intent", "--status", "draft")
+        self.cli(
+            "set-decision",
+            str(self.project),
+            "intent",
+            "--status",
+            "accepted",
+            "--by",
+            "legacy owner",
+            "--reference",
+            "legacy visible acceptance",
+        )
+        intent_path = self.project / "docs" / "sdlc" / "intent.md"
+        legacy_content = "# Legacy accepted intent\nObservable result written before DZ-GOAL existed.\n"
+        intent_path.write_text(legacy_content, encoding="utf-8")
+        legacy_digest = hashlib.sha256(legacy_content.encode("utf-8")).hexdigest()
+
+        state_path = self.project / ".dz" / "state.json"
+        journal_path = self.project / ".dz" / "journal.jsonl"
+        state = self.state()
+        state["workflow_version"] = "2026-09-10.3"
+        state.pop("goal")
+        state["decisions"]["intent"]["artifact_sha256"] = legacy_digest
+        state_path.write_text(
+            json.dumps(state, ensure_ascii=False, indent=2) + "\n", encoding="utf-8"
+        )
+        records = journal_path.read_text(encoding="utf-8").splitlines()
+        latest = json.loads(records[-1])
+        latest["state"] = state
+        records[-1] = json.dumps(latest, ensure_ascii=False, separators=(",", ":"))
+        journal_path.write_text("\n".join(records) + "\n", encoding="utf-8")
+
+        before = intent_path.read_bytes()
+        self.cli("install-guidance", str(self.project))
+        self.assertEqual(intent_path.read_bytes(), before)
+        upgraded = self.state()
+        self.assertEqual(upgraded["goal"]["intent_sha256"], legacy_digest)
+        self.assertIsNone(upgraded["goal"]["statement"])
+        report = json.loads(self.cli("resume-report", str(self.project)).stdout)
+        self.assertTrue(any("predates the goal anchor" in item for item in report["warnings"]))
 
     def test_dashboard_body_change_is_detected_even_with_original_marker(self):
         dashboard = self.project / "PROJECT.md"
@@ -638,6 +688,128 @@ class DzStateTests(unittest.TestCase):
         self.assertEqual(self.state()["decisions"]["intent"]["status"], "accepted")
         self.assertIn("Visible task", (self.project / "docs" / "sdlc" / "work-items.md").read_text())
         self.assertTrue((self.project / "PROJECT.md").is_file())
+
+    def test_intent_acceptance_requires_exactly_one_visible_goal_anchor(self):
+        variants = {
+            "missing": "# Intent\nNo goal marker.\n",
+            "fenced_only": "# Intent\n```markdown\n- [DZ-GOAL] Example only\n```\n",
+            "malformed": "# Intent\n[DZ-GOAL] Missing list marker\n",
+            "duplicate": "# Intent\n- [DZ-GOAL] First result\n- [DZ-GOAL] Second result\n",
+        }
+        for name, content in variants.items():
+            with self.subTest(name=name):
+                project = Path(self.temp.name) / f"goal-{name}"
+                self.cli("init", str(project), "--name", name)
+                path = project / "docs" / "sdlc" / "intent.md"
+                path.parent.mkdir(parents=True, exist_ok=True)
+                path.write_text(content, encoding="utf-8")
+                self.cli("set-decision", str(project), "intent", "--status", "draft")
+                state_before = (project / ".dz" / "state.json").read_bytes()
+                journal_before = (project / ".dz" / "journal.jsonl").read_bytes()
+                self.cli(
+                    "set-decision",
+                    str(project),
+                    "intent",
+                    "--status",
+                    "accepted",
+                    "--by",
+                    "owner",
+                    "--reference",
+                    "visible fixture",
+                    expected=1,
+                )
+                self.assertEqual((project / ".dz" / "state.json").read_bytes(), state_before)
+                self.assertEqual((project / ".dz" / "journal.jsonl").read_bytes(), journal_before)
+
+    def test_goal_anchor_is_identical_in_state_dashboard_and_resume_report(self):
+        self.cli("set-decision", str(self.project), "intent", "--status", "draft")
+        self.cli(
+            "set-decision",
+            str(self.project),
+            "intent",
+            "--status",
+            "accepted",
+            "--by",
+            "owner",
+            "--reference",
+            "visible goal acceptance",
+        )
+        statement = "The operator completes the intended job with an observable correct result"
+        state = self.state()
+        self.assertEqual(state["goal"]["statement"], statement)
+        self.assertEqual(
+            state["goal"]["intent_sha256"],
+            state["decisions"]["intent"]["artifact_sha256"],
+        )
+        self.assertIn(statement, (self.project / "PROJECT.md").read_text(encoding="utf-8"))
+        report = json.loads(self.cli("resume-report", str(self.project)).stdout)
+        self.assertEqual(report["current_summary"]["goal"]["statement"], statement)
+        self.assertTrue(report["current_summary"]["goal"]["indexed"])
+
+    def test_successor_draft_cannot_replace_goal_before_acceptance(self):
+        self.cli("set-decision", str(self.project), "intent", "--status", "draft")
+        self.cli(
+            "set-decision",
+            str(self.project),
+            "intent",
+            "--status",
+            "accepted",
+            "--by",
+            "owner",
+            "--reference",
+            "accepted first goal",
+        )
+        original = self.state()["goal"].copy()
+        self.write_project_file(
+            "docs/sdlc/intent-v2.md",
+            "# Intent v2\n- [DZ-GOAL] The operator completes a deliberately different final result\n",
+        )
+        self.cli(
+            "set-decision",
+            str(self.project),
+            "intent",
+            "--status",
+            "draft",
+            "--path",
+            "docs/sdlc/intent-v2.md",
+        )
+        self.assertEqual(self.state()["goal"], original)
+        self.cli(
+            "set-decision",
+            str(self.project),
+            "intent",
+            "--status",
+            "accepted",
+            "--by",
+            "owner",
+            "--reference",
+            "accepted replacement goal",
+        )
+        self.assertEqual(
+            self.state()["goal"]["statement"],
+            "The operator completes a deliberately different final result",
+        )
+
+    def test_goal_index_tampering_is_detected(self):
+        self.cli("set-decision", str(self.project), "intent", "--status", "draft")
+        self.cli(
+            "set-decision",
+            str(self.project),
+            "intent",
+            "--status",
+            "accepted",
+            "--by",
+            "owner",
+            "--reference",
+            "accepted goal",
+        )
+        state = self.state()
+        state["goal"]["statement"] = "A convenient substitute goal"
+        (self.project / ".dz" / "state.json").write_text(
+            json.dumps(state, ensure_ascii=False, indent=2) + "\n", encoding="utf-8"
+        )
+        result = self.cli("check", str(self.project), expected=1)
+        self.assertIn("goal index differs", result.stderr)
 
     def test_issue_is_routed_and_returned_by_resume_report(self):
         routes = {
@@ -1254,8 +1426,14 @@ class DzStateTests(unittest.TestCase):
         self.cli("update-work", str(self.project), "W1", "--status", "verified")
 
     def test_accepted_decision_path_cannot_change_in_place(self):
-        self.write_project_file("docs/sdlc/intent-v1.md", "# Intent v1\n")
-        self.write_project_file("docs/sdlc/intent-v2.md", "# Intent v2\n")
+        self.write_project_file(
+            "docs/sdlc/intent-v1.md",
+            "# Intent v1\n- [DZ-GOAL] The operator completes goal version one\n",
+        )
+        self.write_project_file(
+            "docs/sdlc/intent-v2.md",
+            "# Intent v2\n- [DZ-GOAL] The operator completes goal version two\n",
+        )
         self.cli(
             "set-decision",
             str(self.project),
@@ -1710,7 +1888,10 @@ class DzStateTests(unittest.TestCase):
             "--reference",
             "visible draft accepted",
         )
-        self.write_project_file("docs/sdlc/intent.md", "# Changed without acceptance\n")
+        self.write_project_file(
+            "docs/sdlc/intent.md",
+            "# Changed without acceptance\n- [DZ-GOAL] The operator completes the replacement job\n",
+        )
         self.cli("check", str(self.project), expected=1)
         self.cli("set-decision", str(self.project), "intent", "--status", "superseded")
         self.cli("set-decision", str(self.project), "intent", "--status", "draft")
@@ -1998,7 +2179,10 @@ class DzStateTests(unittest.TestCase):
         old_contract = self.state()["work_items"][0]["contract_sha256"]
         self.cli("set-decision", str(self.project), "intent", "--status", "superseded")
         self.assertIsNone(self.state()["target"]["id"])
-        self.write_project_file("docs/sdlc/intent.md", "# Expanded intent v2\n")
+        self.write_project_file(
+            "docs/sdlc/intent.md",
+            "# Expanded intent v2\n- [DZ-GOAL] The operator completes the expanded job\n",
+        )
         self.accept_chain()
         state = self.state()
         current_contract = hashlib.sha256(
@@ -2317,6 +2501,13 @@ class DzStateTests(unittest.TestCase):
             scope,
         )
         self.expire_authorized_lease("R1")
+
+        snapshot = (self.project / ".dz/state.json").read_bytes()
+        report = json.loads(self.cli("resume-report", str(self.project)).stdout)
+        self.assertFalse(report["diagnostics"]["record_integrity_ok"])
+        self.assertFalse(report["diagnostics"]["execution_allowed"])
+        self.assertTrue(any("expired" in error for error in report["diagnostics"]["blocking_errors"]))
+        self.assertEqual((self.project / ".dz/state.json").read_bytes(), snapshot)
 
         check = self.cli("check", str(self.project), expected=1)
         self.assertIn("expired", check.stderr)

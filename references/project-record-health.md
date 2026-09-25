@@ -37,8 +37,9 @@ Age alone does not make a record stale. A stable old decision may remain valid. 
 ## Repair rules
 
 - Regenerate a derived dashboard or index from its source when that is authorized; do not hand-edit it into a second truth.
+- Check every generated view, not only PROJECT.md. A report with blocking diagnostics describes available saved facts; it does not renew expired authority or prove a changed artifact. Repair affected work and issue evidence together, and preserve valid unrelated proof during read-only inspection.
 - Merge duplicate unaccepted notes into one canonical record and preserve any distinct evidence.
-- Never silently rewrite an Accepted Intent, Specification, or Plan. The latest explicitly accepted successor governs; later unaccepted brainstorming does not. Remove the old wording from the active view, preserve it in append-only history, and make a material correction a visible successor Draft or complete diff that waits for the appropriate owner.
+- Never silently rewrite accepted bytes. A later definite user correction is already a decision, even before its file is updated: apply SKILL.md's correction procedure, preserve old bytes/history, and refresh the active records in the same turn. Only unaccepted proposals or unsettled consequential choices wait for an owner. Include saved next actions and host task summaries in the stale-record check; no old local goal may veto the user's change.
 - Route an orphaned implementation through the takeover keep/review decision. Preserve it until its fit is known.
 - Route a material health finding through the existing issue-learning loop. Do not create a separate permanent “health issue” system.
 - Keep old evidence as history. Mark why it no longer governs the current target rather than deleting it.

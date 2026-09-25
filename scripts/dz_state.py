@@ -24,7 +24,7 @@ from typing import Any, Callable
 
 
 SCHEMA_VERSION = "1.1"
-WORKFLOW_VERSION = "2026-09-10.3"
+WORKFLOW_VERSION = "2026-09-25.2"
 
 RUN_STATUSES = {
     "active",
@@ -387,21 +387,55 @@ def workspace_snapshot(project: Path) -> dict[str, Any]:
     return {"kind": "git", "digest": digest, "project_prefix": project_prefix, **payload}
 
 
-def compare_workspace_snapshots(
-    saved: Any, current: dict[str, Any]
-) -> dict[str, Any]:
+def valid_workspace_checkpoint(checkpoint: dict[str, Any]) -> bool:
+    """A damaged comparison aid must not invalidate an otherwise valid journal state."""
+    if not {"head", "branch", "entries", "digest"}.issubset(checkpoint):
+        return False
+    if any(checkpoint[name] is not None and not isinstance(checkpoint[name], str)
+           for name in ("head", "branch")) or not isinstance(checkpoint.get("project_prefix", ""), str):
+        return False
+    if not isinstance(checkpoint["digest"], str) or not re.fullmatch(r"[0-9a-f]{64}", checkpoint["digest"]):
+        return False
+    entries = checkpoint["entries"]
+    if not isinstance(entries, list):
+        return False
+    paths = set()
+    for entry in entries:
+        if (not isinstance(entry, dict) or not isinstance(entry.get("path"), str) or not entry["path"]
+                or entry["path"] in paths or not isinstance(entry.get("status"), str) or len(entry["status"]) != 2
+                or not isinstance(entry.get("content"), dict) or not isinstance(entry["content"].get("kind"), str)
+                or ("source" in entry and not isinstance(entry["source"], str))):
+            return False
+        paths.add(entry["path"])
+    payload = {name: checkpoint[name] for name in ("head", "branch", "entries")}
+    try:
+        digest = hashlib.sha256(json.dumps(payload, ensure_ascii=False, sort_keys=True,
+                                          separators=(",", ":")).encode("utf-8")).hexdigest()
+    except (TypeError, ValueError, UnicodeError):
+        return False
+    return digest == checkpoint["digest"]
+
+
+def compare_workspace_snapshots(saved: Any, current: Any) -> dict[str, Any]:
     if not isinstance(saved, dict):
         return {
             "changed_since_saved_record": None,
             "changed_paths": [],
             "uncertainty": "The saved journal record has no workspace checkpoint",
         }
+    if not isinstance(current, dict):
+        return {"changed_since_saved_record": None, "changed_paths": [],
+                "uncertainty": "The current workspace checkpoint is malformed; file changes cannot be compared reliably"}
+    for name, checkpoint in (("saved", saved), ("current", current)):
+        if checkpoint.get("kind") == "git" and not valid_workspace_checkpoint(checkpoint):
+            return {"changed_since_saved_record": None, "changed_paths": [],
+                    "uncertainty": f"The {name} workspace checkpoint is malformed or its digest differs; inspect current files before saving a new checkpoint"}
     if saved.get("kind") != "git" or current.get("kind") != "git":
         reason = current.get("reason") or saved.get("reason") or "Workspace comparison is unavailable"
         return {
             "changed_since_saved_record": None,
             "changed_paths": [],
-            "uncertainty": reason,
+            "uncertainty": reason if isinstance(reason, str) else "Workspace comparison is unavailable",
         }
     if saved.get("project_prefix", "") != current.get("project_prefix", ""):
         return {
@@ -457,6 +491,7 @@ def initial_state(name: str, language: str) -> dict[str, Any]:
         "schema_version": SCHEMA_VERSION,
         "workflow_version": WORKFLOW_VERSION,
         "project": {"name": name, "language": language},
+        "goal": empty_goal(),
         "run": {
             "status": "active",
             "product_verdict": "not_assessed",
@@ -560,6 +595,51 @@ def accepted_contract_sha256(decisions: dict[str, Any]) -> str | None:
     return hashlib.sha256("\0".join(digests).encode("ascii")).hexdigest()
 
 
+def empty_goal() -> dict[str, None]:
+    return {"intent_sha256": None, "statement": None}
+
+
+def goal_statement_from_file(path: Path) -> str | None:
+    """Read the one visible goal anchor while ignoring fenced examples."""
+    statements: list[str] = []
+    fence = None
+    for line in path.read_text(encoding="utf-8").splitlines():
+        stripped = line.strip()
+        marker = re.match(r"^(`{3,}|~{3,})", stripped)
+        if marker:
+            token = marker.group(1)
+            if fence is None:
+                fence = token
+            elif token[0] == fence[0] and len(token) >= len(fence):
+                fence = None
+            continue
+        if fence is not None:
+            continue
+        match = re.fullmatch(r"- \[DZ-GOAL\] (\S.*)", line)
+        if match:
+            statements.append(match.group(1))
+        elif "[DZ-GOAL]" in line:
+            raise ValueError(
+                "Malformed goal line; use - [DZ-GOAL] one observable, solution-independent final result"
+            )
+    if len(statements) > 1:
+        raise ValueError("Intent must contain exactly one DZ-GOAL line")
+    return statements[0] if statements else None
+
+
+def read_goal_anchor(project: Path, decision: dict[str, Any]) -> dict[str, Any]:
+    """Derive the active goal from the exact accepted Intent artifact."""
+    if decision.get("status") != "accepted" or not stored_file_matches(
+        project, decision.get("path"), decision.get("artifact_sha256")
+    ):
+        return empty_goal()
+    _, path = project_file(project, decision["path"], "intent")
+    return {
+        "intent_sha256": decision["artifact_sha256"],
+        "statement": goal_statement_from_file(path),
+    }
+
+
 def read_required_outcomes(project: Path, decision: dict[str, Any]) -> dict[str, Any]:
     """Index exact, visible Must lines; the accepted specification remains canonical."""
     if decision.get("status") != "accepted" or not stored_file_matches(
@@ -643,7 +723,7 @@ def invalidate_verification_target(state: dict[str, Any]) -> None:
     state["target"] = empty_target()
     for item in state.get("work_items", []):
         if isinstance(item, dict) and item.get("status") == "verified":
-            item["status"] = "implemented_unverified"
+            item["status"] = "pending" if item.get("mode") == "read_only" else "implemented_unverified"
             item["updated_at"] = now()
     for issue in state.get("issues", []):
         if issue.get("status") == "verified" or issue.get("evidence_ids"):
@@ -839,11 +919,14 @@ def work_verification_support(
             )
         )
     ]
+    # A repeated read-only check must observe the unchanged target again; its
+    # earlier passing record cannot silently satisfy this new attempt.
+    fresh_ids = set(list(evidence_by_id)[work_item.get("evidence_floor", 0):])
     accepted_criteria = set(work_item.get("acceptance", []))
     complete_targets = (
         {current_target}
         if accepted_criteria.issubset(
-            {evidence_by_id[entry].get("acceptance") for entry in passed}
+            {evidence_by_id[entry].get("acceptance") for entry in passed if entry in fresh_ids}
         )
         else set()
     )
@@ -894,6 +977,8 @@ def reconcile_stale_artifacts(project: Path, state: dict[str, Any]) -> None:
             "spec": "intent_accepted",
             "plan": "spec_accepted",
         }[invalidated_decision]
+        if invalidated_decision == "intent":
+            state["goal"] = empty_goal()
         invalidate_verification_target(state)
 
     target = state.get("target")
@@ -926,8 +1011,20 @@ def reconcile_stale_artifacts(project: Path, state: dict[str, Any]) -> None:
             item, evidence_by_id, evidence_ids, project, current_target(state)
         )
         if not complete_revisions or unresolved:
-            item["status"] = "implemented_unverified"
+            item["status"] = "pending" if item.get("mode") == "read_only" else "implemented_unverified"
             item["updated_at"] = now()
+
+    for issue in state.get("issues", []):
+        if issue.get("status") != "verified":
+            continue
+        proofs = [evidence_by_id.get(evidence_id) for evidence_id in issue.get("evidence_ids", [])]
+        if not proofs or any(
+            proof is None or proof.get("result") != "passed"
+            or (proof.get("target_id"), proof.get("revision"), proof.get("environment")) != current_target(state)
+            or not stored_file_matches(project, proof.get("artifact_path"), proof.get("artifact_sha256"))
+            for proof in proofs
+        ):
+            issue.update(status="implemented_unverified", evidence_ids=[], updated_at=now())
 
     run = state["run"]
     lease = authorized_action(state)
@@ -983,6 +1080,7 @@ def _validate_state(state: dict[str, Any], project_path: Path | None = None) -> 
         "schema_version",
         "workflow_version",
         "project",
+        "goal",
         "run",
         "decisions",
         "target",
@@ -992,9 +1090,9 @@ def _validate_state(state: dict[str, Any], project_path: Path | None = None) -> 
         "issues",
         "requirements",
     }
-    required_root_fields = root_fields - {"issues", "requirements"}
+    required_root_fields = root_fields - {"issues", "requirements", "goal"}
     if state.get("workflow_version") == WORKFLOW_VERSION:
-        required_root_fields.add("requirements")
+        required_root_fields.update({"goal", "requirements"})
     unknown_root = set(state) - root_fields
     missing_root = required_root_fields - set(state)
     if unknown_root:
@@ -1277,6 +1375,54 @@ def _validate_state(state: dict[str, Any], project_path: Path | None = None) -> 
             and not stored_file_matches(project_path, decision.get("path"), digest)
         ):
             errors.append(f"decisions.{name}: artifact is missing, empty, or changed")
+
+    goal_is_governed = state.get("workflow_version") == WORKFLOW_VERSION
+    goal = state.get("goal")
+    if goal is None and state.get("workflow_version") != WORKFLOW_VERSION:
+        goal = empty_goal()
+    if not isinstance(goal, dict):
+        errors.append("goal must be an object")
+        goal = empty_goal()
+    else:
+        unknown = set(goal) - {"intent_sha256", "statement"}
+        missing = {"intent_sha256", "statement"} - set(goal)
+        if unknown:
+            errors.append(f"unknown goal fields: {', '.join(sorted(unknown))}")
+        if missing:
+            errors.append(f"missing goal fields: {', '.join(sorted(missing))}")
+    if goal_is_governed:
+        goal_digest = goal.get("intent_sha256")
+        goal_statement = goal.get("statement")
+        if goal_digest is not None and not (
+            isinstance(goal_digest, str)
+            and len(goal_digest) == DIGEST_LENGTH
+            and all(character in "0123456789abcdef" for character in goal_digest)
+        ):
+            errors.append("goal.intent_sha256 is invalid")
+        if goal_statement is not None and (
+            not isinstance(goal_statement, str) or not goal_statement.strip()
+        ):
+            errors.append("goal.statement must be a non-empty string or null")
+        intent = decisions.get("intent", {})
+        if intent.get("status") == "accepted":
+            if goal_digest != intent.get("artifact_sha256"):
+                errors.append("goal.intent_sha256 must match the current accepted Intent")
+            if (
+                project_path is not None
+                and stored_file_matches(
+                    project_path, intent.get("path"), intent.get("artifact_sha256")
+                )
+            ):
+                try:
+                    expected_goal = read_goal_anchor(project_path, intent)
+                except (OSError, UnicodeError, ValueError) as exc:
+                    errors.append(f"accepted Intent goal anchor is invalid: {exc}")
+                else:
+                    if goal != expected_goal:
+                        errors.append("goal index differs from the exact accepted Intent")
+        elif goal_digest is not None or goal_statement is not None:
+            errors.append("goal must be empty without a current accepted Intent")
+
     if decisions.get("spec", {}).get("status") in {"draft", "accepted"} and decisions.get(
         "intent", {}
     ).get("status") != "accepted":
@@ -1398,6 +1544,9 @@ def _validate_state(state: dict[str, Any], project_path: Path | None = None) -> 
         "blocker",
         "updated_at",
         "carried_from",
+        "mode",
+        "mode_reason",
+        "evidence_floor",
     }
     in_progress = 0
     active_contract = accepted_contract_sha256(decisions)
@@ -1405,7 +1554,7 @@ def _validate_state(state: dict[str, Any], project_path: Path | None = None) -> 
     for item in work_items:
         item_id = item.get("id") if is_canonical_id(item.get("id")) else ""
         unknown = set(item) - work_fields
-        missing = (work_fields - {"carried_from"}) - set(item)
+        missing = (work_fields - {"carried_from", "mode", "mode_reason", "evidence_floor"}) - set(item)
         if unknown:
             errors.append(f"{item_id or 'work item'}: unknown fields: {', '.join(sorted(unknown))}")
         if missing:
@@ -1431,6 +1580,19 @@ def _validate_state(state: dict[str, Any], project_path: Path | None = None) -> 
             errors.append(f"{item_id or 'work item'}: contract_sha256 is invalid")
         if item.get("phase") not in DELIVERY_STAGES:
             errors.append(f"{item_id or 'work item'}: invalid work phase")
+        mode = item.get("mode", "implementation")
+        if mode not in {"implementation", "read_only"}:
+            errors.append(f"{item_id}: invalid work mode")
+        if mode == "read_only":
+            if not isinstance(item.get("mode_reason"), str) or not item["mode_reason"].strip():
+                errors.append(f"{item_id}: read_only work requires a reason")
+            if item.get("phase") in {"build", "deploy"} or item.get("status") == "implemented_unverified":
+                errors.append(f"{item_id}: read_only work cannot register implementation or deployment")
+        elif item.get("mode_reason") is not None:
+            errors.append(f"{item_id}: mode_reason is only for read_only work")
+        floor = item.get("evidence_floor", 0)
+        if type(floor) is not int or not 0 <= floor <= len(raw_evidence):
+            errors.append(f"{item_id}: invalid evidence_floor")
         if item.get("status") not in WORK_STATUSES:
             errors.append(f"{item_id or 'work item'}: invalid work status")
         if item.get("status") == "in_progress" and plan_digest == active_contract:
@@ -1622,11 +1784,12 @@ def _validate_state(state: dict[str, Any], project_path: Path | None = None) -> 
         "prevention",
         "created_at",
         "updated_at",
+        "evidence_floor",
     }
     for issue in issues:
         issue_id = issue.get("id") if is_canonical_id(issue.get("id")) else ""
         unknown = set(issue) - issue_fields
-        missing = issue_fields - set(issue)
+        missing = (issue_fields - {"evidence_floor"}) - set(issue)
         if unknown:
             errors.append(
                 f"{issue_id or 'issue'}: unknown fields: {', '.join(sorted(unknown))}"
@@ -1658,12 +1821,20 @@ def _validate_state(state: dict[str, Any], project_path: Path | None = None) -> 
         status_value = issue.get("status")
         if status_value not in ISSUE_STATUSES:
             errors.append(f"{issue_id or 'issue'}: invalid status")
+        floor = issue.get("evidence_floor", 0)
+        if type(floor) is not int or not 0 <= floor <= len(raw_evidence):
+            errors.append(f"{issue_id}: invalid evidence_floor")
+            floor = 0
         linked_work = issue.get("work_item_id")
         if linked_work is not None:
             if not is_canonical_id(linked_work):
                 errors.append(f"{issue_id or 'issue'}: work_item_id must be canonical or null")
             elif linked_work not in work_by_id:
                 errors.append(f"{issue_id or 'issue'}: unknown work_item_id: {linked_work}")
+            elif work_by_id[linked_work].get("mode") == "read_only" and (
+                kind == "implementation_gap" or status_value in {"in_progress", "implemented_unverified", "verified"}
+            ):
+                errors.append(f"{issue_id}: read_only work cannot represent an implementation repair")
         linked_evidence = issue.get("evidence_ids")
         if not isinstance(linked_evidence, list) or any(
             not is_canonical_id(entry) for entry in (linked_evidence or [])
@@ -1708,6 +1879,8 @@ def _validate_state(state: dict[str, Any], project_path: Path | None = None) -> 
                 proof = evidence_by_id.get(evidence_id)
                 if proof is None:
                     continue
+                if evidence_id not in list(evidence_by_id)[floor:]:
+                    errors.append(f"{issue_id}: evidence {evidence_id} predates this repair attempt")
                 if proof.get("result") != "passed":
                     errors.append(
                         f"{issue_id or 'issue'}: verified evidence {evidence_id} did not pass"
@@ -2085,6 +2258,7 @@ def latest_legacy_v1_state(project: Path) -> dict[str, Any] | None:
 def migrate_legacy_v1_state(state: dict[str, Any]) -> dict[str, Any]:
     migrated = copy.deepcopy(state)
     migrated["schema_version"] = SCHEMA_VERSION
+    migrated.setdefault("goal", empty_goal())
     run = migrated["run"]
     run["authorized_risk_id"] = None
     migrated["target"] = empty_target()
@@ -2222,7 +2396,7 @@ def project_guidance_block() -> str:
     return f"{GUIDANCE_START}\n{template}\n{GUIDANCE_END}\n"
 
 
-def install_project_guidance(project: Path) -> Path:
+def project_guidance_content(project: Path) -> str:
     target = project / "AGENTS.md"
     existing = target.read_text(encoding="utf-8") if target.is_file() else ""
     start_count = existing.count(GUIDANCE_START)
@@ -2249,7 +2423,12 @@ def install_project_guidance(project: Path) -> Path:
             content += "\n\n"
         content += block
 
-    atomic_write(target, content)
+    return content
+
+
+def install_project_guidance(project: Path) -> Path:
+    target = project / "AGENTS.md"
+    atomic_write(target, project_guidance_content(project))
     return target
 
 
@@ -2424,6 +2603,7 @@ def render_dashboard(state: dict[str, Any]) -> str:
         else None
     )
     decisions = state.get("decisions", {})
+    goal = state.get("goal") or empty_goal()
     contract_digest = accepted_contract_sha256(decisions)
     historical_work_count = sum(item.get("contract_sha256") != contract_digest for item in work_items)
     work_items = [item for item in work_items if item.get("contract_sha256") == contract_digest]
@@ -2446,6 +2626,7 @@ def render_dashboard(state: dict[str, Any]) -> str:
             f"<!-- DZ-CURRENT-VIEW:{current_view_fingerprint(state)} -->",
             "",
             "## 现在做到哪",
+            f"- 最终目标：{goal.get('statement') or '尚未建立目标锚点；当前步骤不能代替最终目标'}",
             f"- 当前情况：{label(run['status'], language)}",
             f"- 产品情况：{label(run['product_verdict'], language)}",
             f"- 当前进度：{progress['summary']}",
@@ -2498,6 +2679,7 @@ def render_dashboard(state: dict[str, Any]) -> str:
             f"<!-- DZ-CURRENT-VIEW:{current_view_fingerprint(state)} -->",
             "",
             "## Current position",
+            f"- Final goal: {goal.get('statement') or 'no indexed goal anchor; the current step cannot substitute for the final goal'}",
             f"- Run: {label(run['status'], language)}",
             f"- Product: {label(run['product_verdict'], language)}",
             f"- Current progress: {progress['summary']}",
@@ -2557,8 +2739,7 @@ def render_dashboard(state: dict[str, Any]) -> str:
     return "\n".join(dashboard) + "\n"
 
 
-def render(project: Path, state: dict[str, Any]) -> None:
-    paths = project_paths(project)
+def rendered_views(state: dict[str, Any]) -> dict[str, str]:
     language = state["project"]["language"]
     work_items = state["work_items"]
     issues = state.get("issues", [])
@@ -2569,20 +2750,26 @@ def render(project: Path, state: dict[str, Any]) -> None:
         if language == "zh"
         else "> Generated from `.dz/state.json`; do not maintain a second source of truth here.",
         "",
-        "| ID | 必须完成 | 所属阶段 | 当前情况 | 要做的事 | 检查标准 | 证据 | 备注 |"
+        "| ID | 是否当前任务 | 必须完成 | 所属阶段 | 记录状态 | 要做的事 | 检查标准 | 证据 | 备注 |"
         if language == "zh"
-        else "| ID | Required | Phase | Status | Work | Acceptance | Evidence | Note |",
-        "|---|---|---|---|---|---|---|---|",
+        else "| ID | Current or historical | Required | Phase | Recorded status | Work | Acceptance | Evidence | Note |",
+        "|---|---|---|---|---|---|---|---|---|",
     ]
+    contract = accepted_contract_sha256(state["decisions"])
     for item in work_items:
+        is_current = contract is not None and item["contract_sha256"] == contract
+        scope = ("当前" if is_current else "历史，非当前待办") if language == "zh" else (
+            "Current" if is_current else "Historical, not a current task")
         acceptance = "<br>".join(markdown_cell(value) for value in item.get("acceptance", [])) or "—"
         evidence_text = ", ".join(markdown_cell(value) for value in item.get("evidence_ids", [])) or "—"
         note = markdown_cell(item.get("note") or item.get("blocker") or "—")
+        if item.get("mode") == "read_only":
+            note = markdown_cell(("只读检查：" if language == "zh" else "Read-only observation: ") + item["mode_reason"]) + "<br>" + note
         work_doc.append(
-            f"| {markdown_cell(item['id'])} | {'yes' if item.get('required', True) else 'no'} | {label(item['phase'], language)} | {item['status']} | {markdown_cell(item['title'])} | {acceptance} | {evidence_text} | {note} |"
+            f"| {markdown_cell(item['id'])} | {scope} | {'yes' if item.get('required', True) else 'no'} | {label(item['phase'], language)} | {item['status']} | {markdown_cell(item['title'])} | {acceptance} | {evidence_text} | {note} |"
         )
     if not work_items:
-        work_doc.append("| — | — | — | — | — | — | — | — |")
+        work_doc.append("| — | — | — | — | — | — | — | — | — |")
 
     issue_doc = [
         "# 问题清单" if language == "zh" else "# Issue ledger",
@@ -2606,12 +2793,28 @@ def render(project: Path, state: dict[str, Any]) -> None:
     if not issues:
         issue_doc.append("| — | — | — | — | — | — | — | — | — |")
 
-    atomic_write(paths["dashboard"], render_dashboard(state))
-    atomic_write(paths["work_items"], "\n".join(work_doc) + "\n")
-    atomic_write(paths["issues"], "\n".join(issue_doc) + "\n")
+    return {"dashboard": render_dashboard(state), "work_items": "\n".join(work_doc) + "\n",
+            "issues": "\n".join(issue_doc) + "\n"}
 
 
-def persist(project: Path, state: dict[str, Any], event: str) -> None:
+def generated_view_status(project: Path, state: dict[str, Any]) -> dict[str, bool]:
+    paths = project_paths(project)
+    current = {}
+    for name, expected in rendered_views(state).items():
+        try:
+            current[name] = paths[name].read_text(encoding="utf-8") == expected
+        except (OSError, UnicodeError):
+            current[name] = False
+    return current
+
+
+def render(project: Path, state: dict[str, Any]) -> None:
+    paths = project_paths(project)
+    for name, content in rendered_views(state).items():
+        atomic_write(paths[name], content)
+
+
+def persist(project: Path, state: dict[str, Any], event: str, guidance: str | None = None) -> None:
     state.setdefault("issues", [])
     for decision in state.get("decisions", {}).values():
         if isinstance(decision, dict):
@@ -2630,6 +2833,8 @@ def persist(project: Path, state: dict[str, Any], event: str) -> None:
     errors.extend(append_only_evidence_errors(project, state))
     if errors:
         raise ValueError("; ".join(errors))
+    if guidance is not None:
+        atomic_write(project / "AGENTS.md", guidance)
     paths = project_paths(project)
     workspace = workspace_snapshot(project)
     write_journal(paths["journal"], event, state, workspace)
@@ -2692,13 +2897,17 @@ def install_guidance_command(args: argparse.Namespace) -> None:
         errors.extend(journal_consistency_errors(project, state))
         if errors:
             raise ValueError("; ".join(errors))
-    target = install_project_guidance(project)
+    # Build and validate the full upgrade before touching managed instructions.
+    guidance = project_guidance_content(project)
     if state is not None:
-        state["workflow_version"] = WORKFLOW_VERSION
+        state["goal"] = read_goal_anchor(project, state["decisions"]["intent"])
         state["requirements"] = read_required_outcomes(project, state["decisions"]["spec"])
         reconcile_stale_artifacts(project, state)
-        persist(project, state, "install_guidance")
-    print(target)
+        state["workflow_version"] = WORKFLOW_VERSION
+        persist(project, state, "install_guidance", guidance=guidance)
+    else:
+        atomic_write(project / "AGENTS.md", guidance)
+    print(project / "AGENTS.md")
 
 
 def check_command(args: argparse.Namespace) -> None:
@@ -2725,20 +2934,34 @@ def show_command(args: argparse.Namespace) -> None:
 
 def resume_report_command(args: argparse.Namespace) -> None:
     project = args.project.resolve()
-    state = load_state(project)
-    errors = validate_state(state, project)
+    records, invalid_records = valid_journal_records(project)
+    snapshot_errors = []
+    try:
+        state = load_state(project)
+        snapshot_errors = validate_state(state)
+    except ValueError as exc:
+        snapshot_errors = [str(exc)]
+    if snapshot_errors:
+        if not records:
+            print(json.dumps({"diagnostics": {"read_only": True, "execution_allowed": False,
+                  "record_integrity_ok": False, "current_records_valid": False,
+                  "blocking_errors": snapshot_errors, "summary_basis": "unavailable"},
+                  "journal_records_reviewed": 0, "invalid_journal_records": invalid_records}, indent=2))
+            return
+        state = copy.deepcopy(records[-1]["state"])
+    errors = snapshot_errors + validate_state(state, project)
     errors.extend(active_authorized_lease_errors(state))
     errors.extend(journal_consistency_errors(project, state))
-    if errors:
-        raise ValueError("; ".join(errors))
+    if state.get("workflow_version") != WORKFLOW_VERSION:
+        errors.append("DZ workflow guidance is outdated; align and install current guidance before mutation")
 
-    records, invalid_records = valid_journal_records(project)
     saved_workspace = records[-1].get("workspace") if records else None
     current_workspace = workspace_snapshot(project)
     workspace_comparison = compare_workspace_snapshots(saved_workspace, current_workspace)
     history = []
     previous_run: dict[str, Any] = {}
     previous_decisions: dict[str, Any] = {}
+    previous_goal: dict[str, Any] = {}
     previous_issues: dict[str, Any] = {}
     for record in records:
         record_state = record["state"]
@@ -2774,6 +2997,7 @@ def resume_report_command(args: argparse.Namespace) -> None:
             for name, decision in decisions.items()
             if isinstance(decision, dict)
         }
+        goal_summary = record_state.get("goal") or empty_goal()
         entry: dict[str, Any] = {
             "at": record.get("at"),
             "event": record.get("event"),
@@ -2792,6 +3016,8 @@ def resume_report_command(args: argparse.Namespace) -> None:
             entry["run_changes"] = run_changes
         if decision_changes:
             entry["decision_changes"] = decision_changes
+        if goal_summary != previous_goal:
+            entry["goal_change"] = goal_summary
         issue_changes = {
             key: value
             for key, value in issue_summary.items()
@@ -2802,6 +3028,7 @@ def resume_report_command(args: argparse.Namespace) -> None:
         history.append(entry)
         previous_run = run_summary
         previous_decisions = decision_summary
+        previous_goal = goal_summary
         previous_issues = issue_summary
 
     warnings = []
@@ -2813,6 +3040,13 @@ def resume_report_command(args: argparse.Namespace) -> None:
         warnings.append(
             "Project workflow guidance is older than the installed DZ Skill; propose install-guidance after the user confirms the takeover"
         )
+    if (
+        state.get("decisions", {}).get("intent", {}).get("status") == "accepted"
+        and not (state.get("goal") or {}).get("statement")
+    ):
+        warnings.append(
+            "The accepted Intent predates the goal anchor; keep it governing, then show and accept a successor Intent with one - [DZ-GOAL] line before relying on automated goal-alignment checks"
+        )
     if state.get("decisions", {}).get("spec", {}).get("status") == "accepted" and not requirement_coverage(
         state.get("work_items", []), state.get("decisions", {}), state.get("requirements")
     )["indexed"]:
@@ -2821,11 +3055,17 @@ def resume_report_command(args: argparse.Namespace) -> None:
         warnings.append(
             "The managed DZ section in AGENTS.md is missing or stale; propose install-guidance after the user confirms the takeover"
         )
-    dashboard_current = project_dashboard_is_current(project, state)
+    view_status = generated_view_status(project, state)
+    dashboard_current = view_status["dashboard"]
     if not dashboard_current:
         warnings.append(
             "PROJECT.md is missing or does not match the current state snapshot; inspect the affected records and regenerate the views before relying on it"
         )
+    for name in ("work_items", "issues"):
+        if not view_status[name]:
+            warnings.append(f"{project_paths(project)[name].relative_to(project)} is missing or differs from the current state snapshot")
+    if errors:
+        warnings.append("The summary below describes stored records, not a current verification claim. Resolve blocking diagnostics before execution.")
     if workspace_comparison["uncertainty"]:
         warnings.append(workspace_comparison["uncertainty"])
 
@@ -2836,6 +3076,10 @@ def resume_report_command(args: argparse.Namespace) -> None:
     current_work = [item for item in work_items if item.get("contract_sha256") == current_contract]
     current_summary = {
         "project": state.get("project", {}),
+        "goal": {
+            **(state.get("goal") or empty_goal()),
+            "indexed": bool((state.get("goal") or {}).get("statement")),
+        },
         "progress": current_progress(state),
         "run": {
             key: state.get("run", {}).get(key)
@@ -2882,6 +3126,8 @@ def resume_report_command(args: argparse.Namespace) -> None:
                     "title": item.get("title"),
                     "status": item.get("status"),
                     "phase": item.get("phase"),
+                    "mode": item.get("mode", "implementation"),
+                    "mode_reason": item.get("mode_reason"),
                 }
                 for item in current_work
                 if item.get("status") not in {"verified", "cancelled", "deferred"}
@@ -2907,6 +3153,15 @@ def resume_report_command(args: argparse.Namespace) -> None:
     }
 
     report = {
+        "diagnostics": {
+            "read_only": True,
+            "execution_allowed": False,
+            "record_integrity_ok": not errors,
+            "current_records_valid": not errors,
+            "blocking_errors": errors,
+            "summary_basis": "journal_fallback" if snapshot_errors else ("stored_records" if errors else "validated_records"),
+            "authorization_note": "A diagnostic report never grants execution or external-action authority",
+        },
         "installed_workflow_version": WORKFLOW_VERSION,
         "project_workflow_version": state.get("workflow_version"),
         "journal_records_reviewed": len(records),
@@ -2924,6 +3179,9 @@ def resume_report_command(args: argparse.Namespace) -> None:
         ],
         "generated_views": {
             "project_dashboard_current": dashboard_current,
+            "work_items_current": view_status["work_items"],
+            "issues_current": view_status["issues"],
+            "all_current": all(view_status.values()),
             "current_view_fingerprint": current_view_fingerprint(state),
         },
         "workspace": {
@@ -2934,6 +3192,10 @@ def resume_report_command(args: argparse.Namespace) -> None:
         "warnings": warnings,
         "takeover_rules": {
             "saved_next_action_is_advisory": True,
+            "latest_explicit_user_decision_overrides_stale_saved_goal": True,
+            "persist_explicit_correction_before_continuing": True,
+            "unaccepted_suggestion_does_not_replace_goal": True,
+            "compare_proposed_execution_with_goal_before_mutation": True,
             "reconcile_visible_conversation_and_running_state": True,
             "read_affected_files_when_report_requires": True,
             "full_history_was_mechanically_validated": True,
@@ -3089,6 +3351,26 @@ def set_decision_command(args: argparse.Namespace) -> None:
             )
         decision = state["decisions"][args.name]
         current = decision["status"]
+        user_change = getattr(args, "user_change", False)
+        expected_digest = getattr(args, "expected_sha256", None)
+        if user_change:
+            if (args.status != "accepted" or current not in {"accepted", "superseded"}
+                    or not decision.get("accepted_by") or not args.path or not expected_digest):
+                raise ValueError("--user-change requires a previously accepted decision, --status accepted, a new --path and --expected-sha256")
+            normalized, artifact = project_file(args.project.resolve(), args.path, "user-decided successor")
+            if normalized == decision.get("path"):
+                raise ValueError("Preserve the previous accepted file; use a new successor path")
+            if sha256_file(artifact) != expected_digest:
+                raise ValueError("The user-decided successor differs from --expected-sha256")
+            # Reuse ordinary successor acceptance in this single mutation. The
+            # caller must cite an actual explicit user decision, not a proposal.
+            decision.update(proposal_path=normalized, proposal_sha256=expected_digest,
+                            proposal_created_at=now())
+            # A downstream decision superseded by the same user correction can
+            # use its former accepted version as the base, never a new unseen draft.
+            current = "accepted"
+        elif expected_digest:
+            raise ValueError("--expected-sha256 is only for --user-change")
         has_proposal = bool(decision.get("proposal_path"))
         if current == "accepted" and args.status == "accepted" and not has_proposal:
             raise ValueError(
@@ -3098,7 +3380,7 @@ def set_decision_command(args: argparse.Namespace) -> None:
             raise ValueError(
                 "Accept or discard the pending successor proposal before another decision transition"
             )
-        if args.path and args.status != "draft":
+        if args.path and args.status != "draft" and not user_change:
             raise ValueError("A decision path may be supplied only while preparing a draft")
         if args.status == "accepted" and (not args.by or not args.reference):
             raise ValueError("Acceptance requires --by and --reference")
@@ -3166,6 +3448,16 @@ def set_decision_command(args: argparse.Namespace) -> None:
                 artifact_digest,
             ):
                 raise ValueError("The decision artifact changed after its recorded draft")
+            accepted_goal_statement = None
+            if args.name == "intent":
+                _, intent_artifact = project_file(
+                    args.project.resolve(), artifact_path, "intent decision artifact"
+                )
+                accepted_goal_statement = goal_statement_from_file(intent_artifact)
+                if accepted_goal_statement is None:
+                    raise ValueError(
+                        "Intent needs exactly one visible - [DZ-GOAL] final-result line before acceptance"
+                    )
             decision.update(
                 {
                     "status": "accepted",
@@ -3179,12 +3471,19 @@ def set_decision_command(args: argparse.Namespace) -> None:
                     "proposal_created_at": None,
                 }
             )
+            if args.name == "intent":
+                state["goal"] = {
+                    "intent_sha256": artifact_digest,
+                    "statement": accepted_goal_statement,
+                }
             if args.name == "spec":
                 state["requirements"] = read_required_outcomes(args.project.resolve(), decision)
                 if not state["requirements"]["items"]:
                     raise ValueError("Specification needs visible - [DZ-MUST:R1] promise lines before acceptance")
         else:
             decision["status"] = args.status
+            if args.name == "intent" and args.status == "superseded":
+                state["goal"] = empty_goal()
         accepted_successor = args.status == "superseded" or successor_acceptance
         if accepted_successor and args.name == "intent":
             for downstream in ("spec", "plan"):
@@ -3201,6 +3500,19 @@ def set_decision_command(args: argparse.Namespace) -> None:
                 state["decisions"]["plan"]["proposal_created_at"] = None
         if accepted_successor:
             invalidate_verification_target(state)
+            # An old execution instruction must not survive a new decision.
+            # Reconciliation is local bookkeeping, not approval to build/publish.
+            run = state["run"]
+            next_step = {
+                "intent": "Reconcile Specification and Plan with the current Intent; preserve compatible work",
+                "spec": "Reconcile Plan and work with the current Specification; preserve compatible work",
+                "plan": "Reconcile work with the current Plan, then select the next authorized action",
+            }[args.name]
+            run["next_action"] = next_step if run["status"] == "active" else None
+            if run["status"] == "waiting_user":
+                run["waiting_for"] = "Only unresolved choices under the current decision; do not reconfirm its accepted change"
+            elif run["status"] == "paused":
+                run["resume_when"] = "User resumes work under the current decision; reconcile the remaining plan first"
         stage_map = {
             ("intent", "draft"): "intent_draft",
             ("intent", "accepted"): "intent_accepted",
@@ -3296,6 +3608,9 @@ def add_work_command(args: argparse.Namespace) -> None:
                 "required": not args.optional,
                 "contract_sha256": accepted_contract_sha256(state["decisions"]),
                 "phase": args.phase,
+                "mode": args.mode,
+                "mode_reason": args.reason,
+                "evidence_floor": len(state["evidence"]),
                 "status": "pending",
                 "acceptance": args.acceptance or [],
                 "evidence_ids": [],
@@ -3308,12 +3623,37 @@ def add_work_command(args: argparse.Namespace) -> None:
     mutate(args.project.resolve(), f"add_work:{args.id}", change)
 
 
+def read_only_work_in_progress(state: dict[str, Any]) -> bool:
+    contract = accepted_contract_sha256(state["decisions"])
+    return any(item.get("mode") == "read_only" and item["status"] == "in_progress"
+               and item["contract_sha256"] == contract for item in state["work_items"])
+
+
+def begin_work(state: dict[str, Any], item: dict[str, Any], *, restart: bool = False) -> None:
+    """One entry point for work and issue-driven implementation attempts."""
+    if item["status"] == "in_progress" and not restart:
+        return
+    if item["status"] != "in_progress" and "in_progress" not in WORK_TRANSITIONS[item["status"]]:
+        raise ValueError(f"Cannot begin work from {item['status']}; select or unblock it first")
+    if authorized_action(state) is not None:
+        raise ValueError("Complete or cancel the authorized action before starting work")
+    if item.get("mode") == "read_only":
+        if state["run"]["status"] != "active" or any(risk.get("authorization_pending") for risk in state["risks"]):
+            raise ValueError("Read-only work cannot resume a stopped run or bypass pending authorization")
+        if current_target(state) is None:
+            raise ValueError("Read-only work requires an existing observed target")
+    else:
+        invalidate_verification_target(state)
+    item.update(status="in_progress", blocker=None, evidence_floor=len(state["evidence"]), updated_at=now())
+
+
 def update_work_command(args: argparse.Namespace) -> None:
     def change(state: dict[str, Any]) -> None:
         item = find_by_id(state["work_items"], args.id, "work item")
         if args.status:
             current = item["status"]
-            if args.status != current and args.status not in WORK_TRANSITIONS[current]:
+            readonly_completion = item.get("mode") == "read_only" and current == "in_progress" and args.status == "verified"
+            if args.status != current and args.status not in WORK_TRANSITIONS[current] and not readonly_completion:
                 raise ValueError(f"Invalid work transition: {current} -> {args.status}")
             if args.status in {
                 "in_progress",
@@ -3334,11 +3674,7 @@ def update_work_command(args: argparse.Namespace) -> None:
                     "This work belongs to an older decision contract; use carry-work after reviewing its fit to retain compatible work without re-entering it"
                 )
             if args.status == "in_progress" and args.status != current:
-                if authorized_action(state) is not None:
-                    raise ValueError(
-                        "Complete or cancel the authorized action before reopening implementation work"
-                    )
-                invalidate_verification_target(state)
+                begin_work(state, item)
             item["status"] = args.status
             if args.status != "blocked" and args.blocker is None:
                 item["blocker"] = None
@@ -3361,6 +3697,9 @@ def carry_work_command(args: argparse.Namespace) -> None:
             raise ValueError("Reconciliation needs a reason and distinct old work IDs")
         if args.acceptance and (len(args.ids) != 1 or args.disposition != "revise"):
             raise ValueError("Changed acceptance is only for one explicitly revised work item")
+        title = getattr(args, "title", None)
+        if title is not None and (not title.strip() or len(args.ids) != 1 or args.disposition == "retire"):
+            raise ValueError("A current title requires one kept or revised work item and nonempty text")
         if "requirements" not in state:
             raise ValueError("Refresh this older project's guidance after takeover before carrying work")
         current_promises = {item["acceptance"] for item in state["requirements"]["items"]}
@@ -3385,11 +3724,18 @@ def carry_work_command(args: argparse.Namespace) -> None:
             item = copy.deepcopy(old)
             item.update(id=new_id, contract_sha256=contract, carried_from=old_id,
                         acceptance=acceptance, evidence_ids=[], updated_at=now())
+            if title is not None:
+                item["title"] = title
             if args.disposition == "revise":
+                item.update(status="pending", blocker=None)
+            elif item.get("mode") == "read_only" and item["status"] in {"in_progress", "verified"}:
                 item.update(status="pending", blocker=None)
             elif item["status"] == "verified":
                 item["status"] = "implemented_unverified"
-            item["note"] = (old.get("note") or "") + f"\n{args.disposition} from {old_id}: {args.reason}; fresh checks required"
+            # Revised work must not inherit an obsolete execution instruction.
+            # Its original notes remain on the historical predecessor and journal.
+            retained_note = (old.get("note") or "") if args.disposition == "keep" else ""
+            item["note"] = retained_note + f"\n{args.disposition} from {old_id}: {args.reason}; prior notes remain in history; fresh checks required"
             state["work_items"].append(item)
             for issue in state.get("issues", []):
                 if issue.get("work_item_id") == old_id and issue["status"] not in {"dismissed", "deferred"}:
@@ -3470,6 +3816,11 @@ def update_issue_command(args: argparse.Namespace) -> None:
                     raise ValueError(
                         "Implementation progress requires work under the accepted current decisions"
                     )
+                if work_item.get("mode") == "read_only":
+                    raise ValueError("Read-only work cannot represent an implementation repair")
+                if args.status == "in_progress" and current != "in_progress":
+                    begin_work(state, work_item, restart=True)
+                    issue.update(evidence_ids=[], evidence_floor=len(state["evidence"]), resolution=None)
             issue["status"] = args.status
         issue["updated_at"] = now()
 
@@ -3553,7 +3904,7 @@ def add_evidence_command(args: argparse.Namespace) -> None:
                 current_target(state),
             )
             if not complete_targets or unresolved:
-                work_item["status"] = "implemented_unverified"
+                work_item["status"] = "pending" if work_item.get("mode") == "read_only" else "implemented_unverified"
         work_item["updated_at"] = now()
 
     mutate(args.project.resolve(), f"add_evidence:{args.id}", change)
@@ -3564,6 +3915,8 @@ def add_risk_command(args: argparse.Namespace) -> None:
         if any(item.get("id") == args.id for item in state["risks"]):
             raise ValueError(f"Risk already exists: {args.id}")
         requires_authorization = args.action_kind in AUTHORIZATION_ACTION_KINDS
+        if requires_authorization and read_only_work_in_progress(state):
+            raise ValueError("Finish or stop read-only work before requesting an action authorization")
         expiry = parse_utc_timestamp(args.expires_at)
         if requires_authorization:
             if expiry is None:
@@ -3652,6 +4005,8 @@ def decide_risk_command(args: argparse.Namespace) -> None:
         ) != args.id:
             raise ValueError("Risk decision requires a matching waiting_authorization state")
         if args.decision in {"accepted", "mitigated"}:
+            if read_only_work_in_progress(state):
+                raise ValueError("Read-only work cannot consume an action authorization")
             if args.next_action != risk["scope"]:
                 raise ValueError(
                     "The next action must exactly match the risk scope the user reviewed"
@@ -3854,6 +4209,10 @@ def build_parser() -> argparse.ArgumentParser:
     command.add_argument("--by")
     command.add_argument("--reference")
     command.set_defaults(handler=set_decision_command)
+    command.add_argument("--user-change", action="store_true",
+                         help="Record an explicit user-decided successor atomically; not for brainstorming")
+    command.add_argument("--expected-sha256",
+                         help="Digest of the successor containing only the explicit change plus retained decisions")
 
     command = subparsers.add_parser("discard-decision-proposal")
     project_arg(command)
@@ -3875,6 +4234,8 @@ def build_parser() -> argparse.ArgumentParser:
     command.add_argument("--title", required=True)
     command.add_argument("--optional", action="store_true")
     command.add_argument("--phase", required=True, choices=sorted(DELIVERY_STAGES))
+    command.add_argument("--mode", choices=("implementation", "read_only"), default="implementation")
+    command.add_argument("--reason", help="Required explanation of why read_only work does not change the observed target")
     command.add_argument("--acceptance", action="append", required=True)
     command.set_defaults(handler=add_work_command)
 
@@ -3892,6 +4253,7 @@ def build_parser() -> argparse.ArgumentParser:
     command.add_argument("--disposition", choices=("keep", "revise", "retire"), required=True)
     command.add_argument("--reason", required=True)
     command.add_argument("--acceptance", action="append")
+    command.add_argument("--title", help="Updated task title when carrying one kept or revised item")
     command.set_defaults(handler=carry_work_command)
 
     command = subparsers.add_parser("add-issue")

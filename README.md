@@ -10,7 +10,24 @@ Irixi Project Forge 是一套面向非技术产品经理和初学者的跨平台
 
 工作流的短名称是 `dz`。
 
-当前工作流版本：`2026-09-10.3`；插件版本：`1.0.9`。
+当前工作流版本：`2026-09-25.2`；插件版本：`1.0.11`。
+
+### 这次补好的可靠性问题
+
+- **你改主意，记录跟着改。** 新手对话、主规则和测试标准使用同一套判断；明确决定不再当成待批准的建议，真正没说清的地方才问。
+- **该重验的必须重验。** 同一个问题重新出现，不能拿上次的证明直接说又修好了；只读查看情况则不把其他已验证工作全部打回。
+- **记录不一致时仍能解释现状。** 文件后来变过、权限到期、清单过时，会分别说明；能读出旧记录不代表旧结论仍然有效，也不代表可以继续操作。
+- **旧项目有恢复和升级路径。** 保留历史与已有成果，不偷偷恢复已经结束的开发，也不把旧版本的通过结论当作新标准已通过。父文件夹只有一个直接 DZ 子项目时，停止检查能发现它；有多个就说明歧义，不猜。
+
+这些修复不改变六阶段主流程，也不让你额外填写表格。程序回归、独立 Agent 试用和未测范围分别记录，不能用“测试数量很多”代替实际效果。见[可靠性修复与验证记录](tests/reliability-repair-2026-09-25.md)。
+
+### 改了目标，旧记录不能把你拉回去
+
+你明确说“改成 X，不要 Y，其他不变”，这就已经是决定。DZ 会先简短说明影响，然后在同一轮更新目标或受影响的需求、方案、待办和下一步，再读回来核对；不会让你为同一句话反复确认。只是问“要不要改成 X”时，才继续讨论，不擅自换目标。
+
+旧文件留作历史，不再指挥当前工作；仍然有用的成果保留，旧测试不能算新版本通过。写入失败或平台不能改文件时，DZ 必须说明“还没同步成功”，不能一边答应你、一边照旧做。改目标也不自动授权付款、对外发送或发布。
+
+更新 Skill 不会自动改掉每个旧项目。重新进入具体项目，让 DZ 按最后明确决定核对并同步记录；没有可见的新目标时，它必须问清，不能猜。[本次问题与验证记录](tests/goal-correction-2026-09-25.md)
 
 DZ 不会把“帮我做一个应用”直接理解为立即写代码。它会先用大白话和你说清三件事：想帮谁解决哪件麻烦、这次先做什么和不做什么、准备先从哪一步动手并怎样检查结果。每说清一件都让你看一眼，对了才往下走。技术检查由有工具的 AI 执行，不要求你亲自测试才能进入内部测试。
 
@@ -401,7 +418,7 @@ dz/
 
 ### 验证
 
-自动套件覆盖项目账本、需求漏项、旧任务承接、Codex 收尾、单入口安装和隔离的完整流程，并检查 Python、JSON 和通用版同步；当前数量与结果见 [本次修缮报告](tests/workflow-refinement-2026-09-10.md)，此前的检查保留在 [接续实测报告](tests/continuity-validation-2026-09-10.md)。自动测试证明工具行为，不证明所有 AI 都会遵循规则。另定义二十三组需要新上下文人工执行的行为测试；它们不是持续集成自动门禁：
+自动套件覆盖项目账本、需求漏项、旧任务承接、Codex 收尾、单入口安装和隔离的完整流程，并检查 Python、JSON 和通用版同步；当前数量与结果见 [可靠性修复与验证记录](tests/reliability-repair-2026-09-25.md)，此前的检查保留在 [接续实测报告](tests/continuity-validation-2026-09-10.md)。自动测试证明工具行为，不证明所有 AI 都会遵循规则。另定义二十四组需要新上下文人工执行的行为测试；它们不是持续集成自动门禁：
 
 1. 模糊的“服务所有人”想法；
 2. 区块链、RAG 和多 Agent 技术堆砌；
@@ -425,7 +442,8 @@ dz/
 20. 开发中发现的重要问题必须留下记录并由 DZ 自动分流；小修不反复打扰用户，改变原先约定时先给用户看完整改法；只有实际检查通过并留下防复发办法才能说问题解决。
 21. 调研时必须区分真实行为、用户说法、负责人选择和后来试用结果；不能用帖子数量冒充市场规模或用“愿意付费”冒充付款，并要给出继续、有条件继续或先暂停投入的明确判断。
 22. 项目记录体检必须找出重复、冲突、过时、没有来路和假完成；最后明确同意的版本作数，未同意的新想法不能覆盖它，旧版本退出当前页但保留在历史里。
-23. 用户提出修改意见时先给出专业结论、主要漏洞、机会成本和更好改法，再决定是否修改；小改动不被过度评审，大改动不被盲目执行。
+23. 用户提出修改意见时给出必要的专业判断，指出主要漏洞和更好改法；尚在讨论的建议不能偷偷执行，明确决定也不能因评审而被降回“等待确认”。
+24. 用隔离项目和全新上下文，实测明确改目标、只讨论、文件冲突、只读检查和再次接续；核对实际文件变化，不只看回答是否好听。
 
 行为测试定义见 [`references/forward-tests.md`](references/forward-tests.md)。
 
@@ -555,7 +573,18 @@ Every platform uses the same DZ workflow instead of a brand-specific edition. A 
 
 ### What this refinement changes
 
-Current workflow: `2026-09-10.3`; plugin: `1.0.9`. The six-stage flow and three technical handbooks remain intact.
+Current workflow: `2026-09-25.2`; plugin: `1.0.11`. The six-stage flow and three technical handbooks remain intact.
+
+- **One correction rule:** beginner dialogue, core instructions and evaluation rubrics distinguish a decided change from exploration. Only unsettled consequential choices need a question.
+- **Proportionate proof:** reopening a failure requires a new check; merely inspecting an unchanged product does not revoke unrelated valid results.
+- **Useful diagnosis during drift:** changed files, expired permission and stale generated lists remain reportable. A readable saved record is neither current verification nor authority to execute.
+- **Recoverable continuity:** restore affected issue records and upgrade older closed projects without erasing history, overstating coverage or restarting development. The Stop hook can discover one direct child project; multiple candidates produce an explicit ambiguity rather than a guess.
+
+These changes add no beginner-facing forms. Deterministic regressions, independent Agent trials and untested limits are reported separately in the [reliability repair report](tests/reliability-repair-2026-09-25.md).
+
+An explicit “change to X, drop Y, keep the rest” is already a user decision, not a suggestion awaiting another identical approval. DZ briefly assesses the effect, records the goal or affected requirements, plan, work and next action in the same turn, then reads them back. An exploratory “should we change to X?” remains a proposal.
+
+Old files remain history, compatible work stays, and old tests do not become current passes. If persistence fails or the host lacks file access, DZ discloses that synchronization failed and never resumes the rejected route. Goal changes do not automatically authorize payment, external messages or publication. Updating the Skill does not migrate every old project: reconcile each project's latest visible user decisions on re-entry, asking only for genuinely missing information. See the [correction report](tests/goal-correction-2026-09-25.md).
 
 - **Catch omitted work:** AI labels every mandatory promise in the same visible specification. The tool checks whether each has current required work and real verification, instead of counting only registered tasks. The beginner does not manage these labels.
 - **Preserve useful work after a change:** explain what stays, changes, or is retired. Carry compatible implementation into the accepted new plan without copying records by hand. Preserve old evidence as history; never count it as a fresh pass.
@@ -834,7 +863,7 @@ dz/
 
 ### Validation
 
-The automated suite covers the ledger, omitted requirements, work carry-forward, Codex closeout, single-entry installation and an isolated full lifecycle, plus Python, JSON and generated-entrypoint checks. See the [current refinement report](tests/workflow-refinement-2026-09-10.md) for run counts and results; earlier evidence remains in the [continuity report](tests/continuity-validation-2026-09-10.md). These checks establish tool behavior, not universal agent compliance. DZ also defines twenty-three fresh-context behavioral families that require manual execution and are not an automated CI gate:
+The automated suite covers the ledger, omitted requirements, work carry-forward, Codex closeout, single-entry installation and an isolated full lifecycle, plus Python, JSON and generated-entrypoint checks. See the [reliability repair report](tests/reliability-repair-2026-09-25.md) for current run counts and results; earlier evidence remains in the [continuity report](tests/continuity-validation-2026-09-10.md). These checks establish tool behavior, not universal agent compliance. DZ also defines twenty-four fresh-context behavioral families that require manual execution and are not an automated CI gate:
 
 1. a vague “product for everyone” idea;
 2. fashionable blockchain, RAG, and multi-agent over-scoping;
@@ -858,7 +887,8 @@ The automated suite covers the ledger, omitted requirements, work carry-forward,
 20. persist and route material problems without making beginners classify them, repair bounded defects without repeated interruption, require acceptance before product promises change, and require current Passed evidence plus regression protection before calling an issue fixed.
 21. distinguish observed behavior, stated interest, owner-selected thresholds, and later trial results; never turn post volume into market size or stated willingness into payment, and give a clear proceed, conditional, or hold recommendation.
 22. audit project memory while proving that the latest explicitly accepted version governs, an unaccepted successor cannot override it, and older accepted wording leaves the active view but remains in history.
-23. evaluate a user's proposed change with an owned expert verdict, main hole, opportunity cost, and better form before editing, while keeping small reversible corrections proportionate and material changes controlled.
+23. give proportionate expert judgment on proposed changes, key holes and better alternatives; do not execute exploratory ideas or downgrade an explicit decision into another approval request.
+24. exercise explicit goal changes, exploration, file drift, read-only inspection and fresh-context re-entry in isolated projects; verify actual file changes rather than reassuring prose alone.
 
 See [`references/forward-tests.md`](references/forward-tests.md) for the behavioral oracles.
 

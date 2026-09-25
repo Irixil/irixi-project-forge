@@ -2,7 +2,7 @@
 
 The six stages are a loop, not a waterfall. A stage may return to an earlier artifact when evidence changes the product. What must remain linear is decision authority: an unaccepted artifact cannot trigger the next stage.
 
-At any stage, a user-proposed modification is evaluated before it changes the product. Follow [change-proposal-review.md](change-proposal-review.md): keep the intended benefit separate from the proposed mechanism, give one professional verdict, expose the main hole and opportunity cost, and route an accepted result to the earliest governing artifact it changes. A tiny reversible improvement inside accepted behavior may stay with its current work item; confidence or urgency does not bypass a material review.
+At any stage, distinguish a proposal from a definite user correction. Follow SKILL.md's explicit-correction procedure and [change-proposal-review.md](change-proposal-review.md): assess the effect proportionately, then record the actual decision in the affected artifact. The user's precise change is already confirmation of that delta; it does not need another approval after transcription. Only undecided material choices wait. A small reversible improvement may stay in its current work item; outside actions retain their own authority boundaries.
 
 ```text
 PLAN → DESIGN → BUILD → TEST → DEPLOY → MAINTAIN
@@ -63,6 +63,7 @@ Capture what is wanted, why, for whom, under which constraints, in the originato
 - identify the primary user and triggering situation;
 - understand the current workaround and pain;
 - define the desired observable outcome and initial success signals;
+- express that outcome as exactly one solution-independent `- [DZ-GOAL]` final-result anchor with a separate success condition;
 - distinguish evidence, assumptions, and unknowns;
 - challenge solution-first framing and “everyone” audiences;
 - anchor the needed behavior independently of any named repository, package, framework, or competitor;
@@ -85,6 +86,7 @@ Show the exact Draft artifact or a complete decision-relevant diff. The user cor
 - in which concrete situation;
 - what is wrong with the current approach;
 - what outcome should improve;
+- the one final-result anchor they can restate without naming a feature, repository, model, or architecture;
 - how early success will be observed;
 - material constraints and the main uncertainty.
 
@@ -106,6 +108,7 @@ Compress requirements and experience design into a specification the implementat
 - specify inputs, user-visible process, human confirmation points, outputs, and retained data;
 - select one primary terminal and one first-version business loop;
 - define Must, Later, and Won't;
+- trace every Must to the active `DZ-GOAL`, and ensure the Must set covers every result this version claims;
 - design loading, empty, queued, running, waiting, partial, failure, permission, disconnect, cancel, and recovery behavior as applicable;
 - determine application, deterministic workflow, agent, or hybrid;
 - define acceptance criteria before implementation;
@@ -172,8 +175,8 @@ Show the exact Draft artifact or a complete decision-relevant diff. The user exp
 
 For each approved thin slice:
 
-1. Restate the user-visible result and exclusions.
-2. Implement the smallest necessary change.
+1. Restate the active goal, exact Must, current work item, next action, user-visible result, and exclusions. If that chain is broken, do not execute the step; route it as a supporting change, explicit goal replacement, or later idea.
+2. Implement the smallest necessary change that advances that chain.
 3. Run fast deterministic checks.
 4. Exercise the real flow or interaction needed for that slice.
 5. Fix confirmed failures and repeat the same evidence.
@@ -220,6 +223,7 @@ Determine whether the real product fulfills the accepted promises. The implement
 ### Gate: Reviewed and verifiable
 
 - Every Must criterion has inspectable evidence.
+- An independent goal-coverage check confirms that the complete Must set and real core flow achieve the accepted `DZ-GOAL` for this version; passing only the registered tasks is not enough.
 - No unresolved critical finding remains.
 - Unverified paths and known limitations are explicit.
 - The implementation matches accepted intent, spec, and plan, or accepted revisions exist.
@@ -306,7 +310,7 @@ If the utility batch-renames, deletes, migrates or overwrites pre-existing user 
 
 ## Reopening rules
 
-Before reopening, assess the proposal rather than assuming every new request deserves current investment. “Do not adopt now” goes to the backlog or decision history with the reason; “Test first” creates only the smallest permitted learning step; “Adopt with changes” presents the improved complete wording; “Adopt” still follows the normal acceptance and authorization rules.
+Use SKILL.md's correction procedure rather than a second approval policy here. An unrelated suggestion does not silently replace the goal; an explicit user decision to change the final result does. Record that delta, reconcile downstream records and next action, and retain compatible work. Professional review may recommend a different choice but may not demote an allowed user decision. Unaccepted recommendations and unresolved new choices remain Draft; no rejected old route continues while records catch up.
 
 First classify and record a material problem through [issue-learning-loop.md](issue-learning-loop.md). A bounded implementation defect returns only to its responsible work item. A missing or changed product promise, technical plan, product purpose, later idea, or production report goes to its matching durable home; do not copy every problem into the PRD.
 
