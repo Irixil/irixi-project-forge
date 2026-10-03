@@ -1,5 +1,10 @@
 # Six-Stage AI-Native SDLC Gates
 
+Use SKILL.md’s single confirmation rule: existing explicit acceptance of the same visible position, scope and route counts; ask only about unsettled choices. For a simple utility, one acceptance may cover the three distinct visible product decisions.
+
+
+SKILL.md owns the five-stage personal workflow, proportional effort limits, material applicability and optional parallel coordination. The six stages below implement its technical delivery detail; they do not add five more gates or require multiple agents.
+
 The six stages are a loop, not a waterfall. A stage may return to an earlier artifact when evidence changes the product. What must remain linear is decision authority: an unaccepted artifact cannot trigger the next stage.
 
 At any stage, distinguish a proposal from a definite user correction. Follow SKILL.md's explicit-correction procedure and [change-proposal-review.md](change-proposal-review.md): assess the effect proportionately, then record the actual decision in the affected artifact. The user's precise change is already confirmation of that delta; it does not need another approval after transcription. Only undecided material choices wait. A small reversible improvement may stay in its current work item; outside actions retain their own authority boundaries.

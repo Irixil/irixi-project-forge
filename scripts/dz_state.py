@@ -24,7 +24,7 @@ from typing import Any, Callable
 
 
 SCHEMA_VERSION = "1.1"
-WORKFLOW_VERSION = "2026-09-25.2"
+WORKFLOW_VERSION = "2026-10-03.1"
 
 RUN_STATUSES = {
     "active",
@@ -181,6 +181,7 @@ BLOCKER_KINDS = {
     "missing_external_condition",
     "host_denial",
     "rights_missing",
+    "effort_limit",
 }
 DIGEST_LENGTH = 64
 GUIDANCE_START = "<!-- DZ-PROJECT-CONTINUITY:START -->"
@@ -3202,6 +3203,9 @@ def resume_report_command(args: argparse.Namespace) -> None:
             "review_unresolved_issues_and_later_issue_changes": True,
             "report_present_and_proposed_execution_first": True,
             "user_confirmation_required_before_new_mutation": True,
+            "explicit_current_route_confirmation_is_sufficient": True,
+            "duplicate_route_confirmation_required": False,
+            "confirmation_policy": "Resolve only unsettled routing; an explicit current instruction confirming the exact position, scope and route already supplies confirmation",
             "confirmation_is_not_external_action_authorization": True,
         },
     }

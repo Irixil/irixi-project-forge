@@ -1,5 +1,8 @@
 # Download and Load DZ in Any Agent
 
+Use SKILL.md’s single confirmation rule: existing explicit acceptance of the same visible position, scope and route counts; ask only about unsettled choices. For a simple utility, one acceptance may cover the three distinct visible product decisions.
+
+
 [中文](#中文) · [English](#english)
 
 ## 中文
@@ -7,6 +10,22 @@
 ### 先记住一件事
 
 把 DZ 下载到电脑，不代表 Agent 已经看见它。你还需要完成下面四种加载方式中的一种：安装 Skill、给 Agent 文件读取权限、把通用版放进平台的指令栏，或者在普通聊天里手动提供通用版。
+
+### 新项目直接这样用
+
+当前个人版沿着“接住目标、组织执行、跟踪变化、交付验证、下次继续”推进。它会告诉你现在可用什么、缺什么、下一步怎么做、哪些需要你决定；六阶段技术检查按项目需要使用，简单任务不要求多 Agent 或整套表格。
+
+在允许使用 DZ 的新项目文件夹中选中 `$dz`；如果菜单没有它但 Agent 能读本地文件，就发送：
+
+```text
+先完整读取 <已安装的 DZ 文件夹>/SKILL.md，按 DZ 做这个项目：<用途和希望得到的结果>。完成标准是：<怎样算可用>。已有材料在：<路径>。先用最小可行方式推进，缺少关键决定才问我。
+```
+
+接着旧项目可说：“按最新确认目标接着做，先对照当前文件，告诉我已确认成果、缺口和下一步。”只是讨论用“先讨论，别改目标”；已决定用“目标改成 X，其他不变”。已有项目明确暂停 DZ 或另有工作流时保留其规则，不因全局技能更新而自动启用。
+
+改目标时保留仍有效的事实与兼容成果，旧目标专属结论退出当前路线。反复修不好时按入口中的时间/成本/重试限额停下受阻部分并汇报，不无限重复。模拟检查、真实模型试用和真正主流程的结果分别说明；没测过仍是未验证。
+
+这些行为有些是技能文字约束。脚本负责记录一致性、目标/需求关联、证据有效性和接续诊断；它不会自动计时、监控所有 Agent 或强制模型听话。换模型/平台要带走目标、状态、成果和验收资料，并确认实际工具能力，不能保证零成本切换。
 
 ### 第一步：下载完整文件夹
 
@@ -74,7 +93,7 @@ DZ启动：<写下你的想法或当前做到哪里>。
 
 如果只能发送文字，直接打开 `DZ-UNIVERSAL.md`，把全文粘贴进对话，再发送启动句。有些平台只把上传文件或知识库当作参考资料，不会把它当作固定工作规则；遇到这种情况也使用粘贴全文的方法。这种普通聊天方式依赖当前对话，不能保证平台在新对话里继续记得 DZ。
 
-这种方式可以完成脑暴、三次确认、专业建议和交接。只有当平台真的提供项目文件、命令、浏览器或发布工具时，它才能直接开发、测试或上线。
+这种方式可以完成脑暴、三项关键决定的确认、专业建议和交接。只有当平台真的提供项目文件、命令、浏览器或发布工具时，它才能直接开发、测试或上线。
 
 ### 第三步：确认它真的加载成功
 
@@ -96,7 +115,7 @@ DZ启动：<写下你的想法或当前做到哪里>。
 
 ### 更新后继续旧项目
 
-当前版本为 `2026-09-25.2`。先更新完整文件夹和平台实际加载的安装副本，再在具体项目里调用 DZ。它核对最新明确决定和现有记录；旧文件不能压过你后来明确修改的目标。可以说：“按我们最新确认的目标，把本地目标、需求、待办和下一步同步好，保留兼容成果；只有缺少关键决定才问我。”AI 必须真的保存并读回核对；读不到最近的决定就问，不准猜。尚在讨论的建议不会自动变成决定。旧文件、证据保留为历史，不清空；没有逐项标记的旧要求先整理给你看，不偷偷接受新内容。你仍可随时暂停或如实收尾。
+当前版本为 `2026-10-03.1`。先更新完整文件夹和平台实际加载的安装副本，再在具体项目里调用 DZ。它核对最新明确决定和现有记录；旧文件不能压过你后来明确修改的目标。可以说：“按我们最新确认的目标，把本地目标、需求、待办和下一步同步好，保留兼容成果；只有缺少关键决定才问我。”AI 必须真的保存并读回核对；读不到最近的决定就问，不准猜。尚在讨论的建议不会自动变成决定。旧文件、证据保留为历史，不清空；没有逐项标记的旧要求先整理给你看，不偷偷接受新内容。你仍可随时暂停或如实收尾。
 
 文件变化、授权过期或生成清单不一致时，DZ 先解释实际差异，再按已允许的范围修复记录，不会因为能读出旧记录就继续旧操作。单纯查看情况不会让其他已验证工作全部重来。旧项目升级不会自动启动已经结束的开发。
 
@@ -198,7 +217,7 @@ If it says that DZ is absent from the available Skill list but can read files, u
 
 ### Continue an older project after updating
 
-The current version is `2026-09-25.2`. Update the bundle and the copy actually loaded by your host, then invoke DZ inside the specific project. Ask it to synchronize the goal, requirements, work and next action with your latest explicit decision while preserving compatible work. It must save and read back the result, not let stale files overrule that decision. If the decision is inaccessible, it must ask rather than guess. Unaccepted ideas remain proposals; old files and evidence remain history, not current proof. Legacy missing labels are reconciled visibly, never by accepting invented content. You may still pause or close honestly.
+The current version is `2026-10-03.1`. Update the bundle and the copy actually loaded by your host, then invoke DZ inside the specific project. Ask it to synchronize the goal, requirements, work and next action with your latest explicit decision while preserving compatible work. It must save and read back the result, not let stale files overrule that decision. If the decision is inaccessible, it must ask rather than guess. Unaccepted ideas remain proposals; old files and evidence remain history, not current proof. Legacy missing labels are reconciled visibly, never by accepting invented content. You may still pause or close honestly.
 
 Changed files, expired permission and stale generated lists produce diagnosis rather than permission to continue old actions. Repair only within the agreed scope. Read-only inspection preserves unrelated valid proof, and upgrading a closed project does not restart development.
 

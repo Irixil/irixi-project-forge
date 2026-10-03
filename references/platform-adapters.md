@@ -4,7 +4,7 @@ Use this reference whenever DZ is loaded on any AI surface.
 
 ## One workflow, different hands
 
-Keep product governance vendor-neutral. The user should get the same plain-language discovery, three separate pre-build confirmations, challenge quality, evidence rules, and authorization boundaries on every platform.
+Keep product governance vendor-neutral. On every platform, use the same plain-language discovery, three distinct visible product decisions, professional judgment, evidence rules and authorization boundaries. For a simple utility, SKILL.md permits one explicit acceptance covering all shown choices.
 
 Adapt only how the work is carried out:
 
@@ -96,6 +96,8 @@ This repository also maintains a Codex-native execution mapping because DZ origi
 
 ## Portable handoff
 
+Use SKILL.md’s durable-memory and material-applicability rules. Move the goal, state, deliverables and evidence references together. Changing model/platform can require reloading instructions, moving accessible files, reconciling tool and permission differences, or rerunning environment-dependent checks; do not promise zero-cost switching. Preserve historical proof as history when it does not establish the new environment.
+
 Before a session ends or work moves to another platform, provide one compact handoff containing:
 
 1. who needs help with which trouble;
@@ -103,7 +105,7 @@ Before a session ends or work moves to another platform, provide one compact han
 3. what everyone agreed to make first and how to try it, if reached;
 4. what was actually observed, changed, and tested;
 5. what remains unknown or unauthorized;
-6. the recommended next actions, order, reasons, and meaningful options; on resume, mechanically validate every saved event but give the model a compact current summary first, compare a saved workspace checkpoint with the current project when possible, expand only on conflict or material uncertainty, and wait for the user to confirm or correct the account before new mutations;
-7. links or locations of available project records.
+6. the recommended next actions, order, reasons, and meaningful options; on resume, mechanically validate every saved event but give the model a compact current summary first, compare a saved workspace checkpoint with the current project when possible, expand only on conflict or material uncertainty, and resolve unsettled routing before new mutations; the current explicit instruction can already supply that confirmation under SKILL.md, without duplicate approval;
+7. links or locations of available project records, material applicability/rechecks, the current decision version and any worker still running or not yet synchronized.
 
 Clearly label inference. A handoff preserves context; it does not create approval or turn an unrun check into evidence.

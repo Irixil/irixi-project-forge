@@ -44,6 +44,11 @@ This is a menu of decision-relevant fields, not a form the beginner must fill. K
 - Models, prompts, tools, permissions, budgets, and stopping conditions:
 - Secrets, identity, files, logging, and cost boundaries:
 
+## Execution effort (only when repair or experimentation may loop)
+- Time/cost/attempt bounds and observable progress; use SKILL.md defaults if no existing limit:
+- Stop condition, smallest alternative and resume condition:
+- Parallel subtasks only when useful and authorized: shared goal/contract, ownership, separate outputs and single integration writer:
+
 ## First thin slice
 - Active `DZ-GOAL` and Must IDs advanced by this slice:
 - User-visible loop:

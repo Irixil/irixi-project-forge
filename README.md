@@ -1,5 +1,8 @@
 # Irixi Project Forge
 
+Use SKILL.md’s single confirmation rule: existing explicit acceptance of the same visible position, scope and route counts; ask only about unsettled choices. For a simple utility, one acceptance may cover the three distinct visible product decisions.
+
+
 [中文](#中文) · [English](#english)
 
 ## 中文
@@ -10,9 +13,17 @@ Irixi Project Forge 是一套面向非技术产品经理和初学者的跨平台
 
 工作流的短名称是 `dz`。
 
-当前工作流版本：`2026-09-25.2`；插件版本：`1.0.11`。
+当前工作流版本：`2026-10-03.1`；插件版本：`1.0.12`。
 
-### 这次补好的可靠性问题
+### 这次个人工作方式升级
+
+当前主线是“接住目标 → 组织执行 → 跟踪变化 → 交付验证 → 下次继续”，直接维护在实际加载的 `SKILL.md` 中；通用版由它生成。保留已有六阶段技术检查和本地状态工具，没有新增平台。
+
+新增了简单任务的轻量路线、有限修复尝试与无进展停止、改目标后的材料适用性复核，以及可选并行工作的版本同步。进度汇报围绕“现在可用什么、缺什么、怎么推进、需要我决定什么”。目标、状态、成果、证据可带到别的模型/平台，工具差异和复验仍可能有成本。
+
+限额和语义判断属于 Agent 规则；脚本守住记录与证据的一致性，不能据此声称有全程监控或自动强制执行。本次程序验证、独立复查和未测范围见 [个人工作流升级验证](tests/personal-workflow-2026-10-03.md)。
+
+### 已保留的可靠性修复
 
 - **你改主意，记录跟着改。** 新手对话、主规则和测试标准使用同一套判断；明确决定不再当成待批准的建议，真正没说清的地方才问。
 - **该重验的必须重验。** 同一个问题重新出现，不能拿上次的证明直接说又修好了；只读查看情况则不把其他已验证工作全部打回。
@@ -264,7 +275,7 @@ DZ 整合了以下手册的流程：
 - *AI 产品 Vibe Coding 通用前端技术栈手册*；
 - *AI Agent 产品上线部署手册*。
 
-这三份手册不是可看可不看的参考。第三次确认完成后，DZ 会把适用内容拆成必须入账的施工项：所有项目走通用开发路线；有界面的项目增加代表页面、真实后台、浏览器和中断恢复路线；需要给别人使用时增加账号、隔离、密钥、存储、监控、费用、恢复、上线检查、README 和交接；上线后增加结果、故障、成本和反馈路线。每一项都要留下实际结果，不能只写“参考过手册”。具体框架和云平台仍是可替换的建议，不是强制答案。
+这三份手册不是可看可不看的参考。三项关键决定确认完成后，DZ 会把适用内容拆成必须入账的施工项：所有项目走通用开发路线；有界面的项目增加代表页面、真实后台、浏览器和中断恢复路线；需要给别人使用时增加账号、隔离、密钥、存储、监控、费用、恢复、上线检查、README 和交接；上线后增加结果、故障、成本和反馈路线。每一项都要留下实际结果，不能只写“参考过手册”。具体框架和云平台仍是可替换的建议，不是强制答案。
 
 DZ 同时修正了一些不应成为通用规则的高风险捷径：
 
@@ -573,7 +584,7 @@ Every platform uses the same DZ workflow instead of a brand-specific edition. A 
 
 ### What this refinement changes
 
-Current workflow: `2026-09-25.2`; plugin: `1.0.11`. The six-stage flow and three technical handbooks remain intact.
+Current workflow: `2026-10-03.1`; plugin: `1.0.12`. The six-stage flow and three technical handbooks remain intact.
 
 - **One correction rule:** beginner dialogue, core instructions and evaluation rubrics distinguish a decided change from exploration. Only unsettled consequential choices need a question.
 - **Proportionate proof:** reopening a failure requires a new check; merely inspecting an unchanged product does not revoke unrelated valid results.
