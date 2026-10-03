@@ -5,4 +5,4 @@ description: "Start, build, take over, or resume an app, agent, or product with 
 
 # Irixi Project Forge
 
-Read [`../../SKILL.md`](../../SKILL.md) completely before taking task action and follow it as the canonical DZ workflow. Resolve its referenced resources from the plugin root. Use [`../../references/project-state.md`](../../references/project-state.md) whenever a project location is known or an existing DZ project is resumed.
+Read [`../../SKILL.md`](../../SKILL.md) completely before taking task action and follow it as the canonical DZ workflow. Resolve its referenced resources from the plugin root. Use [`../../references/project-state.md`](../../references/project-state.md) when durable project continuity is needed or an existing DZ project is resumed. A known folder alone does not force ledger initialization for SKILL.md’s simple standalone route.

@@ -1,13 +1,13 @@
 {
   "protocol_version": "1.0",
-  "workflow_version": "2026-09-25.2",
+  "workflow_version": "2026-10-03.1",
   "id": "dz",
   "name": "Irixi Project Forge",
   "description": "A platform-neutral workflow that guides a nontechnical user from an idea or current project state to a verified product or an honest implementation handoff.",
   "source": "https://github.com/Irixil/irixi-project-forge",
   "raw_base_url": "https://raw.githubusercontent.com/Irixil/irixi-project-forge/main/",
   "distribution": {
-    "plugin_version": "1.0.11",
+    "plugin_version": "1.0.12",
     "default_channel": "main",
     "default_channel_is_mutable": true,
     "reproducible_loading": "Replace main in raw_base_url with an explicit Git commit SHA."
@@ -253,5 +253,18 @@
     "cancellation_does_not_prove_external_stop": true,
     "finished_requires_explicit_resume": true,
     "early_closure_never_implies_verified": true
+  },
+  "personal_workflow": {
+    "stages": [
+      "接住目标",
+      "组织执行",
+      "跟踪变化",
+      "交付验证",
+      "下次继续"
+    ],
+    "technical_gates": "Existing SDLC gates; no new state vocabulary",
+    "rule_authority": "SKILL.md",
+    "effort_limits_enforced_by": "Agent instructions, not a runtime watchdog",
+    "parallel_ledger": "Single writer, one coordinating current-contract item in progress"
   }
 }

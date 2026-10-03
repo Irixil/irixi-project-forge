@@ -88,7 +88,7 @@ class DzStateTests(unittest.TestCase):
             "discuss the route before new project changes", refreshed
         )
         self.assertIn("resume-report", refreshed)
-        self.assertIn("2026-09-25.2", refreshed)
+        self.assertIn("2026-10-03.1", refreshed)
 
     def test_resume_report_reads_all_journal_records_and_reports_uncertainty_without_git(self):
         self.cli(
@@ -197,7 +197,7 @@ class DzStateTests(unittest.TestCase):
         stale = self.cli("check", str(self.project), expected=1)
         self.assertIn("install-guidance", stale.stderr)
         self.cli("install-guidance", str(self.project))
-        self.assertEqual(self.state()["workflow_version"], "2026-09-25.2")
+        self.assertEqual(self.state()["workflow_version"], "2026-10-03.1")
         self.assertEqual(self.state()["issues"], [])
         self.cli("check", str(self.project))
 

@@ -39,7 +39,7 @@
         "pending_risk_id": {"anyOf": [{"type": "string", "pattern": "^[^\\s]+$"}, {"type": "null"}]},
         "authorized_risk_id": {"anyOf": [{"type": "string", "pattern": "^[^\\s]+$"}, {"type": "null"}]},
         "blocker": {"type": ["string", "null"]},
-        "blocker_kind": {"enum": [null, "missing_capability", "missing_authority", "missing_external_condition", "host_denial", "rights_missing"]},
+        "blocker_kind": {"enum": [null, "missing_capability", "missing_authority", "missing_external_condition", "host_denial", "rights_missing", "effort_limit"]},
         "resume_when": {"type": ["string", "null"]},
         "finish_reason": {"type": ["string", "null"]},
         "updated_at": {"type": "string", "format": "date-time"}
@@ -182,7 +182,7 @@
           "run": {
             "properties": {
               "blocker": {"type": "string", "minLength": 1},
-              "blocker_kind": {"enum": ["missing_capability", "missing_authority", "missing_external_condition", "host_denial", "rights_missing"]},
+              "blocker_kind": {"enum": ["missing_capability", "missing_authority", "missing_external_condition", "host_denial", "rights_missing", "effort_limit"]},
               "resume_when": {"type": "string", "minLength": 1},
               "waiting_for": {"const": null},
               "pending_risk_id": {"const": null},
