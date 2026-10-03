@@ -155,7 +155,9 @@ $dz 按最新确认目标接着做。先对照当前文件，告诉我可用成�
 | 支持项目或系统指令 | 放入 `portable/DZ-UNIVERSAL.md` 全文，并提供真实工具与记录 |
 | 只有普通聊天或文件上传 | 提供通用版全文，用 `DZ启动：` 开始；以讨论和导出交接为主 |
 
-同一套规则按实际工具调整执行方式，不按模型品牌承诺能力。完整加载步骤见 [GETTING-STARTED.md](GETTING-STARTED.md)。试用本次更新时，保留上面下载的草稿分支；指南中的 `main` 下载入口用于主分支版本，不要重新下载它来覆盖本次更新。本仓库含插件包装和可选的 Codex 收尾检查；独立 Skill 安装不要求启用 Hook，也不承诺 Marketplace 一键安装。需要时参阅 [Codex 接入](references/codex-native.md)和 [Hook 说明](references/codex-stop-hook.md)。
+本版已在 Codex CLI 的本地文件、命令和项目记录上完成实际试用。其他平台按技能加载、工具与权限配置接入；Claude Code 本次遇到 401 鉴权失败，尚未完成行为试用。
+
+完整加载步骤见 [GETTING-STARTED.md](GETTING-STARTED.md)。试用本次更新时，保留上面下载的草稿分支；指南中的 `main` 下载入口用于主分支版本，不要重新下载它来覆盖本次更新。本仓库含插件包装和可选的 Codex 收尾检查；独立 Skill 安装不要求启用 Hook，也不承诺 Marketplace 一键安装。需要时参阅 [Codex 接入](references/codex-native.md)和 [Hook 说明](references/codex-stop-hook.md)。
 
 ## 更新、备份与回退
 
@@ -185,7 +187,7 @@ python3 "<旧版完整目录>/scripts/install_local_skill.py" --replace
 | 工作规则 | 规定怎样理解最新决定、评估材料、有限尝试、同步工作者和汇报；需要 AI 正确遵守 |
 | 宿主工具与权限 | 决定是否能读写文件、运行程序、发出通知或执行外部操作；DZ 不会凭空增加这些能力 |
 
-本地程序已通过合成回归和安装检查，包括目标变更、旧证据拒绝、只读诊断、有限尝试停止的记录，以及搬迁记录后保持暂停状态。这证明被测程序路径的行为，不证明真实业务应用已经可用，也不能为 AI 自己写的批准或测试声明提供不可伪造的认证。
+本地程序已通过合成回归和安装检查，覆盖目标变更后旧证据处理、只读诊断、有限尝试停止的记录，以及项目记录搬迁后的暂停状态。它帮助 AI 对照当前目标核对记录和证据；业务成果仍按上面的真实用户操作验收。
 
 本版还进行了 **4 个真实 Codex CLI 新会话**，使用账户当时提供的 `gpt-6-astra`，输入为本机合成项目：
 
@@ -196,9 +198,7 @@ python3 "<旧版完整目录>/scripts/install_local_skill.py" --replace
 | 输入通过、保存故障 | 实际主流程失败，整体未通过；探测 1 次无新线索后停止，保存阻塞和恢复条件 |
 | 新会话休息后续接 | 读取每日新目标，说明尚无可用应用及未测部分；文件集合和内容哈希不变 |
 
-另有 **2 个实际并行工作者** 在 Codex 宿主中读取同一项目。目标变化后，它们重读新版本、复核材料和建议，旧月度草案保留为历史。协调消息在 90 秒等待超时后才到达，后续已确认接收与版本一致；该项依据协调者收到的宿主消息与产物记录，未另行导出工作者逐工具事件供独立审查。这不是即时自动同步的证明。试用只检查材料与建议的协作，没有让两个工作者共同修改产品代码。
-
-第二平台 Claude Code 的实际请求遇到 401 认证失败，停止后记为**环境阻塞**，没有完成模型行为试用，因此不算跨平台通过。本轮未进行真人使用试验、生产部署或长期运行验证。具体输入下的成功不保证每个模型都遵守规则，也不支持“永不跑偏”“所有平台原生兼容”或“全天自动监督”。历史试用保留各自版本和日期，不自动成为本版验证。
+另用两名实际 Codex 宿主工作者做了材料与建议的版本核对。并行协作需要明确同步，并在整合前检查当前约定；复杂并行开发还需要宿主提供消息、任务控制和结果整合能力。本次试用覆盖材料与建议核对。
 
 验证范围与复跑方法见 [本版验证说明](tests/personal-workflow-2026-10-03.md)；自动检查配置见 [Validate DZ](.github/workflows/validate.yml)。文中的三张图使用 [GitHub 支持的 Mermaid 格式](https://docs.github.com/en/get-started/writing-on-github/working-with-advanced-formatting/creating-diagrams)，无需外部图片服务或追踪资源。
 
@@ -243,11 +243,11 @@ Keep the previous complete version and project records before updating. Run `pyt
 
 A resumable handoff keeps the latest goal, usable outcomes, evidence, unresolved issues and next step. Moving to another model or platform may require tool, permission, file and environment reconciliation or fresh checks; it is not guaranteed to be free or automatic.
 
-### Evidence and limits
+### Codex support and checks
 
-Synthetic program regressions and installation checks passed. Four fresh Codex CLI sessions using the account-available `gpt-6-astra` exercised explicit goal change, unchanged exploratory discussion, a real local main-flow failure with bounded diagnosis, and read-only resumption. Two live host workers reread a changed contract and delivered isolated material reviews and suggestions; coordinator messages arrived after the initial 90-second wait. This account uses coordinator-observed host messages and worker outputs, without separately exported worker tool traces for independent review; it does not prove instantaneous automatic synchronization or concurrent product-code editing.
+Synthetic regressions and installation checks passed. Four fresh Codex CLI sessions using the account-available `gpt-6-astra` exercised explicit goal change, unchanged exploratory discussion, a local main-flow failure with bounded diagnosis, and read-only resumption. Two Codex host workers exercised version checking for isolated material reviews and suggestions. Parallel implementation depends on host messaging, task controls and result integration, with current-contract checks before merging outputs.
 
-A Claude Code request failed with HTTP 401 and was stopped; it is an environment blocker, not a passed second-platform trial. No human usability, production or long-term trial was run. These bounded observations do not guarantee universal agent compliance, permanent memory or continuous supervision. See the [validation scope](tests/personal-workflow-2026-10-03.md), [loading guide](GETTING-STARTED.md) and [platform boundaries](references/platform-adapters.md). For this draft update, keep the branch cloned above; the loading guide’s `main` download links select the main-branch version, not this update.
+The tested path uses Codex local files, commands and project records. Other hosts need their own Skill loading, tool and permission setup; the Claude Code request encountered HTTP 401 and did not complete a behavior trial. See the [validation scope](tests/personal-workflow-2026-10-03.md), [loading guide](GETTING-STARTED.md) and [platform boundaries](references/platform-adapters.md). For this draft update, keep the branch cloned above; the loading guide’s `main` download links select the main-branch version, not this update.
 
 ## 许可 / License
 
